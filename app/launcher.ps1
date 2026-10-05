@@ -6,7 +6,8 @@ param(
   [Parameter(Mandatory=$true)][string]$PromptFile,
   [Parameter(Mandatory=$true)][string]$LogPath
 )
-$ErrorActionPreference = 'Stop'
+# ⚠️ 不能用 Stop 偏好：native stderr（如 unrecognized_model 警告）会被升级成终止错误秒杀会话
+$ErrorActionPreference = 'Continue'
 
 $key = (Get-Content "$env:USERPROFILE\.claude\zhipu.env" | Where-Object { $_ -match '^\s*ZHIPU_API_KEY\s*=' }) -replace '^\s*ZHIPU_API_KEY\s*=\s*',''
 $key = $key.Trim().Trim('"').Trim("'")
@@ -30,5 +31,6 @@ Set-Location $Cwd
 Write-Output "[$Code] start $(Get-Date -Format 'HH:mm:ss') cwd=$Cwd model=$main"
 $prompt = Get-Content $PromptFile -Raw
 # stream-json：每个动作实时一行落盘（面板尾读即"终端形态"）
-$prompt | claude --dangerously-skip-permissions -p --model $main --output-format stream-json --verbose 2>&1 | Out-File -FilePath $LogPath -Encoding utf8
+# ⚠️ 不能加 2>&1：PS5.1 下 stderr 重定向 + Stop 偏好会把 native 警告升级成终止错误（实踩）
+$prompt | claude --dangerously-skip-permissions -p --model $main --output-format stream-json --verbose | Out-File -FilePath $LogPath -Encoding utf8
 Write-Output "[$Code] end $(Get-Date -Format 'HH:mm:ss') exit=$LASTEXITCODE"

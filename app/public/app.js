@@ -15,7 +15,6 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 
 // ── 状态渲染 ──
 function render(d) {
-  document.getElementById('wtitle').textContent = '／ ' + (d.title || d.wave);
   document.getElementById('disp').textContent = new Date(d.dispatchedAt).toLocaleString('zh-CN', { hour12: false });
   document.getElementById('clock').textContent = new Date().toLocaleTimeString('zh-CN', { hour12: false });
 

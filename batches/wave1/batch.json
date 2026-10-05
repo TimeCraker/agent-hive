@@ -4,64 +4,109 @@
   "dispatchedAt": "2026-10-05T15:34:47+08:00",
   "tasks": [
     {
-      "code": "VS", "name": "video-script-workflow 纳入版本控制",
+      "code": "VS",
+      "name": "video-script-workflow 纳入版本控制",
       "goal": "建私有仓 + 首次推送；>5MB 媒体逐个判断去留",
-      "model": "glm53", "cwd": "video-script-workflow",
-      "promptFile": "prompts/VS.md", "status": "done", "legacy": true,
-      "commit": "8333c1c", "remote": "TimeCraker/video-script-workflow (PRIVATE)"
+      "model": "glm53",
+      "cwd": "video-script-workflow",
+      "promptFile": "prompts/VS.md",
+      "status": "done",
+      "legacy": true,
+      "commit": "8333c1c",
+      "remote": "TimeCraker/video-script-workflow (PRIVATE)"
     },
     {
-      "code": "VP", "name": "vibe-studio 收口与产线盘点",
+      "code": "VP",
+      "name": "vibe-studio 收口与产线盘点",
       "goal": "推送 30 个积压提交；产出项目/技能/产物三张盘点清单",
-      "model": "glm53", "cwd": "vibe-studio",
-      "promptFile": "prompts/VP.md", "status": "done", "legacy": true,
+      "model": "glm53",
+      "cwd": "vibe-studio",
+      "promptFile": "prompts/VP.md",
+      "status": "done",
+      "legacy": true,
       "commit": "7c778e0"
     },
     {
-      "code": "PF", "name": "portfolio 移动端性能优化",
+      "code": "PF",
+      "name": "portfolio 移动端性能优化",
       "goal": "Perf 56 → ≥70 或 LCP 5.9s → ≤4.2s（字体归因 + preload）",
-      "model": "flash", "cwd": "my-portfolio",
-      "promptFile": "prompts/PF.md", "status": "done", "legacy": true,
+      "model": "flash",
+      "cwd": "my-portfolio",
+      "promptFile": "prompts/PF.md",
+      "status": "done",
+      "legacy": true,
       "commit": "995831a"
     },
     {
-      "code": "GW", "name": "games 网页端性能优化",
+      "code": "GW",
+      "name": "games 网页端性能优化",
       "goal": "移动端 Perf 39 → ≥55 或 LCP 11.3s → ≤8s（拆库懒加载）",
-      "model": "flash", "cwd": "games",
-      "promptFile": "prompts/GW.md", "status": "done", "legacy": true,
+      "model": "flash",
+      "cwd": "games",
+      "promptFile": "prompts/GW.md",
+      "status": "done",
+      "legacy": true,
       "commit": "f84da63"
     },
     {
-      "code": "SK", "name": "两个 skill 导入 DSH",
+      "code": "SK",
+      "name": "两个 skill 导入 DSH",
       "goal": "frontend-test / perf-audit 落位 DSH 并验证可用",
-      "model": "glm53", "cwd": "dsh-claude-import",
-      "promptFile": "prompts/SK.md", "status": "done", "legacy": true
+      "model": "glm53",
+      "cwd": "dsh-claude-import",
+      "promptFile": "prompts/SK.md",
+      "status": "done",
+      "legacy": true
     },
     {
-      "code": "PB", "name": "coding-plan-bench 升级",
+      "code": "PB",
+      "name": "coding-plan-bench 升级",
       "goal": "跑出 glm-5.3 vs flash 双模型实测对比数据并入库",
-      "model": "glm53", "cwd": "coding-plan-bench",
-      "promptFile": "prompts/PB.md", "status": "done", "legacy": true,
+      "model": "glm53",
+      "cwd": "coding-plan-bench",
+      "promptFile": "prompts/PB.md",
+      "status": "done",
+      "legacy": true,
       "commit": "ec0f774"
     },
     {
-      "code": "PR", "name": "Profile README 刷新",
+      "code": "PR",
+      "name": "Profile README 刷新",
       "goal": "GitHub 主页项目矩阵更新至当前 9+ 项目",
-      "model": "glm53", "cwd": "TimeCraker",
-      "promptFile": "prompts/PR.md", "status": "done", "legacy": true,
+      "model": "glm53",
+      "cwd": "TimeCraker",
+      "promptFile": "prompts/PR.md",
+      "status": "done",
+      "legacy": true,
       "commit": "42a870e"
     },
     {
-      "code": "AC", "name": "auto-content 复活",
+      "code": "AC",
+      "name": "auto-content 复活",
       "goal": "项目已归档（vibe-studio 覆盖产线）",
-      "model": "flash", "cwd": ".",
-      "promptFile": "prompts/AC.md", "status": "cancelled"
+      "model": "flash",
+      "cwd": ".",
+      "promptFile": "prompts/AC.md",
+      "status": "cancelled"
     },
     {
-      "code": "SX", "name": "sex2 第 14 天续写",
+      "code": "SX",
+      "name": "sex2 第 14 天续写",
       "goal": "任务已取消，现场已完全回退",
-      "model": "glm53", "cwd": "sex-workspace/sex2",
-      "promptFile": "prompts/SX.md", "status": "cancelled"
+      "model": "glm53",
+      "cwd": "sex-workspace/sex2",
+      "promptFile": "prompts/SX.md",
+      "status": "cancelled"
+    },
+    {
+      "code": "SMK",
+      "name": "派发链路冒烟测试",
+      "goal": "验证 dispatch → stream-json 日志 → 报告入库 全链路",
+      "model": "glm53",
+      "cwd": ".",
+      "promptFile": "prompts/SMK.md",
+      "status": "done",
+      "dispatchedAt": "2026-10-05T09:55:51.670Z"
     }
   ]
 }

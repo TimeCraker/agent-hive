@@ -10,8 +10,16 @@ const APP = path.dirname(fileURLToPath(import.meta.url));    // app/（应用代
 const PROJECT = path.dirname(APP);                           // 仓根（数据：batches/runs）
 const ROOT = PROJECT;                                        // 兼容旧引用：数据目录挂仓根
 const PORT = Number(process.env.PORT || 17879);
-const LAUNCHER = path.join(APP, 'launcher.ps1');
 const KEY_FILE = path.join(process.env.USERPROFILE, '.claude', 'zhipu.env');
+// claude.exe 真身（npm claude.cmd 的最终目标），直接 spawn 绕开一切 PS 包装层
+const CLAUDE_EXE = path.join(process.env.APPDATA, 'npm', 'node_modules', '@anthropic-ai', 'claude-code', 'bin', 'claude.exe');
+
+function readZhipuKey() {
+  try {
+    const line = fs.readFileSync(KEY_FILE, 'utf8').split('\n').find(l => /^\s*(export\s+)?ZHIPU_API_KEY\s*=/.test(l));
+    return line ? line.split('=').slice(1).join('=').trim().replace(/^["']|["']$/g, '') : '';
+  } catch (e) { return ''; }
+}
 
 const SKIP = new Set(['node_modules', '.git', '.next', 'dist', 'build', 'out', 'coverage', '.turbo', '.pnpm-store', '__pycache__', '.venv']);
 
@@ -121,8 +129,15 @@ function buildStatus(wave) {
       const tail = tailLog(wave, t.code, Math.max(0, logBytes - 8192));
       base.events = tail.events.slice(-3);
     }
-    if (t.status === 'running') base.state = 'running';
-    else base.state = 'pending';
+    if (t.status === 'running') {
+      base.state = 'running';
+      // 自愈：日志流出现 result 事件而 batch 仍 running → 自动翻 done（写回 batch.json）
+      if (base.events.some(e => e.k === 'result')) {
+        const b = loadBatch(wave);
+        const bt = b.tasks.find(x => x.code === t.code);
+        if (bt && bt.status === 'running') { bt.status = 'done'; saveBatch(wave, b); base.state = 'done'; }
+      }
+    } else base.state = 'pending';
     return base;
   });
   const counts = { done: 0, running: 0, pending: 0, cancelled: 0 };
@@ -183,13 +198,45 @@ function dispatch(wave, code) {
   saveBatch(wave, batch);
   const cwdAbs = resolveCwd(t.cwd);
   fs.mkdirSync(path.dirname(logPath(wave, code)), { recursive: true });
-  const child = spawn('powershell.exe', [
-    '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', LAUNCHER,
-    '-Code', code, '-Cwd', cwdAbs, '-ModelProfile', t.model,
-    '-PromptFile', path.join(ROOT, 'batches', wave, t.promptFile),
-    '-LogPath', logPath(wave, code),
-  ], { detached: true, stdio: 'ignore', windowsHide: true });
+  // 直接 spawn claude.exe（零 PS 包装层）：prompt 走 argv，stdout=ndjson 实时流，stderr=排障文件
+  const modelArg = t.model === 'flash' ? 'glm-5.3-flash[1m]' : 'glm-5.3[1m]';
+  const promptText = fs.readFileSync(path.join(ROOT, 'batches', wave, t.promptFile), 'utf8');
+  const outFd = fs.openSync(logPath(wave, code), 'w');
+  const errFd = fs.openSync(logPath(wave, code) + '.launcher.err', 'a');
+  const child = spawn(CLAUDE_EXE, [
+    '--dangerously-skip-permissions', '-p', promptText, '--model', modelArg,
+    '--output-format', 'stream-json', '--verbose',
+  ], {
+    cwd: cwdAbs,
+    env: {
+      ...process.env,
+      ANTHROPIC_BASE_URL: 'https://open.bigmodel.cn/api/anthropic',
+      ANTHROPIC_AUTH_TOKEN: readZhipuKey(),
+      ANTHROPIC_SMALL_FAST_MODEL: 'glm-5.3-flash[1m]',
+      ANTHROPIC_DEFAULT_HAIKU_MODEL: 'glm-5.3-flash[1m]',
+      ANTHROPIC_DEFAULT_SONNET_MODEL: modelArg,
+      ANTHROPIC_DEFAULT_OPUS_MODEL: modelArg,
+      ANTHROPIC_DEFAULT_FABLE_MODEL: modelArg,
+      CLAUDE_CODE_AUTO_COMPACT_WINDOW: '1000000',
+      CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: '1',
+      API_TIMEOUT_MS: '600000',
+      CLAUDE_CODE_EFFORT_LEVEL: 'max',
+      CLAUDE_CODE_MAX_CONTEXT_TOKENS: '1000000',
+    },
+    stdio: ['ignore', outFd, errFd],
+    detached: true, windowsHide: true,
+  });
+  fs.closeSync(outFd);
+  fs.closeSync(errFd);
   child.unref();
+  // claude 正常退出 → batch running 翻 done（自愈，无需人工）
+  child.on('exit', () => {
+    try {
+      const b = loadBatch(wave);
+      const bt = b.tasks.find(x => x.code === code);
+      if (bt && bt.status === 'running') { bt.status = 'done'; saveBatch(wave, b); }
+    } catch (e) { /* 忽略 */ }
+  });
   return { ok: true, pid: child.pid };
 }
 
