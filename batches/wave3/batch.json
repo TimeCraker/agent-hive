@@ -29,9 +29,15 @@
       "model": "glm-5.3[1m]",
       "cwd": "xiaofanzhuo",
       "promptFile": "prompts/XFZ2.md",
-      "status": "running",
+      "status": "accepted",
       "dispatchedAt": "2026-10-05T12:23:52.529Z",
-      "pid": 30396
+      "pid": 30396,
+      "settledAt": "2026-10-05T12:32:03.145Z",
+      "sessionId": "5e472df0-3863-42c4-b053-be4f39669f57",
+      "turns": 27,
+      "costUsd": 2.4050920000000002,
+      "acceptedAt": "2026-10-05T12:33:12.342Z",
+      "acceptNote": "考古+反证+12/22 AC 实证核查通过（5578b91）；两项欠账按宁欠勿假保持未勾，人工闭环项已转所有者"
     },
     {
       "code": "AFD2",
@@ -40,9 +46,15 @@
       "model": "glm-5.3[1m]",
       "cwd": "asterforge-deploy",
       "promptFile": "prompts/AFD2.md",
-      "status": "running",
+      "status": "accepted",
       "dispatchedAt": "2026-10-05T12:23:52.557Z",
-      "pid": 4948
+      "pid": 4948,
+      "settledAt": "2026-10-05T12:25:46.586Z",
+      "sessionId": "f13651d3-7010-443b-9104-b7ef3fb05772",
+      "turns": 13,
+      "costUsd": 0.92612,
+      "acceptedAt": "2026-10-05T12:31:30.708Z",
+      "acceptNote": "README §9 更正核实（376ae42）"
     },
     {
       "code": "GAM2",
@@ -51,9 +63,15 @@
       "model": "glm-5.3[1m]",
       "cwd": "games",
       "promptFile": "prompts/GAM2.md",
-      "status": "running",
+      "status": "accepted",
       "dispatchedAt": "2026-10-05T12:23:52.574Z",
-      "pid": 9748
+      "pid": 9748,
+      "settledAt": "2026-10-05T12:27:30.610Z",
+      "sessionId": "0a3493fd-4c4c-4af5-a2ff-c10774794b5d",
+      "turns": 16,
+      "costUsd": 1.3717400000000002,
+      "acceptedAt": "2026-10-05T12:31:30.741Z",
+      "acceptNote": "前提不成立零改动，git 历史实证（纠正 wave2 误报）"
     },
     {
       "code": "SEXB",
@@ -62,9 +80,15 @@
       "model": "glm-5.3[1m]",
       "cwd": "sex-workspace",
       "promptFile": "prompts/SEXB.md",
-      "status": "running",
+      "status": "accepted",
       "dispatchedAt": "2026-10-05T12:23:52.595Z",
-      "pid": 18240
+      "pid": 18240,
+      "settledAt": "2026-10-05T12:28:05.481Z",
+      "sessionId": "f6e97ab4-823e-4de5-80bc-74f48e564afe",
+      "turns": 15,
+      "costUsd": 1.089382,
+      "acceptedAt": "2026-10-05T12:31:30.747Z",
+      "acceptNote": "AGENT.md 第9节核实（7f5772b）"
     }
   ]
 }
