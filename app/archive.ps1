@@ -6,7 +6,7 @@
 param(
   [string]$Wave = '',
   [switch]$All,
-  [string]$RepoRoot = (Split-Path (Split-Path $PSScriptRoot) )
+  [string]$RepoRoot = (Split-Path $PSScriptRoot)   # 脚本在 app/ 下，剥一层即仓根（原双剥错把工作区根当仓根，「无日志目录」即此因）
 )
 $ErrorActionPreference = 'Stop'
 $WAVE_RE = '^[\w-]+$'
