@@ -81,9 +81,16 @@
       "model": "glm-5.3-flash[1m]",
       "cwd": "vibe-studio",
       "promptFile": "prompts/CVIX.md",
-      "status": "running",
+      "status": "accepted",
       "dispatchedAt": "2026-10-05T14:51:47.769Z",
-      "pid": 22164
+      "pid": 22164,
+      "settledAt": "2026-10-05T15:01:57.313Z",
+      "sessionId": "d5540ce6-627b-46fe-abf9-2508287736c2",
+      "turns": 23,
+      "costUsd": 1.9503780000000002,
+      "outTok": 11394,
+      "acceptedAt": "2026-10-05T15:03:24.366Z",
+      "acceptNote": "10/10 PASS；时间码/帧号数学旁证吻合；副本留存 10 张"
     },
     {
       "code": "INSPLK",
@@ -92,7 +99,9 @@
       "model": "glm-5.3[1m]",
       "cwd": "lekao",
       "promptFile": "prompts/INSPLK.md",
-      "status": "pending"
+      "status": "running",
+      "dispatchedAt": "2026-10-05T15:01:49.118Z",
+      "pid": 10828
     },
     {
       "code": "INSPXZ",
@@ -101,7 +110,9 @@
       "model": "glm-5.3[1m]",
       "cwd": "xiaofanzhuo",
       "promptFile": "prompts/INSPXZ.md",
-      "status": "pending"
+      "status": "running",
+      "dispatchedAt": "2026-10-05T15:01:49.176Z",
+      "pid": 34608
     },
     {
       "code": "INSPPF",
@@ -110,7 +121,9 @@
       "model": "glm-5.3[1m]",
       "cwd": "my-portfolio",
       "promptFile": "prompts/INSPPF.md",
-      "status": "pending"
+      "status": "running",
+      "dispatchedAt": "2026-10-05T15:01:49.211Z",
+      "pid": 22672
     },
     {
       "code": "INSPCB",
@@ -119,7 +132,7 @@
       "model": "glm-5.3[1m]",
       "cwd": "pwa-hw-voice",
       "promptFile": "prompts/INSPCB.md",
-      "status": "pending"
+      "status": "queued"
     },
     {
       "code": "SPECLK",
@@ -128,7 +141,7 @@
       "model": "glm-5.3[1m]",
       "cwd": "lekao",
       "promptFile": "prompts/SPECLK.md",
-      "status": "pending"
+      "status": "queued"
     },
     {
       "code": "SPECGM",
@@ -137,7 +150,7 @@
       "model": "glm-5.3[1m]",
       "cwd": "games",
       "promptFile": "prompts/SPECGM.md",
-      "status": "pending"
+      "status": "queued"
     }
   ]
 }
