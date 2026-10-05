@@ -75,12 +75,12 @@ function render(d) {
     const staleF = t.stale ? '<span class="staleflag">⚠ 停更 ' + fmtDur(t.staleFor) + '</span>' : '';
     // 元信息收敛为一行：提交 · 触达文件数 · 模型（替代散落的多行 mono）
     const metaBits = [];
-    if (t.commit) metaBits.push('<span class="mb">&#9251; ' + esc(t.commit) + '</span>');
+    if (t.commit && t.commit.subject) metaBits.push('<span class="mb">&#9251; ' + esc(String(t.commit.subject).slice(0, 40)) + '</span>');
     if (t.touched && t.touched.length) metaBits.push('<span class="mb">&#9998; ' + t.touched.length + ' 文件</span>');
     if (t.model) metaBits.push('<span class="mb">' + esc(t.model) + '</span>');
     const metaRow = metaBits.length ? '<div class="meta-row">' + metaBits.join('<span class="msep">·</span>') + '</div>' : '';
-    // 实时预览收敛为最新一条（替代多行文字堆叠）
-    const last = t.events && t.events.length ? t.events[t.events.length - 1] : null;
+    // 实时预览收敛为最新一条有效事件（跳过 usage 等无文本遥测）
+    const last = t.events && t.events.length ? [...t.events].reverse().find(e => e.s != null) : null;
     const live = last
       ? '<div class="rc-live"><div class="lv-title">LIVE</div><div class="lv-line"><b>' + (last.k === 'tool' ? '⚙' : '💬') + '</b> ' + esc(last.s).slice(0, 80) + '</div></div>'
       : (t.legacy ? '<div class="rc-live"><div class="lv-title">LEGACY</div><div class="lv-line">旧版派发，无流式日志</div></div>' : '');
@@ -309,7 +309,7 @@ document.getElementById('git-refresh-btn').onclick = async function () {
   await refresh();
   this.classList.remove('spinning');
   this.textContent = '⟳ 已刷新 ' + new Date().toLocaleTimeString('zh-CN', { hour12: false });
-  document.getElementById('git-auto').textContent = '自动刷新 · 5 秒';
+  document.getElementById('git-auto').textContent = 'SSE 实时更新';
 };
 
 // ── 主循环：SSE 实时推送（2s 心跳走秒 + batch 变化即时推），轮询 30s 兜底 ──
