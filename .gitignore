@@ -1,0 +1,6 @@
+# agent-console 运行态不入库
+runs/logs/
+node_modules/
+*.tmp
+.DS_Store
+Thumbs.db

@@ -1,0 +1,61 @@
+<!doctype html><html lang="zh"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AGENT-CONSOLE · 并行派发控制台</title>
+<link rel="stylesheet" href="/theme.css">
+</head><body><div class="wrap">
+<header>
+  <div class="hbar">
+    <span class="tick"></span>
+    <h1>并行派发控制台 <span class="thin" id="wtitle">／ --</span></h1>
+    <div class="hmeta">
+      <span><span class="live"></span>实时 · 5 秒</span>
+      <span id="clock">--:--:--</span>
+      <span>派发于 <b id="disp">--</b></span>
+    </div>
+  </div>
+  <div class="progline">
+    <span class="progtext" id="progtext">--</span>
+    <div class="pbar" id="pbar"></div>
+  </div>
+</header>
+<nav id="nav" aria-label="状态筛选"></nav>
+<div class="sec" id="mainSec">
+  <h2>在办任务 <span class="sub" id="mainSub"></span></h2>
+  <div class="rows" id="rows"></div>
+</div>
+<div class="sec" id="archSec">
+  <div class="arch" id="arch">
+    <button class="arch-toggle" onclick="document.getElementById('arch').classList.toggle('open')" aria-expanded="false">
+      <h2>归档区</h2><span class="sub" id="archSub"></span><span class="arr">&#9654;</span>
+    </button>
+    <div class="arch-body" id="archBody"></div>
+  </div>
+</div>
+<div class="sec">
+  <h2>项目 Git 动态 <span class="sub">各仓最近提交 · 活跃在前</span></h2>
+  <div class="gitlist" id="gitlist"></div>
+</div>
+<footer>
+  <span><span class="lg" style="background:var(--st-running)"></span>进行中</span>
+  <span><span class="lg" style="background:var(--st-done)"></span>已完成</span>
+  <span><span class="lg" style="background:var(--st-pending)"></span>排队中</span>
+  <span><span class="lg" style="background:var(--st-cancelled)"></span>已取消</span>
+  <span style="margin-left:auto">agent-console · 点击进行中行可打开实时终端</span>
+</footer>
+</div>
+<div class="drawer" id="drawer">
+  <div class="dhead">
+    <span class="code" id="d-code">--</span>
+    <span class="st" id="d-st">--</span>
+    <span class="model" id="d-model" style="font-family:var(--mono);font-size:10px;color:#8B949E;border:1px solid #30363D;padding:2px 7px">--</span>
+    <button class="close" id="d-close">关闭 ESC</button>
+  </div>
+  <div class="dterm" id="d-term"></div>
+  <div class="dfoot">
+    <span id="d-follow">● 自动跟随</span>
+    <span id="d-bytes">0 B</span>
+    <span style="margin-left:auto">stream-json 实时流</span>
+  </div>
+</div>
+<script type="module" src="/app.js"></script>
+</body></html>
