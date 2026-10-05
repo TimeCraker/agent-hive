@@ -1,4 +1,4 @@
-// agent-hive 蜂巢 · 派发控制台服务（验收状态机：终态只出自验收）
+// agent-hive 太木 · 派发控制台服务（验收状态机：终态只出自验收）
 // 静态页 + 状态 API + 终端日志尾读 + 派发（spawn claude 无头会话）
 import http from 'http';
 import fs from 'fs';
@@ -474,4 +474,4 @@ const server = http.createServer((req, res) => {
   return serveStatic(res, u.pathname.slice(1));
 });
 
-server.listen(PORT, '127.0.0.1', () => console.log(`agent-hive 蜂巢: http://127.0.0.1:${PORT} · 并发上限 ${MAX_CONCURRENT} · 终态只出自验收`));
+server.listen(PORT, '127.0.0.1', () => console.log(`agent-hive 太木控制台: http://127.0.0.1:${PORT} · 并发上限 ${MAX_CONCURRENT} · 终态只出自验收`));
