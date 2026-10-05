@@ -6,9 +6,11 @@ import path from 'path';
 import { spawn } from 'child_process';
 import { fileURLToPath } from 'url';
 
-const ROOT = path.dirname(fileURLToPath(import.meta.url));
+const APP = path.dirname(fileURLToPath(import.meta.url));    // app/（应用代码）
+const PROJECT = path.dirname(APP);                           // 仓根（数据：batches/runs）
+const ROOT = PROJECT;                                        // 兼容旧引用：数据目录挂仓根
 const PORT = Number(process.env.PORT || 17879);
-const LAUNCHER = path.join(ROOT, 'launcher.ps1');
+const LAUNCHER = path.join(APP, 'launcher.ps1');
 const KEY_FILE = path.join(process.env.USERPROFILE, '.claude', 'zhipu.env');
 
 const SKIP = new Set(['node_modules', '.git', '.next', 'dist', 'build', 'out', 'coverage', '.turbo', '.pnpm-store', '__pycache__', '.venv']);
@@ -57,6 +59,26 @@ function readKey() {
   return line ? line.split('=')[1].trim().replace(/^["']|["']$/g, '') : '';
 }
 
+function readCommits(gitDir, n) {
+  try {
+    const raw = fs.readFileSync(path.join(gitDir, 'logs', 'HEAD'), 'utf8').trim().split('\n');
+    const out = [];
+    for (let i = raw.length - 1; i >= 0 && out.length < n; i--) {
+      const tab = raw[i].indexOf('\t');
+      if (tab < 0) continue;
+      const left = raw[i].slice(0, tab).split(' ');
+      const msg = raw[i].slice(tab + 1).trim();
+      const sha = (left[1] || '').slice(0, 7);
+      const ts = Number(left[left.length - 2]) * 1000;
+      if (!sha || !ts) continue;
+      const low = msg.toLowerCase();
+      const isOp = ['pull:', 'clone:', 'checkout:', 'reset:', 'merge:', 'fetch:', 'rebase:', 'branch:'].some(o => low.startsWith(o));
+      out.push({ h: sha, ts, subject: msg.replace(/^commit(\s*\(initial\))?:\s*/i, ''), kind: isOp ? 'op' : 'commit' });
+    }
+    return out;
+  } catch (e) { return []; }
+}
+
 // ── API: status ──
 function buildStatus(wave) {
   const batch = loadBatch(wave);
@@ -69,16 +91,27 @@ function buildStatus(wave) {
     try { base.reportMtime = fs.statSync(reportPath).mtimeMs; } catch (e) { base.reportMtime = null; }
     if (t.status === 'done' || t.status === 'cancelled') {
       base.state = t.status; base.lastActivityAgo = null; base.touched = []; base.logBytes = 0; base.events = [];
+      // done 任务也带上最近提交（Git 动态归档区展示用）；cancelled 不展示提交
+      if (t.status === 'done') {
+        const gd = path.join(resolveCwd(t.cwd), '.git');
+        if (fs.existsSync(gd)) base.commits = readCommits(gd, 5);
+      }
       return base;
     }
     const abs = resolveCwd(t.cwd);
-    if (!fs.existsSync(abs)) {
-      base.state = 'pending'; base.lastActivityAgo = null; base.touched = []; base.logBytes = 0; base.events = [];
+    const repoExists = fs.existsSync(abs);
+    const gitDir = path.join(abs, '.git');
+    const commits = (repoExists && t.status !== 'cancelled') ? readCommits(gitDir, 5) : [];
+    if (!repoExists) {
+      base.state = 'pending'; base.lastActivityAgo = null; base.touched = []; base.commits = []; base.logBytes = 0; base.events = [];
       return base;
     }
     const { newest, touched } = walkNewest(abs, 3, 600);
+    const lastCommit = commits.find(c => c.kind === 'commit') || null;
     base.lastActivityAgo = newest ? Math.round((now - newest) / 1000) : null;
     base.touched = touched;
+    base.commits = commits;
+    base.commit = lastCommit ? { subject: lastCommit.subject, ts: lastCommit.ts } : null;
     let lp = logPath(wave, t.code);
     let logBytes = 0;
     try { logBytes = fs.statSync(lp).size; } catch (e) { /* none */ }
@@ -163,8 +196,9 @@ function dispatch(wave, code) {
 // ── 静态 ──
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.md': 'text/markdown; charset=utf-8', '.json': 'application/json' };
 function serveStatic(res, rel) {
-  const p = path.join(ROOT, 'public', rel);
-  if (!p.startsWith(path.join(ROOT, 'public'))) { res.writeHead(403); res.end(); return; }
+  const pubRoot = path.join(APP, 'public');
+  const p = path.join(pubRoot, rel);
+  if (!p.startsWith(pubRoot)) { res.writeHead(403); res.end(); return; }
   try {
     const data = fs.readFileSync(p);
     res.writeHead(200, { 'Content-Type': MIME[path.extname(p)] || 'application/octet-stream' });

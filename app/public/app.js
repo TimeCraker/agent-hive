@@ -19,14 +19,17 @@ function render(d) {
   document.getElementById('disp').textContent = new Date(d.dispatchedAt).toLocaleString('zh-CN', { hour12: false });
   document.getElementById('clock').textContent = new Date().toLocaleTimeString('zh-CN', { hour12: false });
 
-  document.getElementById('progtext').innerHTML =
-    '<b>' + d.counts.done + '/' + d.total + '</b> 已完成 · <b>' + (d.counts.running + d.counts.pending) + '</b> 在办' +
-    (d.counts.cancelled ? ' · <b>' + d.counts.cancelled + '</b> 已取消' : '');
+  document.getElementById('s-done').textContent = d.counts.done;
+  document.getElementById('s-running').textContent = d.counts.running + d.counts.pending;
+  document.getElementById('s-pending').textContent = d.counts.pending;
+  document.getElementById('s-cancelled').textContent = d.counts.cancelled;
+  const pct = d.total ? Math.round(d.counts.done / d.total * 100) : 0;
   document.getElementById('pbar').innerHTML =
     '<i class="pb-done" style="width:' + (d.counts.done / d.total * 100) + '%"></i>' +
     '<i class="pb-running" style="width:' + (d.counts.running / d.total * 100) + '%"></i>' +
     '<i class="pb-pending" style="width:' + (d.counts.pending / d.total * 100) + '%"></i>' +
     '<i class="pb-cancelled" style="width:' + (d.counts.cancelled / d.total * 100) + '%"></i>';
+  document.getElementById('pct').textContent = pct + '%';
 
   const tabs = [['all', '全部', d.total], ['running', '进行中', d.counts.running], ['waiting', '等待中', d.counts.waiting || 0], ['done', '已完成', d.counts.done], ['cancelled', '已取消', d.counts.cancelled]];
   document.getElementById('nav').innerHTML = tabs.map(t =>

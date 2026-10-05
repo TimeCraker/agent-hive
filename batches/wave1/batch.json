@@ -40,14 +40,14 @@
     {
       "code": "PB", "name": "coding-plan-bench 升级",
       "goal": "跑出 glm-5.3 vs flash 双模型实测对比数据并入库",
-      "model": "glm53", "cwd": ".",
+      "model": "glm53", "cwd": "coding-plan-bench",
       "promptFile": "prompts/PB.md", "status": "done", "legacy": true,
       "commit": "ec0f774"
     },
     {
       "code": "PR", "name": "Profile README 刷新",
       "goal": "GitHub 主页项目矩阵更新至当前 9+ 项目",
-      "model": "glm53", "cwd": ".",
+      "model": "glm53", "cwd": "TimeCraker",
       "promptFile": "prompts/PR.md", "status": "done", "legacy": true,
       "commit": "42a870e"
     },

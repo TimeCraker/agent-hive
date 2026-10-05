@@ -13,9 +13,15 @@
       <span>派发于 <b id="disp">--</b></span>
     </div>
   </div>
-  <div class="progline">
-    <span class="progtext" id="progtext">--</span>
-    <div class="pbar" id="pbar"></div>
+  <div class="statsband">
+    <div class="stat"><b id="s-done" style="color:var(--st-done)">0</b><span>已完成</span></div>
+    <div class="stat"><b id="s-running" style="color:var(--st-running)">0</b><span>进行中</span></div>
+    <div class="stat"><b id="s-pending" style="color:var(--st-pending)">0</b><span>排队中</span></div>
+    <div class="stat"><b id="s-cancelled" style="color:var(--st-cancelled)">0</b><span>已取消</span></div>
+    <div class="stat barblock">
+      <div class="pbar" id="pbar"></div>
+      <span class="pct" id="pct">0%</span>
+    </div>
   </div>
 </header>
 <nav id="nav" aria-label="状态筛选"></nav>
@@ -32,7 +38,12 @@
   </div>
 </div>
 <div class="sec">
-  <h2>项目 Git 动态 <span class="sub">各仓最近提交 · 活跃在前</span></h2>
+  <h2>项目 Git 动态 <span class="sub">各仓最近提交 · 活跃在前</span>
+    <span class="hbtns">
+      <span class="autolbl" id="git-auto">自动刷新 · 5 秒</span>
+      <button class="btn-refresh" id="git-refresh-btn" title="立即刷新 Git 动态">&#10227; 手动刷新</button>
+    </span>
+  </h2>
   <div class="gitlist" id="gitlist"></div>
 </div>
 <footer>

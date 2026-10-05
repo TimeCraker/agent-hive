@@ -29,6 +29,14 @@ h1 .thin{font-weight:400;color:var(--ink2)}
 .pbar{flex:1;height:6px;background:#E7E7E0;display:flex;overflow:hidden;min-width:120px}
 .pbar i{height:100%;transition:width .4s cubic-bezier(.16,1,.3,1)}
 .pb-done{background:var(--st-done)}.pb-running{background:var(--st-running)}.pb-pending{background:var(--st-pending)}.pb-cancelled{background:#CFCFC8}
+/* 统计块带（页首）：大数字 + 分段进度条 */
+.statsband{display:flex;align-items:stretch;border:1px solid var(--line-strong);background:var(--panel);margin-top:16px}
+.stat{flex:0 0 150px;padding:16px 22px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:2px;justify-content:center}
+.stat b{font-family:var(--mono);font-size:30px;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat span{font-size:11px;color:var(--ink2);letter-spacing:.05em}
+.stat.barblock{flex:1;border-right:none;padding:16px 22px;gap:8px}
+.stat.barblock .pbar{height:10px}
+.stat.barblock .pct{font-family:var(--mono);font-size:12px;color:var(--ink2);font-variant-numeric:tabular-nums}
 /* 导航（唯一，sticky，状态着色） */
 nav{position:sticky;top:0;z-index:100;background:var(--bg);display:flex;gap:8px;flex-wrap:wrap;
   padding:12px 0 10px;border-bottom:1px solid var(--line-strong);margin-bottom:24px}
