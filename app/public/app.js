@@ -79,11 +79,13 @@ function render(d) {
     if (t.touched && t.touched.length) metaBits.push('<span class="mb">&#9998; ' + t.touched.length + ' 文件</span>');
     if (t.model) metaBits.push('<span class="mb">' + esc(t.model) + '</span>');
     const metaRow = metaBits.length ? '<div class="meta-row">' + metaBits.join('<span class="msep">·</span>') + '</div>' : '';
-    // 实时预览收敛为最新一条有效事件（跳过 usage 等无文本遥测）
+    // 实时预览列每行都渲染（列宽固定，行行对齐）；无事件时显示占位
     const last = t.events && t.events.length ? [...t.events].reverse().find(e => e.s != null) : null;
-    const live = last
-      ? '<div class="rc-live"><div class="lv-title">LIVE</div><div class="lv-line"><b>' + (last.k === 'tool' ? '⚙' : '💬') + '</b> ' + esc(last.s).slice(0, 80) + '</div></div>'
-      : (t.legacy ? '<div class="rc-live"><div class="lv-title">LEGACY</div><div class="lv-line">旧版派发，无流式日志</div></div>' : '');
+    let liveInner;
+    if (last) liveInner = '<div class="lv-title">LIVE</div><div class="lv-line"><b>' + (last.k === 'tool' ? '⚙' : '💬') + '</b> ' + esc(last.s).slice(0, 80) + '</div>';
+    else if (t.legacy) liveInner = '<div class="lv-title">LEGACY</div><div class="lv-line">旧版派发，无流式日志</div>';
+    else liveInner = '<div class="lv-title">LIVE</div><div class="lv-line">—</div>';
+    const live = '<div class="rc-live">' + liveInner + '</div>';
     const side = t.status === 'running'
       ? '<div class="rc-side"><span class="enter">查看终端 →</span><div class="meta">最后活动 ' + ago + ' · 已运行 ' + el + '</div>'
         + '<div class="meta" style="display:flex;gap:6px;margin-top:6px"><button class="act danger" data-act="kill" data-code="' + t.code + '">⏹ 强制结束</button></div></div>'
