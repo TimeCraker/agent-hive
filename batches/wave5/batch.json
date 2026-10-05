@@ -1,6 +1,6 @@
 {
   "wave": "wave5",
-  "title": "第五波 · vibe-studio 升级实施 + 空闲槽填充：四站巡检 + 双仓 Spec 起草（11 任务）",
+  "title": "第五波 · vibe-studio 升级计划并行实施（publish 自足 / Remotion 升级安全网 / per-shot viewport / cues 校验器 / 封面目检）",
   "tasks": [
     {
       "code": "PUBD",
@@ -91,66 +91,6 @@
       "outTok": 11394,
       "acceptedAt": "2026-10-05T15:03:24.366Z",
       "acceptNote": "10/10 PASS；时间码/帧号数学旁证吻合；副本留存 10 张"
-    },
-    {
-      "code": "INSPLK",
-      "name": "lekao 线上健康巡检",
-      "goal": "可用性/关键路径/性能/死链四项巡检 + 问题分级清单",
-      "model": "glm-5.3[1m]",
-      "cwd": "lekao",
-      "promptFile": "prompts/INSPLK.md",
-      "status": "running",
-      "dispatchedAt": "2026-10-05T15:01:49.118Z",
-      "pid": 10828
-    },
-    {
-      "code": "INSPXZ",
-      "name": "xiaofanzhuo 线上健康巡检（只读红线）",
-      "goal": "四项巡检 + 问题分级清单；生产零写入",
-      "model": "glm-5.3[1m]",
-      "cwd": "xiaofanzhuo",
-      "promptFile": "prompts/INSPXZ.md",
-      "status": "running",
-      "dispatchedAt": "2026-10-05T15:01:49.176Z",
-      "pid": 34608
-    },
-    {
-      "code": "INSPPF",
-      "name": "my-portfolio 线上健康巡检",
-      "goal": "四项巡检 + 问题分级清单",
-      "model": "glm-5.3[1m]",
-      "cwd": "my-portfolio",
-      "promptFile": "prompts/INSPPF.md",
-      "status": "running",
-      "dispatchedAt": "2026-10-05T15:01:49.211Z",
-      "pid": 22672
-    },
-    {
-      "code": "INSPCB",
-      "name": "coding-plan-bench 线上站巡检",
-      "goal": "四项巡检 + 问题分级清单；不碰本仓工作树",
-      "model": "glm-5.3[1m]",
-      "cwd": "pwa-hw-voice",
-      "promptFile": "prompts/INSPCB.md",
-      "status": "queued"
-    },
-    {
-      "code": "SPECLK",
-      "name": "lekao 下一阶段 Stage Spec 起草",
-      "goal": "免费模式深化方向 PRD/Spec 草案落仓；DRAFT 标注；1 commit",
-      "model": "glm-5.3[1m]",
-      "cwd": "lekao",
-      "promptFile": "prompts/SPECLK.md",
-      "status": "queued"
-    },
-    {
-      "code": "SPECGM",
-      "name": "games web-client 下一阶段 Spec 起草",
-      "goal": "性能二期+内容化 Spec 草案落仓；40 条用户现场零混入",
-      "model": "glm-5.3[1m]",
-      "cwd": "games",
-      "promptFile": "prompts/SPECGM.md",
-      "status": "queued"
     }
   ]
 }
