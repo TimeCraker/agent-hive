@@ -205,13 +205,17 @@ function openTerminal(code) {
   OPEN_CODE = code; LOG_OFFSET = 0; FOLLOW = true;
   const t = DATA.tasks.find(x => x.code === code);
   document.getElementById('d-code').textContent = code;
-  document.getElementById('d-st').textContent = (STLBL[t.status] || t.status) + ' · ' + fmtDur(t.elapsed);
+  document.getElementById('d-name').textContent = t.name;
+  const stEl = document.getElementById('d-st');
+  stEl.className = 'st stpill-' + t.status;
+  stEl.textContent = (STLBL[t.status] || t.status) + ' · ' + fmtDur(t.elapsed);
   document.getElementById('d-model').textContent = t.model;
   document.getElementById('d-sid').textContent = t.sessionId ? 'session ' + String(t.sessionId).slice(0, 8) : '';
   document.getElementById('d-goal').textContent = '目标：' + t.goal;
   document.getElementById('d-term').innerHTML = '';
   document.getElementById('d-bytes').textContent = '';
   document.getElementById('drawer').classList.add('open');
+  document.getElementById('scrim').classList.add('open');
   document.getElementById('d-follow').textContent = '● 自动跟随';
   pollLog();
   if (!POLL_TIMER) POLL_TIMER = setInterval(() => { if (OPEN_CODE) pollLog(); }, 1500);
@@ -219,6 +223,7 @@ function openTerminal(code) {
 function closeTerminal() {
   OPEN_CODE = null;
   document.getElementById('drawer').classList.remove('open');
+  document.getElementById('scrim').classList.remove('open');
   clearInterval(POLL_TIMER); POLL_TIMER = null;
 }
 async function pollLog() {
@@ -233,19 +238,25 @@ async function pollLog() {
     for (const e of d.events) {
       if (e.k === 'usage') continue;   // usage 遥测不再逐事件渲染（台账在 result 收档）
       const div = document.createElement('div');
+      div.classList.add('fade-in');
       if (e.k === 'say') {
         // assistant 文本：markdown-lite 分层渲染
-        div.className = 'md';
+        div.className += ' md';
         div.innerHTML = mdBlock(e.s);
       } else {
-        div.className = 'ln t-' + e.k;
+        div.className += ' ln t-' + e.k;
         div.innerHTML = '<span class="tm">' + new Date().toLocaleTimeString('zh-CN', { hour12: false }) + '</span>' + esc(e.s);
       }
       term.appendChild(div);
     }
     if (d.events.length && stick) term.scrollTop = term.scrollHeight;
     const t = DATA.tasks.find(x => x.code === OPEN_CODE);
-    if (t) { document.getElementById('d-st').textContent = (STLBL[t.status] || t.status) + ' · ' + fmtDur(t.elapsed); updateUsageFooter(t); }
+    if (t) {
+      const stEl = document.getElementById('d-st');
+      stEl.className = 'st stpill-' + t.status;
+      stEl.textContent = (STLBL[t.status] || t.status) + ' · ' + fmtDur(t.elapsed);
+      updateUsageFooter(t);
+    }
   } catch (e) { /* 网络抖动，下轮再试 */ }
 }
 // 会话台账 footer（DSH 风格）：N 轮 · X tok · Y tok/s · $Z —— 数据来自 result 收档字段
@@ -264,6 +275,7 @@ function updateUsageFooter(t) {
 
 // ── 事件绑定 ──
 document.getElementById('d-close').onclick = closeTerminal;
+document.getElementById('scrim').onclick = closeTerminal;
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTerminal(); });
 document.getElementById('d-term').addEventListener('scroll', () => {
   const t = document.getElementById('d-term');
