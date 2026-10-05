@@ -1,5 +1,5 @@
 // agent-console 前端：状态渲染 + 筛选 + 终端抽屉（stream-json 尾读）
-let WAVE = 'wave1';
+let WAVE = new URLSearchParams(location.search).get('wave') || 'wave1';
 let FILTER = 'all';
 let DATA = null;
 let OPEN_CODE = null;   // 终端抽屉当前打开的任务
@@ -17,6 +17,7 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 function render(d) {
   document.getElementById('disp').textContent = new Date(d.dispatchedAt).toLocaleString('zh-CN', { hour12: false });
   document.getElementById('clock').textContent = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+  document.getElementById('wavelbl').textContent = 'Wave ' + String(d.wave || WAVE).replace(/^wave/i, '');
 
   document.getElementById('s-done').textContent = d.counts.done;
   document.getElementById('s-running').textContent = d.counts.running + d.counts.pending;

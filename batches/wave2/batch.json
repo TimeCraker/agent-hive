@@ -1,0 +1,115 @@
+{
+  "wave": "wave2",
+  "title": "第二波 · 全项目文档审计清理（12 个 Agent，ResumeAIX 按用户要求排除）",
+  "dispatchedAt": "2026-10-05T19:04:07+08:00",
+  "tasks": [
+    {
+      "code": "LK",
+      "name": "lekao 文档审计清理",
+      "goal": "全仓文档判定表；免费模式口径校正；≥1 docs commit 或逐篇无可清理依据",
+      "model": "glm-5.3[1m]",
+      "cwd": "lekao",
+      "promptFile": "prompts/LK.md",
+      "status": "pending"
+    },
+    {
+      "code": "XFZ",
+      "name": "xiaofanzhuo 文档审计清理",
+      "goal": "上线后文档判定表；过期 Stage/验收文档处置；≥1 docs commit 或依据",
+      "model": "glm-5.3[1m]",
+      "cwd": "xiaofanzhuo",
+      "promptFile": "prompts/XFZ.md",
+      "status": "pending"
+    },
+    {
+      "code": "MPF",
+      "name": "my-portfolio 文档审计清理",
+      "goal": "全仓文档判定表；冗余/过期处置；≥1 docs commit 或逐篇无可清理依据",
+      "model": "glm-5.3[1m]",
+      "cwd": "my-portfolio",
+      "promptFile": "prompts/MPF.md",
+      "status": "pending"
+    },
+    {
+      "code": "GAM",
+      "name": "games 文档审计清理",
+      "goal": "根+asternova 两级文档判定表；子项目封存/冻结/主力状态标注校正",
+      "model": "glm-5.3[1m]",
+      "cwd": "games",
+      "promptFile": "prompts/GAM.md",
+      "status": "pending"
+    },
+    {
+      "code": "VBS",
+      "name": "vibe-studio 文档审计清理",
+      "goal": "文档判定表；README 的 7-skill 清单与 skills/ 实际对齐",
+      "model": "glm-5.3[1m]",
+      "cwd": "vibe-studio",
+      "promptFile": "prompts/VBS.md",
+      "status": "pending"
+    },
+    {
+      "code": "VSW",
+      "name": "video-script-workflow 文档审计清理",
+      "goal": "agent.md 与实际目录结构核对校正；创作内容零改动",
+      "model": "glm-5.3[1m]",
+      "cwd": "video-script-workflow",
+      "promptFile": "prompts/VSW.md",
+      "status": "pending"
+    },
+    {
+      "code": "CPB",
+      "name": "coding-plan-bench 文档审计清理",
+      "goal": "文档判定表；PLAN.md vs PLAN-v2.md 归档处置；results/ 档案零改动",
+      "model": "glm-5.3[1m]",
+      "cwd": "coding-plan-bench",
+      "promptFile": "prompts/CPB.md",
+      "status": "pending"
+    },
+    {
+      "code": "AFD",
+      "name": "asterforge-deploy 文档审计（极保守）",
+      "goal": "文档与 scripts/configs 实际清单一致性核查；只清理确凿过期项",
+      "model": "glm-5.3[1m]",
+      "cwd": "asterforge-deploy",
+      "promptFile": "prompts/AFD.md",
+      "status": "pending"
+    },
+    {
+      "code": "CFG",
+      "name": "config 七子仓文档审计清理",
+      "goal": "7 子仓文档判定表；旧 claude-code-config 残留引用清零",
+      "model": "glm-5.3[1m]",
+      "cwd": "config",
+      "promptFile": "prompts/CFG.md",
+      "status": "pending"
+    },
+    {
+      "code": "PWA",
+      "name": "pwa-hw-voice 文档轻审计",
+      "goal": "归档状态自洽性核查；小改动或 0 提交（报告说明依据）",
+      "model": "glm-5.3[1m]",
+      "cwd": "pwa-hw-voice",
+      "promptFile": "prompts/PWA.md",
+      "status": "pending"
+    },
+    {
+      "code": "HIVE",
+      "name": "agent-hive 文档自审计",
+      "goal": "README/AGENTS/docs 三篇核对校正；wave2 数据与 app 代码零改动",
+      "model": "glm-5.3[1m]",
+      "cwd": "agent-hive",
+      "promptFile": "prompts/HIVE.md",
+      "status": "pending"
+    },
+    {
+      "code": "SEXA",
+      "name": "sex-workspace 指引文档核对",
+      "goal": "仅 sex2/AGENT.md 与实际结构核对校正；创作内容零接触",
+      "model": "glm-5.3[1m]",
+      "cwd": "sex-workspace",
+      "promptFile": "prompts/SEXA.md",
+      "status": "pending"
+    }
+  ]
+}
