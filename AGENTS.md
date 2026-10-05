@@ -17,7 +17,7 @@
 | `app/public/` | 前端三件套（index.html / app.js / theme.css） | 可改 |
 | `batches/<wave>/batch.json` | 每波任务定义与状态（**状态的唯一真相源**） | 派发/状态变更时写 |
 | `batches/<wave>/prompts/` | 任务包提示词 | 派发前可改，派发后只读 |
-| `runs/logs/<代号>.ndjson` | 各会话 stream-json 实时流 | 只追加，勿手改 |
+| `runs/logs/<wave>/<代号>.ndjson` | 各会话 stream-json 实时流（同目录伴随 `<代号>.ndjson.launcher.err` 排障文件） | 只追加，勿手改 |
 | `runs/reports/<代号>-report.md` | 各会话结果报告 | 会话自己写 |
 | `docs/design.md` | UI/UX 设计决策记录 | 设计变更时更新 |
 
@@ -40,6 +40,12 @@
 }
 ```
 
+wave1 起实际数据中另有以下扩展字段（观测/回填用，派发不要求）：
+
+- 任务级 `dispatchedAt`：dispatch 时由服务写入，该任务的计时起点（elapsed 优先取它，缺省回落 wave 级）
+- `legacy: true`：旧 launcher 派发的会话标记（无流式日志，面板明示 LEGACY）
+- `commit` / `remote`：人工回填的任务产出（提交短哈希 / 远端仓标识）
+
 ## 任务包提示词写法约定
 
 每份提示词是**自包含**的——执行会话没有主控上下文，必须写全。固定结构：
@@ -49,11 +55,11 @@
 3. **红线**（不碰什么、并发避让、安全约束）
 4. **验收标准**（数字化，写明检查命令）
 5. **报告要求**（整文件覆盖写入 `runs/reports/<代号>-report.md`，含自评）
-范例：`batches/wave1/prompts/` 下 9 份。
+范例：`batches/wave1/prompts/` 下 10 份。
 
 ## 派发 API
 
-`POST /api/dispatch`，body `{"wave":"wave1","code":"VS"}`——仅接受 pending；claude 正常退出后状态自动翻 done。
+`POST /api/dispatch`，body `{"wave":"wave1","code":"VS"}`——仅接受 pending；claude 退出后状态自动翻 done（exit 回调），日志出现 result 事件时另有自愈兜底翻 done。
 
 ## 会话启动规范（派发 claude 的硬性要求）
 

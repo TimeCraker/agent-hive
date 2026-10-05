@@ -18,10 +18,10 @@
 - 移动端横向溢出（kv nowrap 无约束）→ min-width:0 + max-width:100% 约束
 - 单一导航（sticky + 状态色实底选中），砍掉一切重复计数导航（v6 双导航顺序不一致被用户指出）
 - Git 动态默认**按项目**全宽列表（v6 三列小卡+全局时间线被否）
-- 状态词汇定稿：已完成 / 进行中 / 等待中 / 已取消（"干得正欢"、"思考中/进行中之分"均被用户否决）
+- 状态词汇定稿：已完成 / 进行中 / 排队中 / 已取消（"干得正欢"、"思考中/进行中之分"均被用户否决）
 
 ### 终端视图方案
-- 旧 `claude -p`（纯文本输出）无法实时观测 → 派发改为**服务端直接 spawn claude.exe**（零 PS 包装层），stdout 落 `runs/logs/<代号>.ndjson`（stream-json 每动作一行），stderr 落 `<代号>.launcher.err`
+- 旧 `claude -p`（纯文本输出）无法实时观测 → 派发改为**服务端直接 spawn claude.exe**（零 PS 包装层），stdout 落 `runs/logs/<wave>/<代号>.ndjson`（stream-json 每动作一行），stderr 落 `<代号>.ndjson.launcher.err`
 - 服务端 `/api/logs/<代号>?since=字节偏移` 增量尾读（不完整行留到下次）
 - 前端终端面板：黑底 #0C0E10、工具调用琥珀 #E3B341、结果绿 #7EE787、自动跟随滚动（用户上滚即暂停）
 - legacy 会话（旧 launcher 派发）无流式日志，面板明示「LEGACY」，文件活动信号兜底

@@ -5,16 +5,16 @@
 ## 快速上手
 
 ```powershell
-# 启动控制台（默认 http://127.0.0.1:17878）
+# 启动控制台（默认端口 17879 → http://127.0.0.1:17879）
 node app/server.mjs
 
-# 指定端口 / 波次
+# 覆盖端口（例：17878）；波次不走 env，由面板 URL ?wave= 或 API 参数指定
 $env:PORT=17878; node app/server.mjs
 ```
 
 1. 在 `batches/<wave>/batch.json` 定义任务（代号/目标/cwd/提示词文件），`model` 字段**直书实际模型 ID**：`glm-5.3[1m]`（文本主力）/ `glm-5.3-flash[1m]`（多模态看图）
 2. 提示词放 `batches/<wave>/prompts/<代号>.md`
-3. 派发：面板「排队中」任务行点击派发（或 POST /api/dispatch）
+3. 派发：POST /api/dispatch（body 如 `{"wave":"wave2","code":"AFD"}`；面板不带派发按钮，点任务行打开的是终端抽屉）
 4. 点「查看终端 →」实时观看会话动态
 5. 会话写报告到 `runs/reports/<代号>-report.md`，面板状态自动翻绿
 
