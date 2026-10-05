@@ -47,9 +47,16 @@
       "model": "glm-5.3[1m]",
       "cwd": "coding-plan-bench",
       "promptFile": "prompts/MXU.md",
-      "status": "running",
+      "status": "accepted",
       "dispatchedAt": "2026-10-05T15:57:20.306Z",
-      "pid": 11756
+      "pid": 11756,
+      "settledAt": "2026-10-05T16:06:23.747Z",
+      "sessionId": "d5963847-bc60-44c3-973c-a8f98b9eff52",
+      "turns": 26,
+      "costUsd": 2.158024,
+      "outTok": 18878,
+      "acceptedAt": "2026-10-05T16:07:36.350Z",
+      "acceptNote": "BMI 8条全落地+A4/A5端点官方核验+stash对照实验（67b8634）；新渠道未实测已诚实标注"
     }
   ]
 }
