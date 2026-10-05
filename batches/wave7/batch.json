@@ -9,14 +9,16 @@
       "model": "glm-5.3[1m]",
       "cwd": "my-portfolio",
       "promptFile": "prompts/DEPPF.md",
-      "status": "reported",
+      "status": "accepted",
       "dispatchedAt": "2026-10-05T15:37:07.264Z",
       "pid": 32136,
       "settledAt": "2026-10-05T15:48:58.937Z",
       "sessionId": "a84b47c6-8ba0-4cad-8cae-43dfad797758",
       "turns": 31,
       "costUsd": 2.6129460000000004,
-      "outTok": 28803
+      "outTok": 28803,
+      "acceptedAt": "2026-10-05T15:52:25.910Z",
+      "acceptNote": "验收方服务器侧独立复核：preload全集=18条noto相对路径+2Fraunces+1Anton与报告枚举一致、Inter/JBMono preload=0（woff2按需保留系c28d74c设计）、首页200。b2d2eac三端一致、停机26s、7项验证绿（1项按SKILL手动兜底）。遗留发现：safe.sh:175引号bug自09-30必挂（10-03遗留tarball佐证），已建议立项修复。"
     },
     {
       "code": "NGXHRD",
