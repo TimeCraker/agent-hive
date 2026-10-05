@@ -156,6 +156,8 @@ nav{position:sticky;top:0;z-index:100;background:var(--bg);display:flex;gap:8px;
 .dterm .ln.t-result{color:#7EE787}
 .dterm .ln.t-sys{color:#8B949E}
 .dterm .ln .tm{color:#58606A;margin-right:10px;font-size:10px}
+.dterm .t-empty{color:#8B949E;font-family:var(--disp);font-size:13px;padding:20px 0;line-height:1.6}
+.dgoal{padding:10px 16px;font-size:12.5px;color:#9BA7B4;border-bottom:1px solid #262B33;line-height:1.5}
 .dfoot{border-top:1px solid #262B33;padding:8px 16px;display:flex;gap:16px;font-family:var(--mono);font-size:10px;color:#8B949E}
 @media(max-width:1100px){.rc-live{display:none}}
 @media(max-width:900px){.drawer{width:100vw}.rc-side{flex:1 1 100%;border-left:none;border-top:1px dashed var(--line)}}

@@ -95,6 +95,7 @@ function openTerminal(code) {
   document.getElementById('d-code').textContent = code;
   document.getElementById('d-st').textContent = STLBL[t.status] + ' · ' + fmtDur(t.elapsed);
   document.getElementById('d-model').textContent = t.model;
+  document.getElementById('d-goal').textContent = '目标：' + t.goal;
   document.getElementById('d-term').innerHTML = '';
   document.getElementById('drawer').classList.add('open');
   document.getElementById('d-follow').textContent = '● 自动跟随';
@@ -111,7 +112,7 @@ async function pollLog() {
   try {
     const r = await fetch(`/api/logs/${OPEN_CODE}?since=${LOG_OFFSET}&wave=${WAVE}`);
     const d = await r.json();
-    if (!d.exists) { document.getElementById('d-bytes').textContent = '日志未生成'; return; }
+    if (!d.exists) { document.getElementById('d-bytes').textContent = '日志未生成（claude 启动后此处实时滚动）'; return; }
     LOG_OFFSET = d.bytes;
     const term = document.getElementById('d-term');
     const stick = FOLLOW;
