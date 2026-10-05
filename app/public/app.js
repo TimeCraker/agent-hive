@@ -73,12 +73,17 @@ function render(d) {
   document.getElementById('rows').innerHTML = mainTasks.map(t => {
     const ago = fmtAgo(t.lastActivityAgo);
     const el = fmtDur(t.elapsed);
-    const staleF = t.stale ? '<span class="staleflag">⚠ 日志停更 ' + fmtDur(t.staleFor) + '</span>' : '';
-    const cmt = t.commit ? '<div class="kv" style="font-family:var(--mono);font-size:11px;color:var(--ink2)">&#9251; ' + esc(t.commit) + '</div>' : '';
-    const tf = t.touched && t.touched.length ? '<div class="kv">&#9998; ' + t.touched.map(esc).join(' &nbsp; ') + '</div>' : '';
-    const live = (t.events && t.events.length)
-      ? '<div class="rc-live"><div class="lv-title">LIVE · 最近动作</div>' + t.events.map(e =>
-          '<div class="lv-line"><b>' + (e.k === 'tool' ? '⚙' : '💬') + '</b> ' + esc(e.s).slice(0, 90) + '</div>').join('') + '</div>'
+    const staleF = t.stale ? '<span class="staleflag">⚠ 停更 ' + fmtDur(t.staleFor) + '</span>' : '';
+    // 元信息收敛为一行：提交 · 触达文件数 · 模型（替代散落的多行 mono）
+    const metaBits = [];
+    if (t.commit) metaBits.push('<span class="mb">&#9251; ' + esc(t.commit) + '</span>');
+    if (t.touched && t.touched.length) metaBits.push('<span class="mb">&#9998; ' + t.touched.length + ' 文件</span>');
+    if (t.model) metaBits.push('<span class="mb">' + esc(t.model) + '</span>');
+    const metaRow = metaBits.length ? '<div class="meta-row">' + metaBits.join('<span class="msep">·</span>') + '</div>' : '';
+    // 实时预览收敛为最新一条（替代多行文字堆叠）
+    const last = t.events && t.events.length ? t.events[t.events.length - 1] : null;
+    const live = last
+      ? '<div class="rc-live"><div class="lv-title">LIVE</div><div class="lv-line"><b>' + (last.k === 'tool' ? '⚙' : '💬') + '</b> ' + esc(last.s).slice(0, 80) + '</div></div>'
       : (t.legacy ? '<div class="rc-live"><div class="lv-title">LEGACY</div><div class="lv-line">旧版派发，无流式日志</div></div>' : '');
     const side = t.status === 'running'
       ? '<div class="rc-side"><span class="enter">查看终端 →</span><div class="meta">最后活动 ' + ago + ' · 已运行 ' + el + '</div>'
@@ -88,7 +93,7 @@ function render(d) {
         : '<div class="rc-side"><span class="meta">等待派发</span></div>';
     return '<div class="rowt clickable' + (t.legacy ? ' legacy' : '') + '" data-code="' + t.code + '">'
       + '<div class="rcol rc-code"><span class="code">' + t.code + '</span><span class="st st-' + t.status + '">' + (STLBL[t.status] || t.status) + '</span>' + staleF + '</div>'
-      + '<div class="rcol rc-main"><span class="tname">' + esc(t.name) + '</span><span class="goal">' + esc(t.goal) + '</span>' + cmt + tf + '</div>'
+      + '<div class="rcol rc-main"><span class="tname">' + esc(t.name) + '</span><span class="goal">' + esc(t.goal) + '</span>' + metaRow + '</div>'
       + live + side + '</div>';
   }).join('') || '<div class="empty">当前筛选下无在办任务</div>';
   document.querySelectorAll('#rows .rowt.clickable').forEach(r => r.onclick = () => openTerminal(r.dataset.code));
@@ -250,7 +255,7 @@ document.getElementById('git-refresh-btn').onclick = async function () {
   document.getElementById('git-auto').textContent = '自动刷新 · 5 秒';
 };
 
-// ── 主循环 ──
+// ── 主循环：SSE 实时推送（2s 心跳走秒 + batch 变化即时推），轮询 30s 兜底 ──
 async function refresh() {
   try {
     const r = await fetch('/api/status?wave=' + encodeURIComponent(WAVE));
@@ -258,4 +263,11 @@ async function refresh() {
     render(DATA);
   } catch (e) { document.getElementById('clock').textContent = '连接中断'; }
 }
-refresh(); setInterval(refresh, 5000);
+refresh();
+try {
+  const es = new EventSource('/api/events?wave=' + encodeURIComponent(WAVE));
+  es.onmessage = ev => { try { DATA = JSON.parse(ev.data); render(DATA); } catch (e) { /* 心跳外杂音 */ } };
+  es.onerror = () => { document.getElementById('live-dot')?.classList.add('reconnecting'); };
+  es.onopen = () => { document.getElementById('live-dot')?.classList.remove('reconnecting'); };
+} catch (e) { setInterval(refresh, 5000); }   // EventSource 不可用时退回轮询
+setInterval(refresh, 30000);                    // 慢速兜底（SSE 静默断连时保底）

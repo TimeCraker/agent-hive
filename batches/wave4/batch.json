@@ -10,7 +10,9 @@
       "model": "glm-5.3[1m]",
       "cwd": "coding-plan-bench",
       "promptFile": "prompts/S01I.md",
-      "status": "pending"
+      "status": "running",
+      "dispatchedAt": "2026-10-05T12:46:51.077Z",
+      "pid": 14020
     },
     {
       "code": "BMI",
@@ -19,7 +21,9 @@
       "model": "glm-5.3[1m]",
       "cwd": "coding-plan-bench",
       "promptFile": "prompts/BMI.md",
-      "status": "pending"
+      "status": "running",
+      "dispatchedAt": "2026-10-05T12:46:51.121Z",
+      "pid": 13488
     },
     {
       "code": "MXU",

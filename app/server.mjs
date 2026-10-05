@@ -368,8 +368,39 @@ function serveStatic(res, rel) {
 // wave 名白名单：字母/数字/下划线/连字符——防错拼 URL（复制带进 markdown 符号等）打崩服务，也防路径穿越
 const WAVE_RE = /^[\w-]+$/;
 
+// ── SSE 实时推送：一条长连接替代 5s 轮询；2s 心跳走秒 elapsed，batch 变化即时推 ──
+const sseClients = new Set();   // { res, wave }
+function sseBroadcast(wave) {
+  const data = JSON.stringify(buildStatus(wave));
+  for (const c of sseClients) {
+    if (c.wave !== wave) continue;
+    try { c.res.write('data: ' + data + '\n\n'); } catch (e) { sseClients.delete(c); }
+  }
+}
+fs.watchFile(path.join(ROOT, 'batches'), { interval: 1200 }, () => {
+  for (const w of new Set([...sseClients].map(c => c.wave))) {
+    try { sseBroadcast(w); } catch (e) { /* wave 消失等 */ }
+  }
+});
+setInterval(() => {
+  for (const w of new Set([...sseClients].map(c => c.wave))) {
+    try { sseBroadcast(w); } catch (e) { /* 忽略 */ }
+  }
+}, 2000);
+
 const server = http.createServer((req, res) => {
   const u = new URL(req.url, 'http://x');
+  if (u.pathname === '/api/events') {
+    // SSE：握手后由 ticker/watch 推送；客户端断开自动清理
+    const w = u.searchParams.get('wave') || 'wave1';
+    if (!WAVE_RE.test(w)) { res.writeHead(400).end(); return; }
+    res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', Connection: 'keep-alive' });
+    res.write(': connected\n\n');
+    const client = { res, wave: w };
+    sseClients.add(client);
+    req.on('close', () => sseClients.delete(client));
+    return;
+  }
   if (u.pathname === '/api/status') {
     const w = u.searchParams.get('wave') || 'wave1';
     let payload;
