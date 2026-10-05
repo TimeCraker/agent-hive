@@ -1,4 +1,4 @@
-// agent-console · 派发控制台服务
+// agent-hive 蜂巢 · 派发控制台服务（验收状态机：终态只出自验收）
 // 静态页 + 状态 API + 终端日志尾读 + 派发（spawn claude 无头会话）
 import http from 'http';
 import fs from 'fs';
