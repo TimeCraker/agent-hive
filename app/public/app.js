@@ -207,7 +207,7 @@ function closeTerminal() {
 async function pollLog() {
   if (!OPEN_CODE) return;
   try {
-    const r = await fetch(`/api/logs/${OPEN_CODE}?since=${LOG_OFFSET}&wave=${WAVE}`);
+    const r = await fetch(`/api/logs/${encodeURIComponent(OPEN_CODE)}?since=${LOG_OFFSET}&wave=${encodeURIComponent(WAVE)}`);
     const d = await r.json();
     if (!d.exists) { document.getElementById('d-bytes').textContent = '日志未生成（claude 启动后此处实时滚动）'; return; }
     LOG_OFFSET = d.bytes;
@@ -253,7 +253,7 @@ document.getElementById('git-refresh-btn').onclick = async function () {
 // ── 主循环 ──
 async function refresh() {
   try {
-    const r = await fetch('/api/status?wave=' + WAVE);
+    const r = await fetch('/api/status?wave=' + encodeURIComponent(WAVE));
     DATA = await r.json();
     render(DATA);
   } catch (e) { document.getElementById('clock').textContent = '连接中断'; }

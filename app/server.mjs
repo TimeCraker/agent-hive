@@ -365,11 +365,18 @@ function serveStatic(res, rel) {
   } catch (e) { res.writeHead(404); res.end('not found'); }
 }
 
+// wave 名白名单：字母/数字/下划线/连字符——防错拼 URL（复制带进 markdown 符号等）打崩服务，也防路径穿越
+const WAVE_RE = /^[\w-]+$/;
+
 const server = http.createServer((req, res) => {
   const u = new URL(req.url, 'http://x');
   if (u.pathname === '/api/status') {
-    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-    res.end(JSON.stringify(buildStatus(u.searchParams.get('wave') || 'wave1')));
+    const w = u.searchParams.get('wave') || 'wave1';
+    let payload;
+    if (!WAVE_RE.test(w)) payload = JSON.stringify({ ok: false, error: 'bad wave name' });
+    else { try { payload = JSON.stringify(buildStatus(w)); } catch (e) { payload = JSON.stringify({ ok: false, error: `wave not found: ${w}` }); } }
+    res.writeHead(payload.includes('"ok":false') ? 400 : 200, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(payload);
     return;
   }
   if (u.pathname.startsWith('/api/logs/')) {
@@ -387,6 +394,7 @@ const server = http.createServer((req, res) => {
       let out;
       try {
         const { wave, code, resume, prompt, force } = JSON.parse(body || '{}');
+        if (!WAVE_RE.test(wave || 'wave1')) throw new Error('bad wave name');
         out = dispatch(wave || 'wave1', code, { resume: !!resume, prompt, force: !!force });
       } catch (e) { out = { ok: false, error: String(e.message || e) }; }
       res.writeHead(out.ok ? 200 : 400, { 'Content-Type': 'application/json; charset=utf-8' });
@@ -401,6 +409,7 @@ const server = http.createServer((req, res) => {
       let out;
       try {
         const { wave, code, verdict, note } = JSON.parse(body || '{}');
+        if (!WAVE_RE.test(wave || 'wave1')) throw new Error('bad wave name');
         out = accept(wave || 'wave1', code, verdict, note);
       } catch (e) { out = { ok: false, error: String(e.message || e) }; }
       res.writeHead(out.ok ? 200 : 400, { 'Content-Type': 'application/json; charset=utf-8' });
@@ -415,6 +424,7 @@ const server = http.createServer((req, res) => {
       let out;
       try {
         const { wave, code } = JSON.parse(body || '{}');
+        if (!WAVE_RE.test(wave || 'wave1')) throw new Error('bad wave name');
         out = killTask(wave || 'wave1', code);
       } catch (e) { out = { ok: false, error: String(e.message || e) }; }
       res.writeHead(out.ok ? 200 : 400, { 'Content-Type': 'application/json; charset=utf-8' });
