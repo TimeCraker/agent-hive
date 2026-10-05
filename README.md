@@ -1,15 +1,15 @@
-# agent-console
+# agent-hive
 
 主 Agent 的**并行派发控制台**：把任务包分发给多个 Claude Code 无头会话，双模型路由（glm-5.3 文本 / glm-5.3-flash 多模态），实时终端观测，报告归档与验收。
 
 ## 快速上手
 
 ```powershell
-# 启动控制台（默认 http://127.0.0.1:17879）
-node server.mjs
+# 启动控制台（默认 http://127.0.0.1:17878）
+node app/server.mjs
 
 # 指定端口 / 波次
-$env:PORT=17878; node server.mjs
+$env:PORT=17878; node app/server.mjs
 ```
 
 1. 在 `batches/<wave>/batch.json` 定义任务（代号/目标/模型/cwd/提示词文件）

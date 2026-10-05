@@ -1,4 +1,4 @@
-# agent-console · UI/UX 设计决策记录
+# agent-hive · UI/UX 设计决策记录
 
 ## 2026-10-05 · v1（从 AGENT-BOARD 临时看板升格）
 

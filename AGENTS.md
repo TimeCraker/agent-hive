@@ -1,6 +1,6 @@
-# agent-console · AGENTS.md
+# agent-hive · AGENTS.md
 
-本文件是「agent-console」项目的协作规则。任何进入本目录工作的 agent（含主控会话派发的子 agent）必须遵守。
+本文件是「agent-hive」项目的协作规则。任何进入本目录工作的 agent（含主控会话派发的子 agent）必须遵守。
 
 ## 项目定位
 
@@ -12,9 +12,9 @@
 
 | 路径 | 用途 | 可变性 |
 |---|---|---|
-| `server.mjs` | Node 服务：静态页 + API + spawn 管理 | 可改 |
-| `launcher.ps1` | Claude 启动器：env 注入 + stream-json 落盘 | 可改 |
-| `public/` | 前端三件套（index.html / app.js / theme.css） | 可改 |
+| `app/server.mjs` | Node 服务：静态页 + API + spawn 管理 | 可改 |
+| `app/launcher.ps1` | Claude 启动器：env 注入 + stream-json 落盘（legacy，派发已内置 server） | 可改 |
+| `app/public/` | 前端三件套（index.html / app.js / theme.css） | 可改 |
 | `batches/<wave>/batch.json` | 每波任务定义与状态（**状态的唯一真相源**） | 派发/状态变更时写 |
 | `batches/<wave>/prompts/` | 任务包提示词 | 派发前可改，派发后只读 |
 | `runs/logs/<代号>.ndjson` | 各会话 stream-json 实时流 | 只追加，勿手改 |
