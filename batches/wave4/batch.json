@@ -10,15 +10,18 @@
       "model": "glm-5.3[1m]",
       "cwd": "coding-plan-bench",
       "promptFile": "prompts/S01I.md",
-      "status": "running",
+      "status": "accepted",
       "dispatchedAt": "2026-10-05T15:33:04.774Z",
       "pid": 35792,
       "sessionId": "3fc771b9-39bc-4702-9ab2-af1f4c40c135",
-      "failReason": "wedged: T-010 提交后 API 挂起 14 分钟无事件，主控 kill 处置（全部工作已提交，零损失）",
-      "settledAt": "2026-10-05T15:38:00.000Z",
+      "turns": null,
+      "settledAt": "2026-10-05T15:57:30.000Z",
+      "settleNote": "T-011 全部交付后 API 挂起，主控 kill+手动收档 reported（报告与 Receipt 已落盘、工作树 clean）",
       "resumeCount": 2,
       "followUp": "挂起恢复：你在 T-010 提交完成后，下一个 API 请求挂起了约 14 分钟无响应，主控把进程杀了——不是你的错误。已核实：T-001 到 T-010 全部提交完毕（最新 bbcf060），工作树干净，Tasks checkbox 已更新到 T-010。\n\n剩余工作只剩最后一步：\n1. 按契约执行 T-011「固化全量自动验收与 bundle 门禁」：补齐跨模块回归/mock upstream/browser e2e（若 Playwright 环境受阻按原授权记 env-blocked 不伪造）、bundle analyzer（初始 JS gzip ≤100KB）与验证后工作区 clean",
-      "killedAt": "2026-10-05T15:32:05.849Z"
+      "killedAt": "2026-10-05T15:56:55.015Z",
+      "acceptedAt": "2026-10-05T15:57:20.290Z",
+      "acceptNote": "11/11 Task→SHA 逐字吻合冻结契约；npm run verify exit 0；Receipt PARTIAL 正确（T-012 owner 证据）；两次中断恢复零损失"
     },
     {
       "code": "BMI",
@@ -44,7 +47,9 @@
       "model": "glm-5.3[1m]",
       "cwd": "coding-plan-bench",
       "promptFile": "prompts/MXU.md",
-      "status": "pending"
+      "status": "running",
+      "dispatchedAt": "2026-10-05T15:57:20.306Z",
+      "pid": 11756
     }
   ]
 }
