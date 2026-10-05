@@ -9,9 +9,14 @@
       "model": "glm-5.3[1m]",
       "cwd": "my-portfolio",
       "promptFile": "prompts/DEPPF.md",
-      "status": "running",
+      "status": "reported",
       "dispatchedAt": "2026-10-05T15:37:07.264Z",
-      "pid": 32136
+      "pid": 32136,
+      "settledAt": "2026-10-05T15:48:58.937Z",
+      "sessionId": "a84b47c6-8ba0-4cad-8cae-43dfad797758",
+      "turns": 31,
+      "costUsd": 2.6129460000000004,
+      "outTok": 28803
     },
     {
       "code": "NGXHRD",
@@ -56,14 +61,16 @@
       "model": "glm-5.3[1m]",
       "cwd": "xiaofanzhuo",
       "promptFile": "prompts/XFZCLEAN.md",
-      "status": "reported",
+      "status": "accepted",
       "dispatchedAt": "2026-10-05T15:39:24.110Z",
       "pid": 34372,
       "settledAt": "2026-10-05T15:46:12.150Z",
       "sessionId": "430f0163-b975-49ee-bb17-0d6817d85cb2",
       "turns": 22,
       "costUsd": 1.80278,
-      "outTok": 22732
+      "outTok": 22732,
+      "acceptedAt": "2026-10-05T15:47:59.052Z",
+      "acceptNote": "验收方服务器侧独立复核：/api/menu dishes=[]、四页200、备份db-preclean-xfzclean-20261005-234317.sqlite实测114688B/600权限与报告一致。盘点逐条对账（8单全E2E指纹、10-03后零新单）闸门严谨；WAL库VACUUM INTO备份正确；单事务显式ID删除+删前二次闸门。商家后续/admin上架真实菜单，收款码上传仍待办。"
     }
   ]
 }
