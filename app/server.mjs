@@ -199,7 +199,8 @@ function dispatch(wave, code) {
   const cwdAbs = resolveCwd(t.cwd);
   fs.mkdirSync(path.dirname(logPath(wave, code)), { recursive: true });
   // 直接 spawn claude.exe（零 PS 包装层）：prompt 走 argv，stdout=ndjson 实时流，stderr=排障文件
-  const modelArg = t.model === 'flash' ? 'glm-5.3-flash[1m]' : 'glm-5.3[1m]';
+  // model 字段即实际模型 ID（声明即执行，零映射）；后台轻任务固定走 flash
+  const modelArg = t.model;
   const promptText = fs.readFileSync(path.join(ROOT, 'batches', wave, t.promptFile), 'utf8');
   const outFd = fs.openSync(logPath(wave, code), 'w');
   const errFd = fs.openSync(logPath(wave, code) + '.launcher.err', 'a');
