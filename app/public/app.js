@@ -22,12 +22,13 @@ function render(d) {
   document.getElementById('s-running').textContent = d.counts.running + d.counts.pending;
   document.getElementById('s-pending').textContent = d.counts.pending;
   document.getElementById('s-cancelled').textContent = d.counts.cancelled;
-  const pct = d.total ? Math.round(d.counts.done / d.total * 100) : 0;
+  // 完成率口径：已取消不计入分母（取消=移出范围，不是未完成）
+  const base = d.counts.done + d.counts.running + d.counts.pending;
+  const pct = base ? Math.round(d.counts.done / base * 100) : 100;
   document.getElementById('pbar').innerHTML =
-    '<i class="pb-done" style="width:' + (d.counts.done / d.total * 100) + '%"></i>' +
-    '<i class="pb-running" style="width:' + (d.counts.running / d.total * 100) + '%"></i>' +
-    '<i class="pb-pending" style="width:' + (d.counts.pending / d.total * 100) + '%"></i>' +
-    '<i class="pb-cancelled" style="width:' + (d.counts.cancelled / d.total * 100) + '%"></i>';
+    '<i class="pb-done" style="width:' + (d.counts.done / base * 100) + '%"></i>' +
+    '<i class="pb-running" style="width:' + (d.counts.running / base * 100) + '%"></i>' +
+    '<i class="pb-pending" style="width:' + (d.counts.pending / base * 100) + '%"></i>';
   document.getElementById('pct').textContent = pct + '%';
 
   const tabs = [['all', '全部', d.total], ['running', '进行中', d.counts.running], ['waiting', '等待中', d.counts.waiting || 0], ['done', '已完成', d.counts.done], ['cancelled', '已取消', d.counts.cancelled]];
