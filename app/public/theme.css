@@ -18,7 +18,8 @@
 *{box-sizing:border-box;margin:0;padding:0}
 ::selection{background:#1A1A18;color:#F3F2ED}
 body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;
-  background-image:radial-gradient(rgba(26,26,24,.032) 1px,transparent 1px);background-size:26px 26px}
+  background-image:radial-gradient(rgba(26,26,24,.032) 1px,transparent 1px);background-size:26px 26px;
+  overflow-x:clip}   /* clip 不创建滚动容器，sticky 不受影响；防抽屉离屏位移撑出横向滚动 */
 .wrap{max-width:1240px;margin:0 auto;padding:0 36px 56px}
 a{color:inherit}
 
@@ -172,7 +173,7 @@ footer{margin-top:12px;padding-top:12px;border-top:1px solid var(--line);display
 @media(max-width:1100px){.sp4,.sp3{grid-column:span 6}.stat{flex:0 0 120px;padding:14px 16px 10px}}
 @media(max-width:900px){.drawer{width:100vw}.rc-side{flex:1 1 100%;border-left:none;border-top:1px dashed var(--line)}}
 @media(max-width:720px){.wrap{padding:16px 16px 48px}.rc-code{flex-basis:70px}.rc-code .code{font-size:19px}
-  .stat{flex:0 0 50%}.stat.barcol{flex:0 0 100%}}
+  .statsband{flex-wrap:wrap}.stat{flex:1 1 50%}.stat.barblock{flex:1 1 100%}}
 
 /* ═══ 验收状态机（终态只出自验收）═══ */
 .stat.b-accepted{--sc:var(--st-accepted)}.stat.b-reported{--sc:var(--st-reported)}
@@ -199,9 +200,9 @@ footer{margin-top:12px;padding-top:12px;border-top:1px solid var(--line);display
   opacity:0;pointer-events:none;transition:opacity .3s var(--ease);z-index:900}
 .scrim.open{opacity:1;pointer-events:auto}
 .drawer{position:fixed;top:0;right:0;width:min(760px,62vw);height:100vh;background:#0D0F12;
-  border-left:1px solid #262B33;transform:translateX(103%);transition:transform .34s var(--ease);
-  z-index:1000;display:flex;flex-direction:column;box-shadow:-28px 0 64px rgba(0,0,0,.38)}
-.drawer.open{transform:translateX(0)}
+  border-left:1px solid #262B33;transform:translateX(103%);transition:transform .34s var(--ease),visibility 0s .34s;
+  visibility:hidden;z-index:1000;display:flex;flex-direction:column;box-shadow:-28px 0 64px rgba(0,0,0,.38)}
+.drawer.open{transform:translateX(0);visibility:visible;transition:transform .34s var(--ease)}
 .drawer .dhead{display:flex;align-items:center;gap:12px;padding:16px 20px 14px;
   background:linear-gradient(to bottom,#13161B,#0D0F12);border-bottom:1px solid #262B33}
 .drawer .dhead .code{font-family:var(--mono);font-weight:700;font-size:20px;color:#E6EDF3;letter-spacing:-.02em}

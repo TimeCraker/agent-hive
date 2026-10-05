@@ -205,7 +205,7 @@ function mdBlock(s) {
 }
 function openTerminal(code) {
   OPEN_CODE = code; LOG_OFFSET = 0; FOLLOW = true; lastTool = null;
-  LEDGER = { turns: 0, tools: 0, est: 0 };
+  LEDGER = { turns: 0, tools: 0 };
   const t = DATA.tasks.find(x => x.code === code);
   document.getElementById('d-code').textContent = code;
   document.getElementById('d-name').textContent = t.name;
@@ -248,7 +248,6 @@ async function pollLog() {
         div.innerHTML = mdBlock(e.s);
         lastTool = null;   // 文本打断工具连击分组
         LEDGER.turns++;
-        LEDGER.est += estTokOf(e.s);
       } else if (e.k === 'tool') {
         // 工具行 v4：紧凑单行 + 连续重复合并 ×N
         const sp = e.s.indexOf(' ');
@@ -257,7 +256,6 @@ async function pollLog() {
         if (/^(Write|Edit|Read|NotebookEdit|MultiEdit)$/i.test(tool)) hint = hint.replace(/^.*[\\/]/, '');
         else if (hint.length > 72) hint = hint.slice(0, 36) + ' … ' + hint.slice(-30);
         LEDGER.tools++;
-        LEDGER.est += estTokOf(e.s);
         if (lastTool && lastTool.tool === tool && lastTool.hint === hint) {
           lastTool.n++;
           lastTool.el.querySelector('.tn').textContent = '×' + lastTool.n;
@@ -285,15 +283,10 @@ async function pollLog() {
     }
   } catch (e) { /* 网络抖动，下轮再试 */ }
 }
-// 会话台账 footer（DSH 风格）——两阶段：运行中显示实时轮数/动作数/估算 tok，收档后升级为真实 tok/成本全台账
+// 会话台账 footer（DSH 风格）——两阶段：运行中显示实时轮数/动作数（真实事件计数），收档后升级为真实 tok/成本全台账
 let lastTool = null;   // 工具连击分组状态（tool+hint 相同的连续行合并 ×N）
-let LEDGER = { turns: 0, tools: 0, est: 0 };   // 运行中实时计数（say=轮，tool=动作，est=估算输出 tok）
+let LEDGER = { turns: 0, tools: 0 };
 const fmtTok = n => n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? (n / 1e3).toFixed(1) + 'k' : String(n ?? 0);
-function estTokOf(s) {
-  // 混合中英估算：CJK ≈1.1 token/字，其余 ≈3.5 字符/token
-  const cjk = (s.match(/[\u4e00-\u9fff\u3000-\u303f\uff00-\uffef]/g) || []).length;
-  return Math.ceil(cjk * 1.1 + (s.length - cjk) / 3.5);
-}
 function updateUsageFooter(t) {
   if (!t) return;
   const bits = [];
@@ -306,13 +299,9 @@ function updateUsageFooter(t) {
     }
     if (t.costUsd != null) bits.push('$' + t.costUsd.toFixed(2));
   } else {
-    // 运行中：实时计数 + 估算输出 tok（zhipu 端点流内无 usage，≈ 为估算值）
+    // 运行中：实时事件计数（zhipu 端点流内无 usage，tok 数收档后才有）
     if (LEDGER.turns) bits.push('⟳ ' + LEDGER.turns + ' 轮');
     if (LEDGER.tools) bits.push(LEDGER.tools + ' 动作');
-    if (LEDGER.est) {
-      bits.push('≈' + fmtTok(LEDGER.est) + ' tok');
-      if (t.elapsed > 0) bits.push('≈' + Math.round(LEDGER.est / t.elapsed) + ' tok/s');
-    }
   }
   document.getElementById('d-bytes').textContent = bits.join(' · ');
 }
