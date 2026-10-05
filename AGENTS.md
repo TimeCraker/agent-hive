@@ -100,3 +100,4 @@ wave1 起实际数据中另有以下扩展字段（观测/回填用，派发不�
 5. **主仓提交规范**：Conventional Commits 中英对照；`runs/logs/` 加入 .gitignore 不入库。
 6. **验收纪律**（主控执行）：**终态只出自验收**——进程退出最多到 `reported`，`accepted` 必须由主控核查报告与 git 实证后经 `/api/accept` 产生；虚报用 reject 打回（note 即续派指令）并 resume 重做，同任务续派 ≤3 次。
 7. **控制台入口先行**：服务启动后、首个任务派发**前**，把带 `?wave=` 的面板 URL 明确交给用户——用户是实时监督与验收主体，无头跑完整波不交入口 = 流程违规（2026-10-05 wave5 实犯，用户来问「我的控制台呢」才补交）。主控以后台进程起服务时，须同时言明服务随主控会话存亡。
+8. **波次收口归档**：波全部终态后跑 `.\app\archive.ps1 -Wave <wave>`（或 `-All` 批量，脚本内置活跃任务守卫）——`runs/logs/<wave>/` 压缩至 `runs/archive/<wave>-logs.zip` 并删原目录；`batches/` 与 `runs/reports/` 永久保留不归档。
