@@ -34,3 +34,32 @@
 
 ### 时间正确性
 - 「已运行」曾随面板重启漂移（STARTED_AT 取服务器启动时刻）→ 根治：派发时刻持久化进 batch.json（dispatchedAt），elapsed = now − dispatchedAt
+
+## 2026-10-05 · v2（验收状态机 + Wave 2/3 实战 + 美术迭代）
+
+### 状态与口径
+- 验收状态机落地：pending → queued → running → reported/failed → accepted/rejected；**终态只出自验收**（进程退出最多到 reported）
+- 统计带与 Tab 顺序对齐：进行中 · 待验收 · 已验收 · 失败 · 已取消（「排队中」并入进行中计数，口径 = running+queued+pending）
+- 完成率分母剔除已取消（取消=移出范围，不是未完成）——用户指出旧算法永远到不了 100%
+
+### 列对齐铁律（S01I vs MXU 错位教训）
+- **代号列曾按内容伸缩**：4 字符代号（S01I）把列撑到 96px+，3 字符（MXU）只有 82px → 行行边界错位
+- 铁律：**多行卡片的每一列用固定 flex-basis + `min-width:0` + 内容省略**，宽度由基准决定、与内容无关
+- LIVE 预览列恒渲染（无事件显示 `—` 占位），不得按需出现
+
+### 终端渲染（markdown-lite + 工具行紧凑化）
+- assistant 文本走 markdown-lite：标题琥珀左轨、表格 mono 底框、`code` 高亮、列表虚线
+- 工具行紧凑化：**徽章（工具名）+ 短提示 + ×N 连击合并**——文件只留 basename、命令中段截断；完整 Windows 路径刷屏是 v3 最大的丑源
+- 工具行左侧琥珀轨道（2px 半透明），与文本块形成交替节奏
+- 新事件行 200ms 渐入（respects prefers-reduced-motion）
+
+### 抽屉 v3
+- 蒙层聚焦：打开时背景暗化 + 微模糊（点击蒙层/ESC 关闭）
+- 页头层级：大号代号 + 任务中文名 + 彩色状态药丸（随状态变色）+ 模型 chip + session 短码
+- 台账 footer 两阶段：运行中 `⟳ N 轮 · M 动作 · ≈X tok · ≈Y tok/s`（实时计数+估算，≈ 标注）；收档后 `⟳ N 轮 · X tok · Y tok/s · $Z`（result 真实数自动替换）
+- 已知边界：zhipu 端点流内 usage 全零（61/61 实测），运行中 tok 只能估算；真实数收档后才有
+
+### 实时推送
+- `/api/events?wave=` SSE 长连接替代 5s 轮询：2s 心跳走秒 elapsed + batch.json 变化即时推（fs.watchFile）
+- 客户端 EventSource + 30s 慢速轮询兜底；页首徽章 `LIVE · SSE`
+- Git 动态按**实际仓库路径**去重分组（同仓多任务合并，组名=仓库目录名，徽章=贡献任务代号）——按任务分组时同仓任务会重复展示同一份提交（S01I/BMI/MXU 三重重复教训）
