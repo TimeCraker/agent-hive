@@ -28,4 +28,4 @@ UI/UX 决策与历史（三次错位复盘、Swiss Industrial Print 选型、终
 
 ## runner 抽象
 
-v1 只有 claude-code 一个实现（launcher.ps1）。未来扩展其他终端工具/GUI 工具时，在 server.mjs 的 dispatch 分支按 runner 类型分派——**不要为假想的工具预写抽象**。
+v1 只有 claude-code 一个 runner（server 内置 spawn claude.exe；app/launcher.ps1 为 legacy）。未来扩展其他终端工具/GUI 工具时，在 server.mjs 的 dispatch 分支按 runner 类型分派——约束细则见 AGENTS.md 定位段。
