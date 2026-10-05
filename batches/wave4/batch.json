@@ -1,0 +1,34 @@
+{
+  "wave": "wave4",
+  "title": "第四波 · coding-plan-bench S01 实施 + 模型信息更新（3 任务）",
+  "dispatchedAt": "2026-10-05T20:45:47+08:00",
+  "tasks": [
+    {
+      "code": "S01I",
+      "name": "S01 可信测速 · 冻结契约实施（T-001→T-011）",
+      "goal": "按依赖序逐 Task 实现并提交；T-012 owner 证据保持未勾；Receipt 落盘",
+      "model": "glm-5.3[1m]",
+      "cwd": "coding-plan-bench",
+      "promptFile": "prompts/S01I.md",
+      "status": "pending"
+    },
+    {
+      "code": "BMI",
+      "name": "最新模型信息调研（B站模型世界 + 官方文档）",
+      "goal": "只读调研产出矩阵更新建议报告；零仓写入",
+      "model": "glm-5.3[1m]",
+      "cwd": "coding-plan-bench",
+      "promptFile": "prompts/BMI.md",
+      "status": "pending"
+    },
+    {
+      "code": "MXU",
+      "name": "预置模型矩阵更新（消费 BMI + S01I 产出）",
+      "goal": "models.ts 预置矩阵按调研建议更新；typecheck+build 过；1 commit",
+      "model": "glm-5.3[1m]",
+      "cwd": "coding-plan-bench",
+      "promptFile": "prompts/MXU.md",
+      "status": "pending"
+    }
+  ]
+}
