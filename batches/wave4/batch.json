@@ -11,8 +11,13 @@
       "cwd": "coding-plan-bench",
       "promptFile": "prompts/S01I.md",
       "status": "running",
-      "dispatchedAt": "2026-10-05T12:46:51.077Z",
-      "pid": 14020
+      "dispatchedAt": "2026-10-05T13:52:47.987Z",
+      "pid": 30728,
+      "sessionId": "3fc771b9-39bc-4702-9ab2-af1f4c40c135",
+      "failReason": "host-shutdown: DSH 退出连带杀死会话（T-006 中途，非会话自身错误）",
+      "settledAt": "2026-10-05T21:52:30.000Z",
+      "resumeCount": 1,
+      "followUp": "宿主中断恢复：你所在的机器刚才意外断电级退出（DSH 关闭把你连带杀死），这不是你的错误，也无须自责。你正实施到 S01 的 T-006 中途。\n\n现场（已核实）：工作区留有 T-006 进行中改动——已修改 package.json / package-lock.json / site/src/App.tsx / site/src/lib/api.ts / src-tauri/Cargo.toml / src-tauri/capabilities/default.json / src-tauri/src/lib.rs / src-tauri/tauri.conf.json；未跟踪新增 sit"
     },
     {
       "code": "BMI",
