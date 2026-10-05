@@ -202,7 +202,7 @@ function mdBlock(s) {
   return out.join('');
 }
 function openTerminal(code) {
-  OPEN_CODE = code; LOG_OFFSET = 0; FOLLOW = true;
+  OPEN_CODE = code; LOG_OFFSET = 0; FOLLOW = true; lastTool = null;
   const t = DATA.tasks.find(x => x.code === code);
   document.getElementById('d-code').textContent = code;
   document.getElementById('d-name').textContent = t.name;
@@ -243,9 +243,28 @@ async function pollLog() {
         // assistant 文本：markdown-lite 分层渲染
         div.className += ' md';
         div.innerHTML = mdBlock(e.s);
+        lastTool = null;   // 文本打断工具连击分组
+      } else if (e.k === 'tool') {
+        // 工具行 v4：紧凑单行 + 连续重复合并 ×N
+        const sp = e.s.indexOf(' ');
+        const tool = sp < 0 ? e.s : e.s.slice(0, sp);
+        let hint = sp < 0 ? '' : e.s.slice(sp + 1);
+        if (/^(Write|Edit|Read|NotebookEdit|MultiEdit)$/i.test(tool)) hint = hint.replace(/^.*[\\/]/, '');
+        else if (hint.length > 72) hint = hint.slice(0, 36) + ' … ' + hint.slice(-30);
+        if (lastTool && lastTool.tool === tool && lastTool.hint === hint) {
+          lastTool.n++;
+          lastTool.el.querySelector('.tn').textContent = '×' + lastTool.n;
+          continue;
+        }
+        div.className += ' ln t-tool';
+        div.innerHTML = '<span class="tbadge">' + esc(tool) + '</span><span class="thint">' + esc(hint) + '</span><span class="tn"></span>';
+        term.appendChild(div);
+        lastTool = { tool, hint, n: 1, el: div };
+        continue;
       } else {
         div.className += ' ln t-' + e.k;
         div.innerHTML = '<span class="tm">' + new Date().toLocaleTimeString('zh-CN', { hour12: false }) + '</span>' + esc(e.s);
+        lastTool = null;
       }
       term.appendChild(div);
     }
@@ -260,6 +279,7 @@ async function pollLog() {
   } catch (e) { /* 网络抖动，下轮再试 */ }
 }
 // 会话台账 footer（DSH 风格）：N 轮 · X tok · Y tok/s · $Z —— 数据来自 result 收档字段
+let lastTool = null;   // 工具连击分组状态（tool+hint 相同的连续行合并 ×N）
 const fmtTok = n => n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? (n / 1e3).toFixed(1) + 'k' : String(n ?? 0);
 function updateUsageFooter(t) {
   if (!t) return;

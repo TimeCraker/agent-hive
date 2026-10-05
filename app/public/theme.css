@@ -222,8 +222,13 @@ footer{margin-top:12px;padding-top:12px;border-top:1px solid var(--line);display
 .dterm::-webkit-scrollbar{width:8px}.dterm::-webkit-scrollbar-thumb{background:#30363D}
 .dterm .ln{white-space:pre-wrap;word-break:break-all;margin-bottom:2px}
 .dterm .ln.t-say{color:#D5DBE1}
-.dterm .ln.t-tool{color:#E3B341;padding-left:10px;border-left:2px solid rgba(227,179,65,.35)}
-.dterm .ln.t-tool::before{content:'⚙ ';}
+/* 工具行 v4：单行紧凑——徽章 + 短提示 + ×N 合并 */
+.dterm .ln.t-tool{display:flex;align-items:center;gap:8px;color:#7A828C;
+  padding:2px 0 2px 10px;border-left:2px solid rgba(227,179,65,.22);
+  white-space:nowrap;overflow:hidden}
+.dterm .ln.t-tool .tbadge{color:#E3B341;font-weight:600;flex:0 0 auto;font-size:11px}
+.dterm .ln.t-tool .thint{overflow:hidden;text-overflow:ellipsis;flex:0 1 auto;min-width:0}
+.dterm .ln.t-tool .tn{color:#58606A;flex:0 0 auto;font-size:10px}
 .dterm .ln.t-result{color:#7EE787}
 .dterm .ln.t-sys{color:#8B949E}
 .dterm .ln .tm{color:#58606A;margin-right:10px;font-size:10px}
