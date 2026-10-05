@@ -21,13 +21,15 @@
       "model": "glm-5.3[1m]",
       "cwd": "coding-plan-bench",
       "promptFile": "prompts/BMI.md",
-      "status": "reported",
+      "status": "accepted",
       "dispatchedAt": "2026-10-05T12:46:51.121Z",
       "pid": 13488,
       "settledAt": "2026-10-05T13:02:48.162Z",
       "sessionId": "3b0c8438-e844-42f8-827c-41c7b3d29384",
       "turns": 47,
-      "costUsd": 4.617812
+      "costUsd": 4.617812,
+      "acceptedAt": "2026-10-05T13:06:51.156Z",
+      "acceptNote": "四要件齐+字段级可执行+硬冲突正确裁定；A4 端点待核点转 MXU 补"
     },
     {
       "code": "MXU",

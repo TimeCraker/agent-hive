@@ -210,6 +210,7 @@ function openTerminal(code) {
   document.getElementById('d-sid').textContent = t.sessionId ? 'session ' + String(t.sessionId).slice(0, 8) : '';
   document.getElementById('d-goal').textContent = '目标：' + t.goal;
   document.getElementById('d-term').innerHTML = '';
+  document.getElementById('d-bytes').textContent = '';
   document.getElementById('drawer').classList.add('open');
   document.getElementById('d-follow').textContent = '● 自动跟随';
   pollLog();
@@ -230,6 +231,7 @@ async function pollLog() {
     const term = document.getElementById('d-term');
     const stick = FOLLOW;
     for (const e of d.events) {
+      if (e.k === 'usage') continue;   // usage 遥测不再逐事件渲染（台账在 result 收档）
       const div = document.createElement('div');
       if (e.k === 'say') {
         // assistant 文本：markdown-lite 分层渲染
@@ -242,10 +244,22 @@ async function pollLog() {
       term.appendChild(div);
     }
     if (d.events.length && stick) term.scrollTop = term.scrollHeight;
-    document.getElementById('d-bytes').textContent = LOG_OFFSET + ' B 已读';
     const t = DATA.tasks.find(x => x.code === OPEN_CODE);
-    if (t) document.getElementById('d-st').textContent = (STLBL[t.status] || t.status) + ' · ' + fmtDur(t.elapsed);
+    if (t) { document.getElementById('d-st').textContent = (STLBL[t.status] || t.status) + ' · ' + fmtDur(t.elapsed); updateUsageFooter(t); }
   } catch (e) { /* 网络抖动，下轮再试 */ }
+}
+// 会话台账 footer（DSH 风格）：N 轮 · X tok · Y tok/s · $Z —— 数据来自 result 收档字段
+const fmtTok = n => n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? (n / 1e3).toFixed(1) + 'k' : String(n ?? 0);
+function updateUsageFooter(t) {
+  if (!t) return;
+  const bits = [];
+  if (t.turns != null) bits.push('⟳ ' + t.turns + ' 轮');
+  if (t.outTok != null) {
+    bits.push(fmtTok(t.outTok) + ' tok');
+    if (t.elapsed > 0) bits.push(Math.round(t.outTok / t.elapsed) + ' tok/s');
+  }
+  if (t.costUsd != null) bits.push('$' + t.costUsd.toFixed(2));
+  document.getElementById('d-bytes').textContent = bits.join(' · ');
 }
 
 // ── 事件绑定 ──

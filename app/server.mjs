@@ -180,10 +180,14 @@ function tailLog(wave, code, since) {
           events.push({ k: 'tool', s: `${c.name} ${String(hint).slice(0, 160)}` });
         }
       }
+      // usage 遥测：前端累计成 轮数/tok·s/缓存命中
+      const us = msg.usage;
+      if (us) events.push({ k: 'usage', u: { i: us.input_tokens || 0, o: us.output_tokens || 0, cr: us.cache_read_input_tokens || 0, cc: us.cache_creation_input_tokens || 0 } });
       if (j.type === 'result') {
         const dur = j.duration_ms ? ` · 用时 ${Math.round(j.duration_ms / 1000)}s` : '';
         const cost = j.total_cost_usd ? ` · $${j.total_cost_usd.toFixed(4)}` : '';
-        events.push({ k: 'result', s: `${j.is_error ? '✗ ' : '✓ '}${String(j.result || j.subtype || 'done').slice(0, 300)}${dur}${cost}`, err: j.is_error === true, sid: j.session_id || null, turns: j.num_turns ?? null, cost: j.total_cost_usd ?? null });
+        const outTok = j.usage?.output_tokens ?? null;
+        events.push({ k: 'result', s: `${j.is_error ? '✗ ' : '✓ '}${String(j.result || j.subtype || 'done').slice(0, 300)}${dur}${cost}`, err: j.is_error === true, sid: j.session_id || null, turns: j.num_turns ?? null, cost: j.total_cost_usd ?? null, outTok });
       }
     } catch (e) { /* 不完整行留给下一次 since */ }
   }
@@ -205,6 +209,7 @@ function settleTask(bt, res) {
     if (res.sid) bt.sessionId = res.sid;
     if (res.turns != null) bt.turns = res.turns;
     if (res.cost != null) bt.costUsd = res.cost;
+    if (res.outTok != null) bt.outTok = res.outTok;
   }
   const hasReport = fs.existsSync(path.join(ROOT, 'runs', 'reports', `${bt.code}-report.md`));
   if (!res) { bt.status = 'failed'; bt.failReason = 'no-result-event'; return; }
@@ -228,7 +233,7 @@ function lastResultEvent(wave, code) {
       try {
         const j = JSON.parse(lines[i]);
         if (j.type === 'result') {
-          return { k: 'result', s: String(j.result || j.subtype || '').slice(0, 300), err: j.is_error === true, sid: j.session_id || null, turns: j.num_turns ?? null, cost: j.total_cost_usd ?? null };
+          return { k: 'result', s: String(j.result || j.subtype || '').slice(0, 300), err: j.is_error === true, sid: j.session_id || null, turns: j.num_turns ?? null, cost: j.total_cost_usd ?? null, outTok: j.usage?.output_tokens ?? null };
         }
       } catch (e) { /* 半行 */ }
     }
