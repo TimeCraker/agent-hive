@@ -1,11 +1,11 @@
 <!doctype html><html lang="zh"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AGENT-CONSOLE · 并行派发控制台</title>
+<title>蜂巢控制台 · 并行派发</title>
 <link rel="stylesheet" href="/theme.css">
 </head><body><div class="wrap">
 <header>
   <div class="hbar">
-    <h1>蜂巢 <span class="thin">／ 并行派发控制台 · <span id="wavelbl">Wave 1</span></span></h1>
+    <h1>蜂巢控制台<span class="thin" id="wavelbl"> · Wave 1</span></h1>
     <div class="hmeta">
       <span class="hchip"><span class="live"></span>LIVE · 5s</span>
       <span class="hchip" id="clock">--:--:--</span>
@@ -13,10 +13,12 @@
     </div>
   </div>
   <div class="statsband">
-    <div class="stat"><b id="s-done" style="color:var(--st-done)">0</b><span>已完成</span></div>
-    <div class="stat"><b id="s-running" style="color:var(--st-running)">0</b><span>进行中</span></div>
-    <div class="stat"><b id="s-pending" style="color:var(--st-pending)">0</b><span>排队中</span></div>
-    <div class="stat"><b id="s-cancelled" style="color:var(--st-cancelled)">0</b><span>已取消</span></div>
+    <div class="stat b-accepted"><b id="s-accepted" style="color:var(--st-accepted)">0</b><span>已验收</span></div>
+    <div class="stat b-reported"><b id="s-reported" style="color:var(--st-reported)">0</b><span>待验收</span></div>
+    <div class="stat b-running"><b id="s-running" style="color:var(--st-running)">0</b><span>进行中</span></div>
+    <div class="stat b-queued"><b id="s-wait" style="color:var(--st-queued)">0</b><span>排队中</span></div>
+    <div class="stat b-failed"><b id="s-failed" style="color:var(--st-failed)">0</b><span>失败</span></div>
+    <div class="stat b-cancelled"><b id="s-cancelled" style="color:var(--st-cancelled)">0</b><span>已取消</span></div>
     <div class="stat barblock">
       <div class="pbar" id="pbar"></div>
       <span class="pct" id="pct">0%</span>
@@ -46,11 +48,13 @@
   <div class="gitlist" id="gitlist"></div>
 </div>
 <footer>
+  <span><span class="lg" style="background:var(--st-accepted)"></span>已验收</span>
+  <span><span class="lg" style="background:var(--st-reported)"></span>待验收</span>
   <span><span class="lg" style="background:var(--st-running)"></span>进行中</span>
-  <span><span class="lg" style="background:var(--st-done)"></span>已完成</span>
-  <span><span class="lg" style="background:var(--st-pending)"></span>排队中</span>
+  <span><span class="lg" style="background:var(--st-queued)"></span>排队中</span>
+  <span><span class="lg" style="background:var(--st-failed)"></span>失败/打回</span>
   <span><span class="lg" style="background:var(--st-cancelled)"></span>已取消</span>
-  <span style="margin-left:auto">agent-console · 点击进行中行可打开实时终端</span>
+  <span style="margin-left:auto">蜂巢 · 终态只出自验收 · 点行开终端 · 归档区可验收/打回/续派</span>
 </footer>
 </div>
 <div class="drawer" id="drawer">
@@ -58,6 +62,7 @@
     <span class="code" id="d-code">--</span>
     <span class="st" id="d-st">--</span>
     <span class="model" id="d-model" style="font-family:var(--mono);font-size:10px;color:#8B949E;border:1px solid #30363D;padding:2px 7px">--</span>
+    <span id="d-sid" style="font-family:var(--mono);font-size:10px;color:#58606A"></span>
     <button class="close" id="d-close">关闭 ESC</button>
   </div>
   <div class="dgoal" id="d-goal"></div>

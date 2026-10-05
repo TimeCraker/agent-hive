@@ -1,8 +1,27 @@
 {
   "wave": "wave3",
-  "title": "第三波 · 复核项修复（4 个 Agent）",
+  "title": "第三波 · 复核项修复（4 任务 + 1 冒烟）",
   "dispatchedAt": "2026-10-05T19:51:19+08:00",
   "tasks": [
+    {
+      "code": "SMK2",
+      "name": "派发链路冒烟（验收状态机版）",
+      "goal": "验证 reported→resume→accepted 全链路；1 分钟内完成",
+      "model": "glm-5.3[1m]",
+      "cwd": "agent-hive",
+      "promptFile": "prompts/SMK2.md",
+      "status": "accepted",
+      "dispatchedAt": "2026-10-05T12:23:10.663Z",
+      "pid": 32516,
+      "settledAt": "2026-10-05T12:23:25.389Z",
+      "sessionId": "ee2f1380-9bb0-4c02-9598-55ba71dce8ea",
+      "turns": 2,
+      "costUsd": 0.509544,
+      "resumeCount": 1,
+      "followUp": "续派验证：在你刚写的报告文件末尾整文件重写，追加一行「## 续派标记：RESUMED-OK（sessionId 回来了）」，其他内容保持不变，仍整文件覆盖写入同一路径。",
+      "acceptedAt": "2026-10-05T12:23:43.208Z",
+      "acceptNote": "全链路冒烟通过"
+    },
     {
       "code": "XFZ2",
       "name": "xiaofanzhuo DEPLOY §8 验收欠账处理",
@@ -10,7 +29,9 @@
       "model": "glm-5.3[1m]",
       "cwd": "xiaofanzhuo",
       "promptFile": "prompts/XFZ2.md",
-      "status": "pending"
+      "status": "running",
+      "dispatchedAt": "2026-10-05T12:23:52.529Z",
+      "pid": 30396
     },
     {
       "code": "AFD2",
@@ -19,7 +40,9 @@
       "model": "glm-5.3[1m]",
       "cwd": "asterforge-deploy",
       "promptFile": "prompts/AFD2.md",
-      "status": "pending"
+      "status": "running",
+      "dispatchedAt": "2026-10-05T12:23:52.557Z",
+      "pid": 4948
     },
     {
       "code": "GAM2",
@@ -28,7 +51,9 @@
       "model": "glm-5.3[1m]",
       "cwd": "games",
       "promptFile": "prompts/GAM2.md",
-      "status": "pending"
+      "status": "running",
+      "dispatchedAt": "2026-10-05T12:23:52.574Z",
+      "pid": 9748
     },
     {
       "code": "SEXB",
@@ -37,7 +62,9 @@
       "model": "glm-5.3[1m]",
       "cwd": "sex-workspace",
       "promptFile": "prompts/SEXB.md",
-      "status": "pending"
+      "status": "running",
+      "dispatchedAt": "2026-10-05T12:23:52.595Z",
+      "pid": 18240
     }
   ]
 }

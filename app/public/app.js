@@ -1,4 +1,4 @@
-// agent-console 前端：状态渲染 + 筛选 + 终端抽屉（stream-json 尾读）
+// agent-hive 前端：验收状态机渲染 + 筛选 + 终端抽屉 + 验收/打回/续派/结束
 let WAVE = new URLSearchParams(location.search).get('wave') || 'wave1';
 let FILTER = 'all';
 let DATA = null;
@@ -7,82 +7,127 @@ let LOG_OFFSET = 0;     // 增量尾读偏移
 let FOLLOW = true;      // 自动跟随滚动
 let POLL_TIMER = null;
 
-const STLBL = { running: '进行中', done: '已完成', pending: '排队中', cancelled: '已取消' };
-const STCLR = { running: 'var(--st-running)', done: 'var(--st-done)', pending: 'var(--st-pending)', cancelled: 'var(--st-cancelled)' };
+const STLBL = { running: '进行中', queued: '排队中', pending: '待派发', reported: '待验收', accepted: '已验收', rejected: '已打回', failed: '失败', done: '已完成', cancelled: '已取消' };
 const fmtDur = s => { s = Math.max(0, s); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60); return h ? h + '小时' + m + '分' : m + '分' + String(Math.floor(s % 60)).padStart(2, '0') + '秒' };
 const fmtAgo = s => { if (s == null) return '—'; if (s < 60) return s + '秒前'; if (s < 3600) return Math.floor(s / 60) + '分钟前'; if (s < 86400) return Math.floor(s / 3600) + '小时前'; return Math.floor(s / 86400) + '天前' };
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const isGreen = t => t.status === 'accepted' || t.status === 'done';
+const isBad = t => t.status === 'failed' || t.status === 'rejected';
+const isLive = t => t.status === 'running' || t.status === 'queued' || t.status === 'pending';
+
+async function api(path, body) {
+  try {
+    const r = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) });
+    return await r.json();
+  } catch (e) { return { ok: false, error: String(e.message || e) }; }
+}
 
 // ── 状态渲染 ──
+const TABCLR = { all: '#111111', running: 'var(--st-running)', reported: 'var(--st-reported)', accepted: 'var(--st-accepted)', failed: 'var(--st-failed)', cancelled: 'var(--st-cancelled)' };
+function matchTab(t) {
+  return FILTER === 'all'
+    || (FILTER === 'running' && isLive(t))
+    || (FILTER === 'reported' && t.status === 'reported')
+    || (FILTER === 'accepted' && isGreen(t))
+    || (FILTER === 'failed' && isBad(t))
+    || (FILTER === 'cancelled' && t.status === 'cancelled');
+}
 function render(d) {
   document.getElementById('disp').textContent = new Date(d.dispatchedAt).toLocaleString('zh-CN', { hour12: false });
   document.getElementById('clock').textContent = new Date().toLocaleTimeString('zh-CN', { hour12: false });
-  document.getElementById('wavelbl').textContent = 'Wave ' + String(d.wave || WAVE).replace(/^wave/i, '');
+  document.getElementById('wavelbl').textContent = ' · Wave ' + String(d.wave || WAVE).replace(/^wave/i, '');
 
-  document.getElementById('s-done').textContent = d.counts.done;
-  document.getElementById('s-running').textContent = d.counts.running + d.counts.pending;
-  document.getElementById('s-pending').textContent = d.counts.pending;
-  document.getElementById('s-cancelled').textContent = d.counts.cancelled;
-  // 完成率口径：已取消不计入分母（取消=移出范围，不是未完成）
-  const base = d.counts.done + d.counts.running + d.counts.pending;
-  const pct = base ? Math.round(d.counts.done / base * 100) : 100;
+  const c = d.counts || {};
+  const green = (c.accepted || 0) + (c.done || 0);
+  const reported = c.reported || 0;
+  const bad = (c.failed || 0) + (c.rejected || 0);
+  const running = c.running || 0;
+  const wait = (c.queued || 0) + (c.pending || 0);
+  const cancelled = c.cancelled || 0;
+  document.getElementById('s-accepted').textContent = green;
+  document.getElementById('s-reported').textContent = reported;
+  document.getElementById('s-running').textContent = running;
+  document.getElementById('s-wait').textContent = wait;
+  document.getElementById('s-failed').textContent = bad;
+  document.getElementById('s-cancelled').textContent = cancelled;
+  // 完成率口径：已验收 ÷（全部 − 已取消）；黄=待验收 蓝=进行中 红=失败 灰=排队
+  const base = Math.max(1, d.total - cancelled);
   document.getElementById('pbar').innerHTML =
-    '<i class="pb-done" style="width:' + (d.counts.done / base * 100) + '%"></i>' +
-    '<i class="pb-running" style="width:' + (d.counts.running / base * 100) + '%"></i>' +
-    '<i class="pb-pending" style="width:' + (d.counts.pending / base * 100) + '%"></i>';
-  document.getElementById('pct').textContent = pct + '%';
+    '<i class="pb-accepted" style="width:' + (green / base * 100) + '%"></i>' +
+    '<i class="pb-reported" style="width:' + (reported / base * 100) + '%"></i>' +
+    '<i class="pb-running" style="width:' + (running / base * 100) + '%"></i>' +
+    '<i class="pb-failed" style="width:' + (bad / base * 100) + '%"></i>' +
+    '<i class="pb-pending" style="width:' + (wait / base * 100) + '%"></i>';
+  document.getElementById('pct').textContent = Math.round(green / base * 100) + '%';
 
-  const tabs = [['all', '全部', d.total], ['running', '进行中', d.counts.running], ['waiting', '等待中', d.counts.waiting || 0], ['done', '已完成', d.counts.done], ['cancelled', '已取消', d.counts.cancelled]];
-  document.getElementById('nav').innerHTML = tabs.map(t =>
-    '<button class="tab tc' + ((FILTER === 'all' && t[0] === 'all') || FILTER === t[0] ? ' on' : '') + (t[2] === 0 ? ' zero' : '') + '" style="--tc:var(--st-' + t[0] + ', #111)" data-f="' + t[0] + '">'
-    + '<span class="dot"></span>' + t[1] + '<span class="n">' + t[2] + '</span></button>'
+  const tabs = [['all', '全部', d.total], ['running', '进行中', running + wait], ['reported', '待验收', reported], ['accepted', '已验收', green], ['failed', '失败', bad], ['cancelled', '已取消', cancelled]];
+  document.getElementById('nav').innerHTML = tabs.map(([k, lbl, n]) =>
+    '<button class="tab tc' + (FILTER === k ? ' on' : '') + (n === 0 ? ' dim' : '') + '" style="--tc:' + TABCLR[k] + '" data-f="' + k + '">'
+    + '<span class="dot"></span>' + lbl + '<span class="n">' + n + '</span></button>'
   ).join('');
   document.querySelectorAll('#nav .tab').forEach(b => b.onclick = () => { FILTER = b.dataset.f; render(DATA); });
 
-  const showMain = t => (t.status === 'running' || t.status === 'pending') && (FILTER === 'all' || FILTER === t.status);
-  const mainTasks = d.tasks.filter(showMain);
+  const mainTasks = d.tasks.filter(t => isLive(t) && matchTab(t));
   document.getElementById('mainSec').style.display = mainTasks.length ? 'block' : 'none';
-  document.getElementById('mainSub').textContent = mainTasks.length + ' 个' + (mainTasks.some(t => t.legacy) ? ' · 含 legacy 会话（无流式日志，点行看文件活动信号）' : '');
+  document.getElementById('mainSub').textContent = mainTasks.length + ' 个' + (d.maxConcurrent ? ' · 并发上限 ' + d.maxConcurrent : '') + (mainTasks.some(t => t.legacy) ? ' · 含 legacy 会话（无流式日志）' : '');
   document.getElementById('rows').innerHTML = mainTasks.map(t => {
     const ago = fmtAgo(t.lastActivityAgo);
     const el = fmtDur(t.elapsed);
-    const st = STLBL[t.status];
-    const c = t.commit ? '<div class="kv" style="font-family:var(--mono);font-size:11px;color:var(--ink2)">&#9251; ' + esc(t.commit) + '</div>' : '';
+    const staleF = t.stale ? '<span class="staleflag">⚠ 日志停更 ' + fmtDur(t.staleFor) + '</span>' : '';
+    const cmt = t.commit ? '<div class="kv" style="font-family:var(--mono);font-size:11px;color:var(--ink2)">&#9251; ' + esc(t.commit) + '</div>' : '';
     const tf = t.touched && t.touched.length ? '<div class="kv">&#9998; ' + t.touched.map(esc).join(' &nbsp; ') + '</div>' : '';
     const live = (t.events && t.events.length)
       ? '<div class="rc-live"><div class="lv-title">LIVE · 最近动作</div>' + t.events.map(e =>
           '<div class="lv-line"><b>' + (e.k === 'tool' ? '⚙' : '💬') + '</b> ' + esc(e.s).slice(0, 90) + '</div>').join('') + '</div>'
       : (t.legacy ? '<div class="rc-live"><div class="lv-title">LEGACY</div><div class="lv-line">旧版派发，无流式日志</div></div>' : '');
     const side = t.status === 'running'
-      ? '<div class="rc-side"><span class="enter">查看终端 →</span><div class="meta">最后活动 ' + ago + '</div><div class="meta">已运行 ' + el + '</div></div>'
-      : '<div class="rc-side"><span class="meta">等待派发</span></div>';
+      ? '<div class="rc-side"><span class="enter">查看终端 →</span><div class="meta">最后活动 ' + ago + ' · 已运行 ' + el + '</div>'
+        + '<div class="meta" style="display:flex;gap:6px;margin-top:6px"><button class="act danger" data-act="kill" data-code="' + t.code + '">⏹ 强制结束</button></div></div>'
+      : t.status === 'queued'
+        ? '<div class="rc-side"><span class="meta">排队中 · 并发满自动补位</span></div>'
+        : '<div class="rc-side"><span class="meta">等待派发</span></div>';
     return '<div class="rowt clickable' + (t.legacy ? ' legacy' : '') + '" data-code="' + t.code + '">'
-      + '<div class="rcol rc-code"><span class="code">' + t.code + '</span><span class="st st-' + t.status + '">' + st + '</span></div>'
-      + '<div class="rcol rc-main"><span class="tname">' + esc(t.name) + '</span><span class="goal">' + esc(t.goal) + '</span>' + c + tf + '</div>'
+      + '<div class="rcol rc-code"><span class="code">' + t.code + '</span><span class="st st-' + t.status + '">' + (STLBL[t.status] || t.status) + '</span>' + staleF + '</div>'
+      + '<div class="rcol rc-main"><span class="tname">' + esc(t.name) + '</span><span class="goal">' + esc(t.goal) + '</span>' + cmt + tf + '</div>'
       + live + side + '</div>';
   }).join('') || '<div class="empty">当前筛选下无在办任务</div>';
   document.querySelectorAll('#rows .rowt.clickable').forEach(r => r.onclick = () => openTerminal(r.dataset.code));
 
-  const archTasks = d.tasks.filter(t => t.status === 'done' || t.status === 'cancelled');
+  const archTasks = d.tasks.filter(t => !isLive(t));
   document.getElementById('archSec').style.display = archTasks.length ? 'block' : 'none';
-  document.getElementById('archSub').textContent = archTasks.length + ' 条（' + d.counts.done + ' 完成 · ' + d.counts.cancelled + ' 取消）';
-  document.getElementById('archBody').innerHTML = archTasks.filter(t => FILTER === 'all' || FILTER === t.status).map(t =>
-    '<div class="arow"><span class="code" style="font-family:var(--mono);font-size:17px;font-weight:700">' + t.code + '</span>'
-    + '<span class="tname' + (t.status === 'cancelled' ? ' strike' : '') + '" style="font-size:13.5px;font-weight:600;margin-right:auto">' + esc(t.name) + '</span>'
-    + '<span class="goal" style="font-size:11.5px;color:var(--ink2);max-width:42%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(t.goal) + '</span>'
-    + (t.status === 'done' ? '<span class="chip chip-done">已完成</span>' : '<span class="chip chip-cancelled">已取消</span>') + '</div>'
-  ).join('') || '<div class="empty">无匹配条目</div>';
+  document.getElementById('archSub').textContent = archTasks.length + ' 条（已验收 ' + green + ' · 待验收 ' + reported + ' · 失败 ' + bad + ' · 取消 ' + cancelled + '）';
+  document.getElementById('archBody').innerHTML = archTasks.filter(matchTab).map(t => {
+    let chip = '', acts = '';
+    if (t.status === 'accepted') chip = '<span class="chip chip-accepted">已验收</span>';
+    else if (t.status === 'done') chip = '<span class="chip chip-done">已完成</span>';
+    else if (t.status === 'reported') {
+      chip = '<span class="chip chip-reported">待验收</span>';
+      acts = '<button class="act good" data-act="accept" data-code="' + t.code + '">✓ 验收</button><button class="act danger" data-act="reject" data-code="' + t.code + '">✗ 打回</button>';
+    } else if (t.status === 'rejected') {
+      chip = '<span class="chip chip-bad">已打回</span>';
+      acts = '<button class="act" data-act="resume" data-code="' + t.code + '">▶ 续派重做</button>';
+    } else if (t.status === 'failed') {
+      chip = '<span class="chip chip-bad" title="' + esc(t.failReason || '') + '">失败</span>';
+      acts = '<button class="act" data-act="retry" data-code="' + t.code + '">↻ 重跑</button>'
+        + (t.sessionId ? '<button class="act" data-act="resume" data-code="' + t.code + '">▶ 续派</button>' : '');
+    } else chip = '<span class="chip chip-cancelled">已取消</span>';
+    return '<div class="arow"><span class="code" style="font-family:var(--mono);font-size:17px;font-weight:700">' + t.code + '</span>'
+      + '<span class="tname' + (t.status === 'cancelled' ? ' strike' : '') + '" style="font-size:13.5px;font-weight:600;margin-right:auto">' + esc(t.name) + '</span>'
+      + '<span class="goal" style="font-size:11.5px;color:var(--ink2);max-width:34%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(t.goal) + '</span>'
+      + acts + chip + '</div>';
+  }).join('') || '<div class="empty">无匹配条目</div>';
+  bindActs();
 
   const gitTasks = d.tasks.filter(t => (t.commits && t.commits.length)).sort((a, b) => b.commits[0].ts - a.commits[0].ts);
   document.getElementById('gitlist').innerHTML = gitTasks.map(t => {
-    const rows = t.commits.slice(0, 4).map(c =>
-      '<div class="cmt' + (c.kind === 'op' ? ' op' : '') + '">'
-      + '<span class="w">' + fmtAgo(Math.floor((d.now - c.ts) / 1000)) + '</span>'
-      + '<span class="s">' + esc(c.subject) + '</span>'
-      + '<span class="h">' + c.h + '</span></div>'
+    const rows = t.commits.slice(0, 4).map(cm =>
+      '<div class="cmt' + (cm.kind === 'op' ? ' op' : '') + '">'
+      + '<span class="w">' + fmtAgo(Math.floor((d.now - cm.ts) / 1000)) + '</span>'
+      + '<span class="s">' + esc(cm.subject) + '</span>'
+      + '<span class="h">' + cm.h + '</span></div>'
     ).join('');
     return '<div class="pj"><div class="pj-head">'
-      + '<span class="pj-dot" style="background:var(--st-' + (t.status === 'done' ? 'done' : 'running') + ')"></span>'
+      + '<span class="pj-dot" style="background:var(--st-' + (isGreen(t) ? 'accepted' : 'running') + ')"></span>'
       + '<span class="pj-name">' + esc(t.name) + '</span>'
       + '<span class="pj-code">' + t.code + '</span>'
       + '<span class="pj-when">最近提交 ' + fmtAgo(Math.floor((d.now - t.commits[0].ts) / 1000)) + '</span>'
@@ -90,7 +135,38 @@ function render(d) {
   }).join('') || '<div class="empty">暂无提交</div>';
 }
 
-// ── 终端抽屉 ──
+// ── 行内操作：验收 / 打回 / 续派 / 重跑 / 强制结束 ──
+function bindActs() {
+  document.querySelectorAll('[data-act]').forEach(b => b.onclick = e => { e.stopPropagation(); doAction(b.dataset.act, b.dataset.code); });
+}
+async function doAction(act, code) {
+  if (act === 'accept') {
+    if (!confirm('验收通过 ' + code + '？（绿色终态封档）')) return;
+    const r = await api('/api/accept', { wave: WAVE, code, verdict: 'accept' });
+    if (!r.ok) alert(r.error);
+  } else if (act === 'reject') {
+    const note = prompt('打回 ' + code + ' 的理由（将作为续派提示词）：');
+    if (!note || !note.trim()) return;
+    const r = await api('/api/accept', { wave: WAVE, code, verdict: 'reject', note });
+    if (!r.ok) alert(r.error);
+  } else if (act === 'resume') {
+    const t = (DATA.tasks || []).find(x => x.code === code) || {};
+    const p = prompt('续派指令（派回原会话 ' + String(t.sessionId || '').slice(0, 8) + '）：', t.rejectNote || '');
+    if (!p || !p.trim()) return;
+    const r = await api('/api/dispatch', { wave: WAVE, code, resume: true, prompt: p });
+    if (!r.ok) alert(r.error); else if (r.queued) alert('并发满员，已转入排队，exit 自动补位');
+  } else if (act === 'retry') {
+    if (!confirm('整档重跑 ' + code + '？（全新会话，日志重写）')) return;
+    const r = await api('/api/dispatch', { wave: WAVE, code });
+    if (!r.ok) alert(r.error);
+  } else if (act === 'kill') {
+    if (!confirm('强制结束 ' + code + ' 的会话进程树？（仅挂死时使用）')) return;
+    const r = await api('/api/kill', { wave: WAVE, code });
+    if (!r.ok) alert(r.error);
+  }
+  refresh();
+}
+
 // ── 终端抽屉 ──
 // markdown-lite：标题/表格/代码/列表分层渲染（转义后最小转换，不做完整 md）
 function mdInline(s) {
@@ -113,8 +189,9 @@ function openTerminal(code) {
   OPEN_CODE = code; LOG_OFFSET = 0; FOLLOW = true;
   const t = DATA.tasks.find(x => x.code === code);
   document.getElementById('d-code').textContent = code;
-  document.getElementById('d-st').textContent = STLBL[t.status] + ' · ' + fmtDur(t.elapsed);
+  document.getElementById('d-st').textContent = (STLBL[t.status] || t.status) + ' · ' + fmtDur(t.elapsed);
   document.getElementById('d-model').textContent = t.model;
+  document.getElementById('d-sid').textContent = t.sessionId ? 'session ' + String(t.sessionId).slice(0, 8) : '';
   document.getElementById('d-goal').textContent = '目标：' + t.goal;
   document.getElementById('d-term').innerHTML = '';
   document.getElementById('drawer').classList.add('open');
@@ -151,7 +228,7 @@ async function pollLog() {
     if (d.events.length && stick) term.scrollTop = term.scrollHeight;
     document.getElementById('d-bytes').textContent = LOG_OFFSET + ' B 已读';
     const t = DATA.tasks.find(x => x.code === OPEN_CODE);
-    if (t) document.getElementById('d-st').textContent = STLBL[t.status] + ' · ' + fmtDur(t.elapsed);
+    if (t) document.getElementById('d-st').textContent = (STLBL[t.status] || t.status) + ' · ' + fmtDur(t.elapsed);
   } catch (e) { /* 网络抖动，下轮再试 */ }
 }
 
