@@ -10,7 +10,8 @@
       "model": "glm-5.3[1m]",
       "cwd": "lekao",
       "promptFile": "prompts/LK.md",
-      "status": "pending"
+      "status": "done",
+      "dispatchedAt": "2026-10-05T11:07:35.073Z"
     },
     {
       "code": "XFZ",
@@ -19,7 +20,8 @@
       "model": "glm-5.3[1m]",
       "cwd": "xiaofanzhuo",
       "promptFile": "prompts/XFZ.md",
-      "status": "pending"
+      "status": "done",
+      "dispatchedAt": "2026-10-05T11:40:33.855Z"
     },
     {
       "code": "MPF",
@@ -28,7 +30,8 @@
       "model": "glm-5.3[1m]",
       "cwd": "my-portfolio",
       "promptFile": "prompts/MPF.md",
-      "status": "pending"
+      "status": "done",
+      "dispatchedAt": "2026-10-05T11:07:35.172Z"
     },
     {
       "code": "GAM",
@@ -37,7 +40,8 @@
       "model": "glm-5.3[1m]",
       "cwd": "games",
       "promptFile": "prompts/GAM.md",
-      "status": "pending"
+      "status": "done",
+      "dispatchedAt": "2026-10-05T11:07:35.189Z"
     },
     {
       "code": "VBS",
@@ -46,7 +50,8 @@
       "model": "glm-5.3[1m]",
       "cwd": "vibe-studio",
       "promptFile": "prompts/VBS.md",
-      "status": "pending"
+      "status": "done",
+      "dispatchedAt": "2026-10-05T11:07:35.207Z"
     },
     {
       "code": "VSW",
@@ -55,7 +60,8 @@
       "model": "glm-5.3[1m]",
       "cwd": "video-script-workflow",
       "promptFile": "prompts/VSW.md",
-      "status": "pending"
+      "status": "done",
+      "dispatchedAt": "2026-10-05T11:07:35.243Z"
     },
     {
       "code": "CPB",
@@ -64,7 +70,8 @@
       "model": "glm-5.3[1m]",
       "cwd": "coding-plan-bench",
       "promptFile": "prompts/CPB.md",
-      "status": "pending"
+      "status": "done",
+      "dispatchedAt": "2026-10-05T11:07:35.283Z"
     },
     {
       "code": "AFD",
@@ -73,7 +80,8 @@
       "model": "glm-5.3[1m]",
       "cwd": "asterforge-deploy",
       "promptFile": "prompts/AFD.md",
-      "status": "pending"
+      "status": "done",
+      "dispatchedAt": "2026-10-05T11:07:35.331Z"
     },
     {
       "code": "CFG",
@@ -82,7 +90,8 @@
       "model": "glm-5.3[1m]",
       "cwd": "config",
       "promptFile": "prompts/CFG.md",
-      "status": "pending"
+      "status": "done",
+      "dispatchedAt": "2026-10-05T11:07:35.383Z"
     },
     {
       "code": "PWA",
@@ -91,7 +100,8 @@
       "model": "glm-5.3[1m]",
       "cwd": "pwa-hw-voice",
       "promptFile": "prompts/PWA.md",
-      "status": "pending"
+      "status": "done",
+      "dispatchedAt": "2026-10-05T11:07:35.422Z"
     },
     {
       "code": "HIVE",
@@ -100,7 +110,8 @@
       "model": "glm-5.3[1m]",
       "cwd": "agent-hive",
       "promptFile": "prompts/HIVE.md",
-      "status": "pending"
+      "status": "done",
+      "dispatchedAt": "2026-10-05T11:07:35.531Z"
     },
     {
       "code": "SEXA",
@@ -109,7 +120,8 @@
       "model": "glm-5.3[1m]",
       "cwd": "sex-workspace",
       "promptFile": "prompts/SEXA.md",
-      "status": "pending"
+      "status": "done",
+      "dispatchedAt": "2026-10-05T11:07:35.655Z"
     }
   ]
 }
