@@ -166,14 +166,18 @@ function tailLog(wave, code, since) {
       const msg = j.message || {};
       const content = Array.isArray(msg.content) ? msg.content : [];
       for (const c of content) {
-        if (c.type === 'text' && c.text) events.push({ k: 'say', s: c.text.slice(0, 400) });
+        if (c.type === 'text' && c.text) events.push({ k: 'say', s: c.text });
         else if (c.type === 'tool_use') {
           const i = c.input || {};
           const hint = i.file_path || i.command || i.description || i.pattern || i.url || '';
           events.push({ k: 'tool', s: `${c.name} ${String(hint).slice(0, 160)}` });
         }
       }
-      if (j.type === 'result') events.push({ k: 'result', s: String(j.result || j.subtype || '').slice(0, 300) });
+      if (j.type === 'result') {
+        const dur = j.duration_ms ? ` · 用时 ${Math.round(j.duration_ms / 1000)}s` : '';
+        const cost = j.total_cost_usd ? ` · $${j.total_cost_usd.toFixed(4)}` : '';
+        events.push({ k: 'result', s: `${j.is_error ? '✗ ' : '✓ '}${j.result || j.subtype || 'done'}${dur}${cost}` });
+      }
     } catch (e) { /* 不完整行留给下一次 since */ }
   }
   // 计算完整行的累计字节：重算到最后一个完整换行为止

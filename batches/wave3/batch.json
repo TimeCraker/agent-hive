@@ -1,0 +1,43 @@
+{
+  "wave": "wave3",
+  "title": "第三波 · 复核项修复（4 个 Agent）",
+  "dispatchedAt": "2026-10-05T19:51:19+08:00",
+  "tasks": [
+    {
+      "code": "XFZ2",
+      "name": "xiaofanzhuo DEPLOY §8 验收欠账处理",
+      "goal": "8-28 复验覆盖面考古 + AC 逐条只读核对；有证据才勾，无证据只注记",
+      "model": "glm-5.3[1m]",
+      "cwd": "xiaofanzhuo",
+      "promptFile": "prompts/XFZ2.md",
+      "status": "pending"
+    },
+    {
+      "code": "AFD2",
+      "name": "asterforge-deploy README §9 密码指向修正",
+      "goal": "查 backups/ 实际结构，§9 指向当前权威 env 位置；零密钥值外泄",
+      "model": "glm-5.3[1m]",
+      "cwd": "asterforge-deploy",
+      "promptFile": "prompts/AFD2.md",
+      "status": "pending"
+    },
+    {
+      "code": "GAM2",
+      "name": "games ui-polish 孤儿脚本目录处置",
+      "goal": "4 个脚本逐个判定：安全则入库 / 损坏则 gitignore；40 条用户现场零混入",
+      "model": "glm-5.3[1m]",
+      "cwd": "games",
+      "promptFile": "prompts/GAM2.md",
+      "status": "pending"
+    },
+    {
+      "code": "SEXB",
+      "name": "sex2 AGENT.md 补阅读器工具链环节",
+      "goal": "第 8 节后补「同步阅读器」流程约定；创作内容零接触",
+      "model": "glm-5.3[1m]",
+      "cwd": "sex-workspace",
+      "promptFile": "prompts/SEXB.md",
+      "status": "pending"
+    }
+  ]
+}

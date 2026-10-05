@@ -91,6 +91,24 @@ function render(d) {
 }
 
 // ── 终端抽屉 ──
+// ── 终端抽屉 ──
+// markdown-lite：标题/表格/代码/列表分层渲染（转义后最小转换，不做完整 md）
+function mdInline(s) {
+  return s
+    .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>');
+}
+function mdBlock(s) {
+  const out = [];
+  for (const ln of s.split('\n')) {
+    if (/^\s*#{1,6}\s/.test(ln)) out.push('<div class="mdh">' + mdInline(esc(ln.replace(/^\s*#+\s*/, ''))) + '</div>');
+    else if (/^\s*\|/.test(ln)) out.push('<div class="mdtbl">' + esc(ln) + '</div>');
+    else if (/^\s*[-*]\s/.test(ln)) out.push('<div class="li">' + mdInline(esc(ln.replace(/^\s*[-*]\s/, ''))) + '</div>');
+    else if (ln.trim() === '') out.push('<div class="sp"></div>');
+    else out.push('<div class="tx">' + mdInline(esc(ln)) + '</div>');
+  }
+  return out.join('');
+}
 function openTerminal(code) {
   OPEN_CODE = code; LOG_OFFSET = 0; FOLLOW = true;
   const t = DATA.tasks.find(x => x.code === code);
@@ -120,8 +138,14 @@ async function pollLog() {
     const stick = FOLLOW;
     for (const e of d.events) {
       const div = document.createElement('div');
-      div.className = 'ln t-' + e.k;
-      div.innerHTML = '<span class="tm">' + new Date().toLocaleTimeString('zh-CN', { hour12: false }) + '</span>' + esc(e.s);
+      if (e.k === 'say') {
+        // assistant 文本：markdown-lite 分层渲染
+        div.className = 'md';
+        div.innerHTML = mdBlock(e.s);
+      } else {
+        div.className = 'ln t-' + e.k;
+        div.innerHTML = '<span class="tm">' + new Date().toLocaleTimeString('zh-CN', { hour12: false }) + '</span>' + esc(e.s);
+      }
       term.appendChild(div);
     }
     if (d.events.length && stick) term.scrollTop = term.scrollHeight;
