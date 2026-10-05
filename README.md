@@ -12,7 +12,7 @@ node app/server.mjs
 $env:PORT=17878; node app/server.mjs
 ```
 
-1. 在 `batches/<wave>/batch.json` 定义任务（代号/目标/cwd/提示词文件），**`model` 字段按需路由**：`glm53`（纯文本，烧主力额度）/ `flash`（需要看图：截图目检、封面验收）
+1. 在 `batches/<wave>/batch.json` 定义任务（代号/目标/cwd/提示词文件），`model` 字段**直书实际模型 ID**：`glm-5.3[1m]`（文本主力）/ `glm-5.3-flash[1m]`（多模态看图）
 2. 提示词放 `batches/<wave>/prompts/<代号>.md`
 3. 派发：面板「排队中」任务行点击派发（或 POST /api/dispatch）
 4. 点「查看终端 →」实时观看会话动态
