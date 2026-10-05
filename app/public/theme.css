@@ -6,7 +6,7 @@
   --bg:#F3F2ED; --panel:#FDFDFC; --panel2:#F8F7F2;
   --line:#E4E3DA; --line2:#D0CFC5; --line-strong:#1A1A18;
   --ink:#1A1A18; --ink2:#5F5D55; --ink3:#9B978C;
-  --accent:#D64523;
+  --accent:#A8513C;   /* 珊瑚实底档——与个人主站 TimeCraker Studio 色板同源（my-portfolio globals.css --signal-solid #a8513c，白字 5.4:1 AA）*/
   --st-running:#2D5A88; --st-done:#2E7D46; --st-pending:#A8761A; --st-cancelled:#8A8F98;
   --st-accepted:#2E7D3A; --st-reported:#C08A1E; --st-failed:#C4341D; --st-rejected:#8C2B1A; --st-queued:#7A828C;
   --mono:"JetBrains Mono","Cascadia Code",Consolas,ui-monospace,monospace;
@@ -31,9 +31,9 @@ header{padding:32px 0 0}
 h1{font-family:var(--disp);font-size:21px;font-weight:700;letter-spacing:-.025em;white-space:nowrap;display:inline-flex;align-items:center}
 /* 「太木」印章字块：红底白字，配 Swiss 印刷的红色强调 */
 .brand-seal{display:inline-flex;align-items:center;justify-content:center;
-  background:var(--accent);color:#F6F5F0;font-family:var(--disp);
+  background:var(--accent);color:#FAF9F5;font-family:var(--disp);
   font-size:17px;font-weight:700;padding:3px 8px 3px 10px;letter-spacing:.28em;
-  margin-right:11px;box-shadow:2px 2px 0 rgba(26,26,24,.14)}
+  margin-right:11px;box-shadow:2px 2px 0 rgba(168,81,60,.22)}
 h1 .thin{font-weight:400;color:var(--ink3);font-size:14px;letter-spacing:0}
 h1 .thin::before{content:'·';margin-right:8px;color:var(--ink3)}
 .hmeta{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
