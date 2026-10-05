@@ -16,7 +16,7 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 // ── 状态渲染 ──
 function render(d) {
   document.getElementById('wtitle').textContent = '／ ' + (d.title || d.wave);
-  document.getElementById('disp').textContent = '已完成 ' + d.counts.done + '/' + d.total;
+  document.getElementById('disp').textContent = new Date(d.dispatchedAt).toLocaleString('zh-CN', { hour12: false });
   document.getElementById('clock').textContent = new Date().toLocaleTimeString('zh-CN', { hour12: false });
 
   document.getElementById('progtext').innerHTML =
@@ -28,9 +28,10 @@ function render(d) {
     '<i class="pb-pending" style="width:' + (d.counts.pending / d.total * 100) + '%"></i>' +
     '<i class="pb-cancelled" style="width:' + (d.counts.cancelled / d.total * 100) + '%"></i>';
 
-  const tabs = [['all', '全部', d.total], ['running', '进行中', d.counts.running], ['done', '已完成', d.counts.done], ['cancelled', '已取消', d.counts.cancelled]].filter(x => x[2] > 0);
+  const tabs = [['all', '全部', d.total], ['running', '进行中', d.counts.running], ['waiting', '等待中', d.counts.waiting || 0], ['done', '已完成', d.counts.done], ['cancelled', '已取消', d.counts.cancelled]];
   document.getElementById('nav').innerHTML = tabs.map(t =>
-    '<button class="tab' + (FILTER === t[0] ? ' on' : '') + (t[0] === 'all' ? '' : ' tc') + '" style="--tc:var(--st-' + t[0] + ')" data-f="' + t[0] + '">' + t[1] + '<span class="n">' + t[2] + '</span></button>'
+    '<button class="tab tc' + ((FILTER === 'all' && t[0] === 'all') || FILTER === t[0] ? ' on' : '') + (t[2] === 0 ? ' zero' : '') + '" style="--tc:var(--st-' + t[0] + ', #111)" data-f="' + t[0] + '">'
+    + '<span class="dot"></span>' + t[1] + '<span class="n">' + t[2] + '</span></button>'
   ).join('');
   document.querySelectorAll('#nav .tab').forEach(b => b.onclick = () => { FILTER = b.dataset.f; render(DATA); });
 
@@ -68,15 +69,21 @@ function render(d) {
     + (t.status === 'done' ? '<span class="chip chip-done">已完成</span>' : '<span class="chip chip-cancelled">已取消</span>') + '</div>'
   ).join('') || '<div class="empty">无匹配条目</div>';
 
-  const gitTasks = d.tasks.filter(t => t.commit).sort((a, b) => (b.reportMtime || 0) - (a.reportMtime || 0));
-  document.getElementById('gitlist').innerHTML = gitTasks.map(t =>
-    '<div class="pj"><div class="pj-head">'
-    + '<span class="pj-dot" style="background:var(--st-' + (t.status === 'done' ? 'done' : 'running') + ')"></span>'
-    + '<span class="pj-name">' + esc(t.name) + '</span>'
-    + '<span class="pj-code">' + t.code + '</span>'
-    + '<span class="pj-when">' + esc(t.commit) + '</span>'
-    + '</div></div>'
-  ).join('') || '<div class="empty">暂无提交</div>';
+  const gitTasks = d.tasks.filter(t => (t.commits && t.commits.length)).sort((a, b) => b.commits[0].ts - a.commits[0].ts);
+  document.getElementById('gitlist').innerHTML = gitTasks.map(t => {
+    const rows = t.commits.slice(0, 4).map(c =>
+      '<div class="cmt' + (c.kind === 'op' ? ' op' : '') + '">'
+      + '<span class="w">' + fmtAgo(Math.floor((d.now - c.ts) / 1000)) + '</span>'
+      + '<span class="s">' + esc(c.subject) + '</span>'
+      + '<span class="h">' + c.h + '</span></div>'
+    ).join('');
+    return '<div class="pj"><div class="pj-head">'
+      + '<span class="pj-dot" style="background:var(--st-' + (t.status === 'done' ? 'done' : 'running') + ')"></span>'
+      + '<span class="pj-name">' + esc(t.name) + '</span>'
+      + '<span class="pj-code">' + t.code + '</span>'
+      + '<span class="pj-when">最近提交 ' + fmtAgo(Math.floor((d.now - t.commits[0].ts) / 1000)) + '</span>'
+      + '</div><div class="pj-commits">' + rows + '</div></div>';
+  }).join('') || '<div class="empty">暂无提交</div>';
 }
 
 // ── 终端抽屉 ──
@@ -128,6 +135,14 @@ document.getElementById('d-term').addEventListener('scroll', () => {
   FOLLOW = atBottom;
   document.getElementById('d-follow').textContent = FOLLOW ? '● 自动跟随' : '⏸ 已暂停跟随';
 });
+document.getElementById('git-refresh-btn').onclick = async function () {
+  this.classList.add('spinning');
+  this.textContent = '⟳ 刷新中…';
+  await refresh();
+  this.classList.remove('spinning');
+  this.textContent = '⟳ 已刷新 ' + new Date().toLocaleTimeString('zh-CN', { hour12: false });
+  document.getElementById('git-auto').textContent = '自动刷新 · 5 秒';
+};
 
 // ── 主循环 ──
 async function refresh() {
