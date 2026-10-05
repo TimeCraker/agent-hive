@@ -44,10 +44,9 @@ function render(d) {
   const running = c.running || 0;
   const wait = (c.queued || 0) + (c.pending || 0);
   const cancelled = c.cancelled || 0;
-  document.getElementById('s-accepted').textContent = green;
+  document.getElementById('s-running').textContent = running + wait;   // 进行中 = running + queued + pending（与 Tab 口径一致）
   document.getElementById('s-reported').textContent = reported;
-  document.getElementById('s-running').textContent = running;
-  document.getElementById('s-wait').textContent = wait;
+  document.getElementById('s-accepted').textContent = green;
   document.getElementById('s-failed').textContent = bad;
   document.getElementById('s-cancelled').textContent = cancelled;
   // 完成率口径：已验收 ÷（全部 − 已取消）；黄=待验收 蓝=进行中 红=失败 灰=排队
