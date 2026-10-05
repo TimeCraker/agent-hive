@@ -132,11 +132,12 @@ function buildStatus(wave) {
     if (t.status !== 'running') { base.state = t.status; return base; }   // pending / queued：未起进程
     if (logBytes > 0) {
       const tail = tailLog(wave, t.code, Math.max(0, logBytes - 8192));
-      base.events = tail.events.slice(-3);
+      // usage 遥测只服务抽屉台账（/api/logs），卡片预览滤掉——否则 slice(-3) 窗口会被无文本事件占满显示成 —
+      base.events = tail.events.filter(e => e.k !== 'usage').slice(-3);
       base.staleFor = logMtime ? Math.round((now - logMtime) / 1000) : null;
       base.stale = logMtime ? (now - logMtime > STALE_AFTER_MS) : false;   // 日志停更提示
       // 自愈：exit 回调丢失（如服务重启）时，日志出现 result 事件而 batch 仍 running → 就地收档
-      const res = base.events.find(e => e.k === 'result');
+      const res = tail.events.find(e => e.k === 'result');
       if (res) {
         const b = loadBatch(wave);
         const bt = b.tasks.find(x => x.code === t.code);
