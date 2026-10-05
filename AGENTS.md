@@ -21,6 +21,40 @@
 | `runs/reports/<代号>-report.md` | 各会话结果报告 | 会话自己写 |
 | `docs/design.md` | UI/UX 设计决策记录 | 设计变更时更新 |
 
+## batch.json 字段表
+
+```json
+{
+  "wave": "wave2",                    // 波次名（= 目录名）
+  "title": "显示标题",
+  "dispatchedAt": "ISO 时间",          // 首次派发时写入，此后不改
+  "tasks": [{
+    "code": "PF",                     // 代号：大写短码，全仓唯一，= 报告/日志文件名
+    "name": "任务中文名",
+    "goal": "一句话验收目标（含数字指标）",
+    "model": "glm-5.3[1m]",           // 实际模型 ID，直书：[1m] 文本主力 / glm-5.3-flash[1m] 看图
+    "cwd": "相对仓根的任务目录",         // 会话工作目录
+    "promptFile": "prompts/<代号>.md", // 相对 batches/<wave>/ 的提示词路径
+    "status": "pending"               // pending → running → done / cancelled
+  }]
+}
+```
+
+## 任务包提示词写法约定
+
+每份提示词是**自包含**的——执行会话没有主控上下文，必须写全。固定结构：
+
+1. **任务一句话** + 背景（已核实的事实，勿让执行者重新考古）
+2. **步骤**（编号，可执行）
+3. **红线**（不碰什么、并发避让、安全约束）
+4. **验收标准**（数字化，写明检查命令）
+5. **报告要求**（整文件覆盖写入 `runs/reports/<代号>-report.md`，含自评）
+范例：`batches/wave1/prompts/` 下 9 份。
+
+## 派发 API
+
+`POST /api/dispatch`，body `{"wave":"wave1","code":"VS"}`——仅接受 pending；claude 正常退出后状态自动翻 done。
+
 ## 会话启动规范（派发 claude 的硬性要求）
 
 1. **必须以「允许一切」模式启动**：`claude --dangerously-skip-permissions -p ...`——无头会话无人值守，任何权限弹窗都会静默卡死会话，没有例外。
