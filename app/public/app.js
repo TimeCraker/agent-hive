@@ -35,7 +35,7 @@ function matchTab(t) {
 function render(d) {
   document.getElementById('disp').textContent = new Date(d.dispatchedAt).toLocaleString('zh-CN', { hour12: false });
   document.getElementById('clock').textContent = new Date().toLocaleTimeString('zh-CN', { hour12: false });
-  document.getElementById('wavelbl').textContent = ' · Wave ' + String(d.wave || WAVE).replace(/^wave/i, '');
+  document.getElementById('wavelbl').textContent = 'Wave ' + String(d.wave || WAVE).replace(/^wave/i, '');
 
   const c = d.counts || {};
   const green = (c.accepted || 0) + (c.done || 0);
