@@ -12,6 +12,8 @@ node app/server.mjs
 $env:PORT=17878; node app/server.mjs
 ```
 
+**启动后第一件事：把控制台交给用户**——`http://127.0.0.1:17879?wave=<wave>` 要在首个任务派发前明确给出。控制台是用户的实时监督与验收入口；主控只在后台跑而不交入口，等于把「主控派发、用户监督」的分工做成黑箱。主控以后台进程方式起服务时，需同时说明服务随主控会话存亡（会话退出服务即停，连带杀死在跑会话，wave4 S01I 实例）。
+
 1. 在 `batches/<wave>/batch.json` 定义任务（代号/目标/cwd/提示词文件），`model` 字段**直书实际模型 ID**：`glm-5.3[1m]`（文本主力）/ `glm-5.3-flash[1m]`（多模态看图）
 2. 提示词放 `batches/<wave>/prompts/<代号>.md`
 3. 派发：`POST /api/dispatch {"wave","code"}`——并发满员自动转 `queued` 排队、退出自动补位（上限 `HIVE_MAX_CONCURRENT`，默认 4，防 429）
