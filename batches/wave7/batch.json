@@ -1,0 +1,69 @@
+{
+  "wave": "wave7",
+  "title": "第七波 · wave6 验收问题修复（P1 部署 + nginx / CPB / 小饭桌数据清理，4 任务）",
+  "tasks": [
+    {
+      "code": "DEPPF",
+      "name": "my-portfolio 上线 10-05 perf 轮",
+      "goal": "部署脚本执行 + 原子 7 项验证通过 + 线上 preload 复测两项达标",
+      "model": "glm-5.3[1m]",
+      "cwd": "my-portfolio",
+      "promptFile": "prompts/DEPPF.md",
+      "status": "running",
+      "dispatchedAt": "2026-10-05T15:37:07.264Z",
+      "pid": 32136
+    },
+    {
+      "code": "NGXHRD",
+      "name": "nginx 修复：lekao 启用 h2 + 小饭桌补安全头",
+      "goal": "lekao ALPN h2 生效 + xiaofanzhuo 4 安全头齐全 + 两站 200 无 5xx",
+      "model": "glm-5.3[1m]",
+      "cwd": "asterforge-deploy",
+      "promptFile": "prompts/NGXHRD.md",
+      "status": "accepted",
+      "dispatchedAt": "2026-10-05T15:37:07.313Z",
+      "pid": 30376,
+      "settledAt": "2026-10-05T15:43:52.167Z",
+      "sessionId": "95f92015-b64d-42a6-874e-576ff9d2f728",
+      "turns": 33,
+      "costUsd": 2.949014,
+      "outTok": 17674,
+      "acceptedAt": "2026-10-05T15:45:51.468Z",
+      "acceptNote": "验收方独立复核（服务器侧curl）：lekao HTTP/2 200、xfz 4/4安全头+顺带h2、两站200；git实证9f39e1b恰好2conf +13/-1未push按口径。任务书http2断言错误被实证纠偏（1.24.0无http2 on，用listen ssl http2），nginx -t告警自纠后reload，8域名回归全绿。HSTS一周后升长周期为遗留待办。"
+    },
+    {
+      "code": "DEPCB",
+      "name": "coding-plan-bench Pages 重部署",
+      "goal": "线上 bundle hash 变更 + leaderboards 含 glm-5.3 + 矩阵入口 + api/health ok",
+      "model": "glm-5.3[1m]",
+      "cwd": "pwa-hw-voice",
+      "promptFile": "prompts/DEPCB.md",
+      "status": "rejected",
+      "dispatchedAt": "2026-10-05T15:37:07.342Z",
+      "pid": 35216,
+      "settledAt": "2026-10-05T15:43:17.977Z",
+      "sessionId": "c41b70ee-d5a3-4777-bcca-1c8e427ddd3e",
+      "turns": 22,
+      "costUsd": 1.2408859999999997,
+      "outTok": 15849,
+      "rejectedAt": "2026-10-05T15:45:01.313Z",
+      "rejectNote": "部署目标未达成＝外部阻塞：CF凭据双通道缺失（已独立核实gh secret空+Deploy工作流三连败，8-04最后成功）。执行质量优：clone/构建/清理全过、根因定位确凿、任务书口径纠错2条采纳。待所有者配好凭据（报告建议方式B：gh secrets+CI）后resume重跑，按报告修正口径核验。"
+    },
+    {
+      "code": "XFZCLEAN",
+      "name": "小饭桌生产测试数据清理（所有者已授权）",
+      "goal": "备份后清零 7 道测试菜 + 8 张测试单 + 线上空态验证 + 计数前后留档",
+      "model": "glm-5.3[1m]",
+      "cwd": "xiaofanzhuo",
+      "promptFile": "prompts/XFZCLEAN.md",
+      "status": "reported",
+      "dispatchedAt": "2026-10-05T15:39:24.110Z",
+      "pid": 34372,
+      "settledAt": "2026-10-05T15:46:12.150Z",
+      "sessionId": "430f0163-b975-49ee-bb17-0d6817d85cb2",
+      "turns": 22,
+      "costUsd": 1.80278,
+      "outTok": 22732
+    }
+  ]
+}

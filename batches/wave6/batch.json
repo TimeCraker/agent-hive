@@ -10,9 +10,16 @@
       "model": "glm-5.3[1m]",
       "cwd": "lekao",
       "promptFile": "prompts/INSPLK.md",
-      "status": "running",
+      "status": "accepted",
       "dispatchedAt": "2026-10-05T15:01:49.118Z",
-      "pid": 10828
+      "pid": 10828,
+      "settledAt": "2026-10-05T15:18:17.453Z",
+      "sessionId": "16751c1d-b477-4f47-b950-e643ded44fbf",
+      "turns": 35,
+      "costUsd": 1.617574,
+      "outTok": 17482,
+      "acceptedAt": "2026-10-05T15:21:54.098Z",
+      "acceptNote": "零P0/P1；P2 HTTP/2 待修"
     },
     {
       "code": "INSPXZ",
@@ -21,9 +28,16 @@
       "model": "glm-5.3[1m]",
       "cwd": "xiaofanzhuo",
       "promptFile": "prompts/INSPXZ.md",
-      "status": "running",
+      "status": "accepted",
       "dispatchedAt": "2026-10-05T15:01:49.176Z",
-      "pid": 34608
+      "pid": 34608,
+      "settledAt": "2026-10-05T15:18:17.480Z",
+      "sessionId": "af55aa47-5ceb-4e2f-bf3a-302398858a11",
+      "turns": 36,
+      "costUsd": 1.6518439999999999,
+      "outTok": 17850,
+      "acceptedAt": "2026-10-05T15:21:54.067Z",
+      "acceptNote": "零P0/P1；P2×2（生产测试数据/安全头）转所有者"
     },
     {
       "code": "INSPPF",
@@ -32,9 +46,16 @@
       "model": "glm-5.3[1m]",
       "cwd": "my-portfolio",
       "promptFile": "prompts/INSPPF.md",
-      "status": "running",
+      "status": "accepted",
       "dispatchedAt": "2026-10-05T15:01:49.211Z",
-      "pid": 22672
+      "pid": 22672,
+      "settledAt": "2026-10-05T15:18:17.524Z",
+      "sessionId": "15c396a4-44b4-4c97-85bb-077f88d6cc36",
+      "turns": 39,
+      "costUsd": 2.3338,
+      "outTok": 25282,
+      "acceptedAt": "2026-10-05T15:21:54.108Z",
+      "acceptNote": "P1：10-05 性能优化未部署，待手动部署"
     },
     {
       "code": "INSPCB",
@@ -43,7 +64,16 @@
       "model": "glm-5.3[1m]",
       "cwd": "pwa-hw-voice",
       "promptFile": "prompts/INSPCB.md",
-      "status": "queued"
+      "status": "accepted",
+      "dispatchedAt": "2026-10-05T15:06:50.225Z",
+      "pid": 19960,
+      "settledAt": "2026-10-05T15:14:35.569Z",
+      "sessionId": "3e0bb68c-907d-457b-af78-de0159b2994e",
+      "turns": 30,
+      "costUsd": 1.693972,
+      "outTok": 16715,
+      "acceptedAt": "2026-10-05T15:21:54.104Z",
+      "acceptNote": "P2：线上落后远端一个世代，待部署"
     },
     {
       "code": "SPECLK",
@@ -52,7 +82,16 @@
       "model": "glm-5.3[1m]",
       "cwd": "lekao",
       "promptFile": "prompts/SPECLK.md",
-      "status": "queued"
+      "status": "accepted",
+      "dispatchedAt": "2026-10-05T15:14:35.572Z",
+      "pid": 10876,
+      "settledAt": "2026-10-05T15:21:18.427Z",
+      "sessionId": "7fae1387-dc06-4943-8393-1863f3121b74",
+      "turns": 25,
+      "costUsd": 1.9320880000000002,
+      "outTok": 18553,
+      "acceptedAt": "2026-10-05T15:22:13.807Z",
+      "acceptNote": "草案结构完整+经济测算有据+8决策点带建议（347ba8c）；转所有者评审"
     },
     {
       "code": "SPECGM",
@@ -61,7 +100,16 @@
       "model": "glm-5.3[1m]",
       "cwd": "games",
       "promptFile": "prompts/SPECGM.md",
-      "status": "queued"
+      "status": "accepted",
+      "dispatchedAt": "2026-10-05T15:21:18.430Z",
+      "pid": 10488,
+      "settledAt": "2026-10-05T15:26:15.995Z",
+      "sessionId": "bc832ec8-59ec-4239-836a-a27b7eeffebb",
+      "turns": 20,
+      "costUsd": 1.5784319999999998,
+      "outTok": 14849,
+      "acceptedAt": "2026-10-05T15:36:18.039Z",
+      "acceptNote": "复核通过：f5be446恰好1文件+153行落仓stage-specs、DRAFT标注、8M+32未跟踪用户现场原样零混入、未push；9决策点留所有者。"
     }
   ]
 }

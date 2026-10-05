@@ -91,6 +91,62 @@
       "outTok": 11394,
       "acceptedAt": "2026-10-05T15:03:24.366Z",
       "acceptNote": "10/10 PASS；时间码/帧号数学旁证吻合；副本留存 10 张"
+    },
+    {
+      "code": "PWAD",
+      "name": "pw 填表脚本收录进 publish 模板（git 历史 7277880）",
+      "goal": "pw/ ≥9 文件收录，node --check 9/9，hsr 引用 0；SKILL.md 入口；1 commit",
+      "model": "glm-5.3[1m]",
+      "cwd": "vibe-studio",
+      "promptFile": "prompts/PWAD.md",
+      "status": "accepted",
+      "dispatchedAt": "2026-10-05T15:11:35.378Z",
+      "pid": 35128,
+      "settledAt": "2026-10-05T15:21:50.475Z",
+      "sessionId": "98730714-4151-4604-b7e0-300c6dbc1c3e",
+      "turns": 54,
+      "costUsd": 1.8823860000000008,
+      "outTok": 15939,
+      "acceptedAt": "2026-10-05T15:23:46.855Z",
+      "acceptNote": "主控复核 9/9 语法、0 hsr 引用、SKILL 入口就位；run.mjs 挂 pw 层调度留后续拍板"
+    },
+    {
+      "code": "PFDR",
+      "name": "probe-footage 补 durationInFrames（点亮时长规则）",
+      "goal": "正反测试各 1 组；demo 链无 duration-unknown 且 0 error；1 commit",
+      "model": "glm-5.3[1m]",
+      "cwd": "vibe-studio",
+      "promptFile": "prompts/PFDR.md",
+      "status": "cancelled",
+      "dispatchedAt": "2026-10-05T15:18:31.313Z",
+      "pid": 36004,
+      "killedAt": "2026-10-05T15:20:31.732Z",
+      "settledAt": "2026-10-05T15:22:58.463Z",
+      "failReason": "no-result-event"
+    },
+    {
+      "code": "PRAV",
+      "name": "probe-anchors 支持条目级视口",
+      "goal": "单测 ≥4 例正反；缺省零变化；SKILL.md 字段文档；1 commit",
+      "model": "glm-5.3[1m]",
+      "cwd": "vibe-studio",
+      "promptFile": "prompts/PRAV.md",
+      "status": "cancelled",
+      "dispatchedAt": "2026-10-05T15:19:11.420Z",
+      "pid": 34796,
+      "killedAt": "2026-10-05T15:20:31.809Z",
+      "settledAt": "2026-10-05T15:22:58.464Z",
+      "failReason": "no-result-event"
+    },
+    {
+      "code": "RDLC",
+      "name": "README 记 Remotion license 口径",
+      "goal": "README 一行提醒；check-docs 0 fail 0 warn；1 commit",
+      "model": "glm-5.3[1m]",
+      "cwd": "vibe-studio",
+      "promptFile": "prompts/RDLC.md",
+      "status": "cancelled",
+      "settledAt": "2026-10-05T15:22:58.464Z"
     }
   ]
 }
