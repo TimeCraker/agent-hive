@@ -21,6 +21,16 @@
 | `runs/reports/<代号>-report.md` | 各会话结果报告 | 会话自己写 |
 | `docs/design.md` | UI/UX 设计决策记录 | 设计变更时更新 |
 
+## 会话启动规范（派发 claude 的硬性要求）
+
+1. **必须以「允许一切」模式启动**：`claude --dangerously-skip-permissions -p ...`——无头会话无人值守，任何权限弹窗都会静默卡死会话，没有例外。
+2. **模型按任务是否需要看图路由**（batch.json 的 `model` 字段声明，spawn 时映射为 `--model` 参数与 `ANTHROPIC_DEFAULT_*_MODEL` env）：
+   - `glm53` = `glm-5.3[1m]`：纯文本任务（编码 / 审计 / 续写 / 跑分）
+   - `flash` = `glm-5.3-flash[1m]`：**需要看图的任务**（截图目检 / 封面验收 / UI 走查）
+3. **prompt 必须走 argv 位置参数**：stdio[0]='ignore'，漏传会报「Input must be provided」秒退（实踩）。
+4. **stderr 必须落 `<log>.launcher.err` 文件**：claude 的警告（如 unrecognized_model）全在这里，是排障第一现场。
+5. **key 走 env 注入**：`ANTHROPIC_BASE_URL`（智谱端点）+ `ANTHROPIC_AUTH_TOKEN`（读 `~/.claude/zhipu.env`），每次派发经 spawn env 注入，零配置文件依赖。
+
 ## 铁律
 
 1. **状态的唯一真相源是 batch.json**——面板显示、验收、时间计算全部以它为准。`dispatchedAt` 写入后不改。
