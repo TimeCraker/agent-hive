@@ -303,9 +303,15 @@ async function loadWaves() {
     sel.innerHTML = (d.waves || []).map(w => {
       const running = (w.counts.running || 0) + (w.counts.queued || 0) + (w.counts.pending || 0);
       const accepted = (w.counts.accepted || 0) + (w.counts.done || 0);
-      const mark = w.active ? '●' : '✓';
-      const stat = w.active ? running + ' 在跑' : accepted + '/' + w.total;
-      return '<option value="' + w.wave + '"' + (w.wave === WAVE ? ' selected' : '') + '>'
+      const reported = w.counts.reported || 0;
+      const bad = (w.counts.failed || 0) + (w.counts.rejected || 0);
+      // 活跃/状态着色：原生 option 支持 Chrome/Windows 逐项底色
+      let mark = '✓', bg = '', fg = '';
+      if (w.active) { mark = '●'; bg = '#2D5A88'; fg = '#FAF9F5'; }
+      else if (reported > 0) { mark = '◔'; bg = 'rgba(192,138,30,.25)'; }
+      else if (bad > 0) { mark = '✗'; bg = 'rgba(196,52,29,.18)'; }
+      const stat = w.active ? running + ' 在跑' : reported ? reported + ' 待验收' : accepted + '/' + w.total;
+      return '<option value="' + w.wave + '" style="background:' + bg + ';color:' + fg + '"' + (w.wave === WAVE ? ' selected' : '') + '>'
         + mark + ' ' + w.wave.replace(/^wave/i, 'Wave ') + ' · ' + stat + '</option>';
     }).join('');
     sel.onchange = e => { location.href = '/?wave=' + e.target.value; };
