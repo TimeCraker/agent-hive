@@ -1,0 +1,87 @@
+{
+  "wave": "wave9",
+  "title": "第九波 · 部署链路修复 + 全仓深度审计（2 写 + 7 读，9 任务）",
+  "tasks": [
+    {
+      "code": "FIXPSF",
+      "name": "修复主站部署脚本引号 bug（09-30 起每次部署必挂）",
+      "goal": "根因定位+最小修复 deploy-portfolio-safe.sh 远程段引号；bash -n 全绿；heredoc 透传文本与本地模拟断言步展开均验证正确；最小 diff 提交",
+      "model": "glm-5.3[1m]",
+      "cwd": "my-portfolio",
+      "promptFile": "prompts/FIXPSF.md",
+      "status": "pending"
+    },
+    {
+      "code": "HSTSUP",
+      "name": "lekao + 小饭桌 HSTS 升长周期（所有者已授权）",
+      "goal": "两站 HSTS max-age 604800→31536000；nginx -t 绿后 reload；curl 两站响应头留证；仓内模板同步 + 提交",
+      "model": "glm-5.3[1m]",
+      "cwd": "asterforge-deploy",
+      "promptFile": "prompts/HSTSUP.md",
+      "status": "pending"
+    },
+    {
+      "code": "AUDGM",
+      "name": "games/asternova 深度审计（只读）",
+      "goal": "五子项目（web-client/backend/client-godot-v2/render-lab/art）文档一致性 + 代码质量 + 仓库卫生审计，P0-P3 分级问题清单，每条附证据",
+      "model": "glm-5.3[1m]",
+      "cwd": "games",
+      "promptFile": "prompts/AUDGM.md",
+      "status": "pending"
+    },
+    {
+      "code": "AUDVBS",
+      "name": "vibe-studio 7 技能质量审计（只读）",
+      "goal": "7 个 skill（ppt/humanizer/video-motion/narration/auto-subtitle/publish/web-capture）逐个完整性/可执行性/依赖真实性审计，分级清单 + 改进 backlog",
+      "model": "glm-5.3[1m]",
+      "cwd": "vibe-studio",
+      "promptFile": "prompts/AUDVBS.md",
+      "status": "pending"
+    },
+    {
+      "code": "AUDVSW",
+      "name": "video-script-workflow 创作工坊审计（只读）",
+      "goal": "角色档案库结构 + 阅读器小工具健康度（语法级）+ agent.md 与实际目录一致性审计，分级清单",
+      "model": "glm-5.3[1m]",
+      "cwd": "video-script-workflow",
+      "promptFile": "prompts/AUDVSW.md",
+      "status": "pending"
+    },
+    {
+      "code": "AUDCFG",
+      "name": "config/ 配置中心安全审计（只读，重点密钥）",
+      "goal": "6 子目录密钥泄漏扫描（报告零密钥明文）+ README 同步方式真实性抽查 + git 卫生盘点，分级清单",
+      "model": "glm-5.3[1m]",
+      "cwd": "config",
+      "promptFile": "prompts/AUDCFG.md",
+      "status": "pending"
+    },
+    {
+      "code": "AUDLKS",
+      "name": "lekao 代码安全审计（只读）",
+      "goal": "API 鉴权覆盖矩阵全枚举 + 签到 T-Coin 防刷 + 注入/硬编码密钥/依赖漏洞审计，P0-P3 分级清单",
+      "model": "glm-5.3[1m]",
+      "cwd": "lekao",
+      "promptFile": "prompts/AUDLKS.md",
+      "status": "pending"
+    },
+    {
+      "code": "AUDAFD",
+      "name": "asterforge-deploy 手册真实性审计（只读 + SSH 只读）",
+      "goal": "README/COLD-START 声称的服务/脚本/证书 vs 服务器实际与各业务仓现役脚本偏差盘点，偏差清单每条附两侧证据",
+      "model": "glm-5.3[1m]",
+      "cwd": "asterforge-deploy",
+      "promptFile": "prompts/AUDAFD.md",
+      "status": "pending"
+    },
+    {
+      "code": "AUDDEBT",
+      "name": "5 仓 TODO/FIXME 技术债盘点（只读）",
+      "goal": "xiaofanzhuo/my-portfolio/agent-hive/coding-plan-bench/pwa-hw-voice 全量 TODO/FIXME/HACK 盘点 + 未提交改动盘点，分级技术债台账",
+      "model": "glm-5.3[1m]",
+      "cwd": ".",
+      "promptFile": "prompts/AUDDEBT.md",
+      "status": "pending"
+    }
+  ]
+}

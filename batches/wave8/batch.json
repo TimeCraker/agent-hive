@@ -1,0 +1,155 @@
+{
+  "dispatchedAt": null,
+  "tasks": [
+    {
+      "cwd": ".",
+      "promptFile": "prompts/RES.md",
+      "goal": "文档与实际代码零漂移：过期点全部修正，≥1 docs commit（或注明跳过）；报告含过期点清单",
+      "model": "glm-5.3[1m]",
+      "code": "RES",
+      "name": "ResumeAIX 文档保鲜度审计",
+      "status": "cancelled",
+      "dispatchedAt": "2026-10-06T03:41:36.109Z",
+      "pid": 11384,
+      "killedAt": "2026-10-06T03:44:50.710Z",
+      "settledAt": "2026-10-06T03:44:50.862Z",
+      "failReason": "no-result-event",
+      "cancelledAt": "2026-10-06T03:46:10.309Z",
+      "cancelReason": "本地双分支（main + codex 功能分支检出中），审计跳过待分支收口"
+    },
+    {
+      "cwd": ".",
+      "promptFile": "prompts/LEK.md",
+      "goal": "文档与实际代码零漂移：过期点全部修正，≥1 docs commit（或注明跳过）；报告含过期点清单",
+      "model": "glm-5.3[1m]",
+      "code": "LEK",
+      "name": "lekao 文档保鲜度审计",
+      "status": "running",
+      "dispatchedAt": "2026-10-06T03:41:36.162Z",
+      "pid": 7468
+    },
+    {
+      "cwd": ".",
+      "promptFile": "prompts/XFZ.md",
+      "goal": "文档与实际代码零漂移：过期点全部修正，≥1 docs commit（或注明跳过）；报告含过期点清单",
+      "model": "glm-5.3[1m]",
+      "code": "XFZ",
+      "name": "xiaofanzhuo 文档保鲜度审计",
+      "status": "reported",
+      "dispatchedAt": "2026-10-06T03:41:36.181Z",
+      "pid": 29628,
+      "settledAt": "2026-10-06T03:45:39.460Z",
+      "sessionId": "94261fe2-d56b-4bfd-a2c0-999d5564cb9e",
+      "turns": 31,
+      "costUsd": 1.738258,
+      "outTok": 11710
+    },
+    {
+      "cwd": ".",
+      "promptFile": "prompts/MPF.md",
+      "goal": "文档与实际代码零漂移：过期点全部修正，≥1 docs commit（或注明跳过）；报告含过期点清单",
+      "model": "glm-5.3[1m]",
+      "code": "MPF",
+      "name": "my-portfolio 文档保鲜度审计",
+      "status": "running",
+      "dispatchedAt": "2026-10-06T03:41:36.198Z",
+      "pid": 13808
+    },
+    {
+      "cwd": ".",
+      "promptFile": "prompts/VBS.md",
+      "goal": "文档与实际代码零漂移：过期点全部修正，≥1 docs commit（或注明跳过）；报告含过期点清单",
+      "model": "glm-5.3[1m]",
+      "code": "VBS",
+      "name": "vibe-studio 文档保鲜度审计",
+      "status": "running",
+      "dispatchedAt": "2026-10-06T03:44:50.865Z",
+      "pid": 11820
+    },
+    {
+      "cwd": ".",
+      "promptFile": "prompts/HIVE.md",
+      "goal": "文档与实际代码零漂移：过期点全部修正，≥1 docs commit（或注明跳过）；报告含过期点清单",
+      "model": "glm-5.3[1m]",
+      "code": "HIVE",
+      "name": "agent-hive 文档保鲜度审计",
+      "status": "running",
+      "dispatchedAt": "2026-10-06T03:45:39.961Z",
+      "pid": 13444
+    },
+    {
+      "cwd": ".",
+      "promptFile": "prompts/CPB.md",
+      "goal": "文档与实际代码零漂移：过期点全部修正，≥1 docs commit（或注明跳过）；报告含过期点清单",
+      "model": "glm-5.3[1m]",
+      "code": "CPB",
+      "name": "coding-plan-bench 文档保鲜度审计",
+      "status": "queued"
+    },
+    {
+      "cwd": ".",
+      "promptFile": "prompts/GAM.md",
+      "goal": "文档与实际代码零漂移：过期点全部修正，≥1 docs commit（或注明跳过）；报告含过期点清单",
+      "model": "glm-5.3[1m]",
+      "code": "GAM",
+      "name": "games 文档保鲜度审计",
+      "status": "queued"
+    },
+    {
+      "cwd": ".",
+      "promptFile": "prompts/AFD.md",
+      "goal": "文档与实际代码零漂移：过期点全部修正，≥1 docs commit（或注明跳过）；报告含过期点清单",
+      "model": "glm-5.3[1m]",
+      "code": "AFD",
+      "name": "asterforge-deploy 文档保鲜度审计",
+      "status": "queued"
+    },
+    {
+      "cwd": ".",
+      "promptFile": "prompts/VSW.md",
+      "goal": "文档与实际代码零漂移：过期点全部修正，≥1 docs commit（或注明跳过）；报告含过期点清单",
+      "model": "glm-5.3[1m]",
+      "code": "VSW",
+      "name": "video-script-workflow 文档保鲜度审计",
+      "status": "queued"
+    },
+    {
+      "cwd": ".",
+      "promptFile": "prompts/SEX.md",
+      "goal": "文档与实际代码零漂移：过期点全部修正，≥1 docs commit（或注明跳过）；报告含过期点清单",
+      "model": "glm-5.3[1m]",
+      "code": "SEX",
+      "name": "sex-workspace 文档保鲜度审计",
+      "status": "queued"
+    },
+    {
+      "cwd": ".",
+      "promptFile": "prompts/PWA.md",
+      "goal": "文档与实际代码零漂移：过期点全部修正，≥1 docs commit（或注明跳过）；报告含过期点清单",
+      "model": "glm-5.3[1m]",
+      "code": "PWA",
+      "name": "pwa-hw-voice 文档保鲜度审计",
+      "status": "queued"
+    },
+    {
+      "cwd": ".",
+      "promptFile": "prompts/CFG.md",
+      "goal": "文档与实际代码零漂移：过期点全部修正，≥1 docs commit（或注明跳过）；报告含过期点清单",
+      "model": "glm-5.3[1m]",
+      "code": "CFG",
+      "name": "config 文档保鲜度审计",
+      "status": "queued"
+    },
+    {
+      "cwd": ".",
+      "promptFile": "prompts/ROOTDOC.md",
+      "goal": "项目地图 14 行与实况一致，归属矛盾清零；报告含修正清单",
+      "model": "glm-5.3[1m]",
+      "code": "ROOTDOC",
+      "name": "工作区根文档一致性审计（CLAUDE.md + AGENTS.md）",
+      "status": "queued"
+    }
+  ],
+  "title": "全仓文档保鲜度审计（14 任务：13 仓 + 根文档）",
+  "wave": "wave8"
+}

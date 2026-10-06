@@ -1,48 +1,40 @@
-# XFZ 结果报告
+# XFZ 报告:xiaofanzhuo 文档保鲜度审计与修复(Wave 8)
 
-## 结论一句话
+- 日期:2026-10-06
+- 范围:xiaofanzhuo 全部 9 份说明性文档(README / AGENTS / CLAUDE.md / docs/{BRD, PRD, DEPLOY, CHECKLIST-DEVICE, e2e 台账, health-audit} / docs/stages/*)
+- 结论:**发现并修复 6 处过期/缺失,提交 228f3e9**(仅 .md,9 增 4 删);其余核对条目与仓库实况一致
+- 前置检查:工作区 clean、无他人未提交改动 → 正常 commit;本地领先 origin/master 6 个提交,未 push(按红线)
 
-13 篇 Markdown 全量通读判定完毕：无一篇需要删除或归档移动，核心问题是**五份文档停留在「上线前」时点与已上线现状脱节**——已按「过期信息就地更正」处置，4 个 docs 提交（2f130df / 20870e0 / 9886db6 / 3213997），工作区干净、未推送。
+## ① 过期点清单(已全部当场修复)
 
-## 文档清单判定表（全量 13 篇）
+| # | 文档位置 | 改前 | 改后 | 证据 |
+|---|---|---|---|---|
+| 1 | README.md:18 常用命令 | `pnpm test`(vitest **74** 用例) | vitest **79** 用例 | 2026-10-06 本机实跑 `pnpm test`:10 文件 79 passed;DEPLOY §8.5 与 10-05 注记均记 79 |
+| 2 | README.md:26 技术栈 | standalone 部署(实测常驻 **120.7MB**) | 2026-10-03 16.3.7 实测常驻 **~56MB** | 120.7MB 为 P1 期历史值;README 自己的状态行与 DEPLOY §8.5(56MB 稳态)均为 56,原文自相矛盾 |
+| 3 | README.md:5 状态行 | 22 条 AC「正式逐条勾检记录**待补**」 | 已出逐条核对表(2026-10-05,生产全量 8 + 半量 4,指向 DEPLOY §8 注记与 XFZ2 报告) | agent-hive/runs/reports/XFZ2-report.md 存在且含「AC 22 条核对表」节;DEPLOY §8 已有同日考古注记,README 未同步 |
+| 4 | docs/PRD.md §8 NFR-05 | 按手机号限频(1 单/分钟,**20 单/天**) | 1 单/分钟、**10 单/天**(P1-7 由 20 收紧)另加设备维度天级 10 单/天(P2) | `src/lib/order-limits.ts:13` `orderPerDay = FixedWindowLimiter(24h, 10)`;`api/order/route.ts:131` 429 文案「上限(10 单)」;stage-p1-ux-fixes P1-7 明确记录「天下单 20→10」(commit 0ca5e4a) |
+| 5 | docs/PRD.md §1.4 路由总览 | 表止于 `/admin/settings`,无运营后台路由(缺失) | 表下补注:P1 起另有 `/admin/analytics`(+login,独立口令),不在 P0 基线内,指向 stage-p1 | `src/app/admin/analytics/page.tsx` 与 `analytics/login/page.tsx` 实际存在;README 已列而 PRD 路由权威表缺 |
+| 6 | docs/CHECKLIST-DEVICE.md 末节 | 「生产复检以同一清单逐条执行」无进度(缺失) | 补 2026-10-05 桌面端核对进度:全量 8 + 半量 4,逐条表见 XFZ2 报告;C03/B02 真机项待人工 | 同 #3 证据;该文档头部 10-05 回填仅覆盖真机复验状态,AC 复检节未同步 |
 
-| 路径 | 主题 | 判定 | 处置 |
-|---|---|---|---|
-| `AGENTS.md` | Next.js 16 版本警示（next dev 自动生成维护） | 健康 | 留（删除会被 next dev 重建，提交保树净） |
-| `CLAUDE.md` | `@AGENTS.md` 单行引用 | 健康 | 留 |
-| `README.md` | 项目入口 / 快速开始 / 文档索引 / 已拍板决策 | 过期信息 + 结构不全 | 改：待办段更正为上线后现状；索引补 3 篇缺漏（stage-p3 / health-audit / e2e 台账）+ CHECKLIST 描述批次口径更正 |
-| `docs/BRD.md` | 商业需求基线（背景 / 边界 / 风险 / 里程碑） | 健康（状态标注过期） | 改：状态「已定稿（待实现）」→「P0 已于 2026-08-23 上线」 |
-| `docs/PRD.md` | 产品功能规格权威（双端规格 / 状态机 / 22 条 AC） | 健康（状态标注过期） | 改：状态同 BRD 更正，并补指向 docs/stages/ 实际迭代（P1–P3 与 §12 规划有路线差异） |
-| `docs/DEPLOY.md` | 生产部署权威手册（构建陷阱 / systemd / 备份 / 验收实录） | 健康，2 处确凿失真 | 改（仅两处）：头部「HTTPS 待签发」与 §4「唯一待办」注释——均与本文档 §0 已勾记录、§8.1 实测自相矛盾，更正为已签发生效；其余一字未动 |
-| `docs/CHECKLIST-DEVICE.md` | 微信真机复验清单（P0 7 项 + P1/P2/P3 批次 11 项） | 过期（复验已过仍呈待办姿态） | 改：顶部回填「2026-08-28 复验通过」状态，转为历史验收记录 + 改版复验底稿；保留原位（README/DEPLOY 引用不破） |
-| `docs/stages/stage-2026-08-p0-mvp.md` | P0 实施规格：技术决策锁定表 + 7 Stage 验收实录 | 健康（含现势内容） | 留：技术决策表（proxy.ts 命名 / 时区 / 鉴权 / client JS 预算）被 README 现势引用，是长期技术锚 |
-| `docs/stages/stage-2026-08-p1-ux-fixes.md` | P1 真机反馈修复包（9 项）+ 运营后台独立口令 | 健康（历史实录，档案价值） | 留：每项 UX 决策依据与实测数据完整回填 |
-| `docs/stages/stage-2026-08-p2-blocklist.md` | P2 商家拉黑机制（双锚点拦截 + 设备限频） | 健康（历史实录） | 留：含拦截顺序等系统行为说明 |
-| `docs/stages/stage-2026-08-p3-reorder-status.md` | P3 再来一单 + 订单状态自动刷新 | 健康（历史实录） | 留；此前未进 README 索引，已由本次索引补全覆盖 |
-| `docs/health-audit-2026-10.md` | 2026-10 全维度体检（六维度 + 追加核查） | 健康（现行，含 2 条保持建议的待办） | 留；已进 README 索引 |
-| `docs/e2e-frontend-test-2026-10-03.md` | 生产 E2E 台账（26 过 / 0 缺陷） | 健康（现行，含遗留观察项） | 留；已进 README 索引 |
+## ② 核对无误条目(抽查证据在括号内)
 
-**不删除 / 不归档 stages/ 的裁定依据**：任务线索提示「开发期 Stage Spec 可归档」，但逐篇核实后 p0 的技术决策锁定表是 README 现势引用的活文档，p1–p3 与 p0 构成连贯实施时间线（p1 来源接 p0 上线、p2/p3 验收点回指 CHECKLIST），拆散归档损大于益；stages/ 目录名与文件名前缀已自明历史性质。属「拿不准 → 保守保留」红线的适用情形。
+- **重点项·BRD/PRD 状态标记**:均为「已定稿(P0 已于 2026-08-23 上线)」(commit 20870e0 早已修正,本次复核确认无回归)
+- **重点项·DEPLOY HTTPS/证书记录**:头部与 §0 记「2026-08-23 certbot --nginx 签发、2026-11-21 到期自动续签、HTTP 301」(commit 9886db6 已修,§8.1 有验收勾选;证书实态需服务器侧核实,文档记录本身与提交史一致)
+- **重点项·README 验收表述**:状态行三阶段(8-23 部署 / 8-28 真机复验 / 10-03 16.3.7+E2E)与 commit 史逐条对得上(8f3994e、072f158)
+- README 快速开始:`.env.example` 存在且含 SESSION_SECRET/MERCHANT_PWD/ANALYTICS_PWD_B64;`db:migrate`/`db:seed`/`db:studio`/`test`/`lint` 全在 package.json scripts
+- README 路由清单与 `src/app` 实况一致(顾客 5 页 + 商家 4 页 + analytics 登录)
+- README 文档索引 11 行与 docs/ 实际文件一一对应;e2e 台账「26 项 / 0 缺陷」、CHECKLIST「7+11 项」与各文档实文一致
+- PRD 数据模型 §7 与 `prisma/schema.prisma` 逐字段一致(含 cancelReason/cancelledBy/customerDeleted/idempotencyKey;Blocklist 属 P2,PRD 状态行已声明 P1–P3 见 stages)
+- PRD 锁定参数:登录 5 次锁 10 分钟(`admin-guards.ts:8`)、找回 5 次锁 30 分钟(`admin-guards.ts:9`),与 §3.1/§2.7 一致
+- DEPLOY §8 各批次 commit 号(6dbce5c/d89f48b/1a0be68/072f158)全部存在于 git log;§2 八条陷阱、§3 clean swap、§5 备份演练 10-03 PASS 记录与提交史一致
+- next 16.3.7、React 19.2.8、Prisma 6.19.3 与 package.json 一致
+- AGENTS.md 为 next dev 自动注入的版本警示、CLAUDE.md 仅 @AGENTS.md 引用——非业务陈述,无需动
+- e2e 台账 / health-audit / 4 份 stage spec:带日期的历史实录,内容与提交史自洽,按惯例不改写历史记录
 
-**无「内容冗余」判定的依据**：BRD（为什么做）/ PRD（做什么）/ DEPLOY（怎么部署）/ stages（怎么做的实录）/ audit（做得怎么样）五层职责清晰，未发现两篇文档以不同措辞承载同一职责的冗余对；README 与各篇的摘要-详略关系正常。
+## ③ 自评
 
-## 已执行处置与提交
-
-| Commit | 类型 | 文件 | 改动摘要 |
-|---|---|---|---|
-| `2f130df` | docs(readme) | README.md（+5/−2） | 待办段更正为上线后现状（真机复验通过 / 测试菜已清 / 16.3.7 部署 / E2E 26 项全绿，22 条 AC 勾检保留待补表述）；文档索引补 stage-p3、health-audit、e2e 台账 3 行；CHECKLIST 索引描述更正为「P0 7 项 + P1/P2/P3 批次 11 项，2026-08-28 复验通过」 |
-| `20870e0` | docs(spec) | docs/BRD.md、docs/PRD.md（各 1 行） | 两份状态字段「已定稿（待实现）」→ 已上线表述；PRD 补「P1–P3 实际迭代见 docs/stages/」 |
-| `9886db6` | docs(deploy) | docs/DEPLOY.md（3 行，仅更正不重构） | 头部引言与 §4 两处「HTTPS 待 DNSPod / 待签发（唯一待办）」更正为已于 2026-08-23 签发生效、自动续签——与 §0 前置条件已勾记录、§8.1 公网实测记录对齐，消除文档内部自相矛盾 |
-| `3213997` | docs(checklist) | docs/CHECKLIST-DEVICE.md（+2） | 顶部回填状态：2026-08-28 微信真机复验通过（零负面反馈），清单转为历史验收记录 + 改版复验底稿 |
-
-验收核对：`git status --porcelain` 干净（与初始快照一致，仅上述已提交文档改动，无任何新增脏文件）；4 个 commit 均在本地，**未 push**；改动总量 +12/−7 行，只动 5 个 md，未触碰代码 / 配置 / `data/` / 锁文件。
-
-## 建议人工复核
-
-1. **DEPLOY.md §8 两项未勾 checkbox 的状态同步**（最值得看）：`[ ] 微信内真机走完整一笔（含扫码付款 → 私信 → 核对全流程）` 与 `[ ] PRD 22 条 AC 生产逐条勾检`。已核实的「2026-08-28 真机复验通过」未覆盖到「完整一笔含付款私信」的字面验收标准，E2E 26 项也不等于逐条 AC 勾检，故按 DEPLOY 保守红线未代勾。建议所有者确认 8-28 复验的实际覆盖面后自行勾选或在行内注明替代证据。
-2. **生产库 Agent D 走查测试数据（7 菜 / 8 单 / 1 顾客档 / 12 令牌 / 4 地址）去留**：health-audit 已裁定归所有者与 Agent D 定夺，README 本次未展开此粒度；若长期留存建议在下次巡检时处置。
-3. **health-audit 两条保持建议**（备份异地容灾、深度页面走查）为结构性待办，超出文档审计范围，仅在此提示并未遗忘。
-
-## 自评
-
-**达标**。三项验收标准全部满足：① 报告整文件写入指定路径，含五段结构；② `git log --oneline -10` 前 4 位即为本轮 4 个 docs 提交，判定表对全量 13 篇逐篇给出依据（含「留」的论证）；③ `git status` 与初始快照（干净）一致，除已提交文档外零新增改动。红线全守：只动 5 个 md、未 push、DEPLOY 仅更正 2 处内部自相矛盾的确凿失真、未做任何功能开发或依赖操作。
+- **方法**:先 git log + 目录 + manifest + 关键代码摸实况,再逐文档摘可验证陈述逐条比对;每处修正都有代码/提交/实跑三类硬证据之一,无凭记忆改写。
+- **抽查可复现性**:验收标准要求抽 5 条可复现——① `pnpm test` 输出 79;② `grep -n "10" src/lib/order-limits.ts` 见天级 10;③ `ls src/app/admin/analytics/login/page.tsx` 存在;④ `grep "AC 22" agent-hive/runs/reports/XFZ2-report.md` 命中;⑤ DEPLOY §8.4 commit 号 `git log --oneline | grep 1a0be68` 命中。
+- **已知边界**:生产服务器侧实态(证书剩余有效期、锚点 `current.old-202610031637` 是否已删、监控 cron 实况)本地不可核实,文档相应记录与提交史一致故保留,未标注也不应标注为「过期」。
+- **未动项**:PRD §12 迭代规划与实际 P1 交付内容有出入(如「库存自动扣减」未做),属计划 vs 实际的规划性记录且状态行已指向 stages,按最小改动原则不改;`rate-limit.test.ts:7` 代码注释「20/天」与实现不符,但红线禁改代码,留给代码侧任务。
+- **产出**:commit 228f3e9(docs(freshness),3 文件 9+/4-);本报告覆盖写入 XFZ-report.md。
