@@ -294,23 +294,21 @@ function updateUsageFooter(t) {
   document.getElementById('d-bytes').textContent = bits.join(' · ');
 }
 
-// ── Wave 切换条：活跃在前，完结置灰，点击跳转 ──
+// ── Wave 切换下拉：活跃在前，完结在后，切换即跳 ──
 async function loadWaves() {
   try {
     const r = await fetch('/api/waves');
     const d = await r.json();
-    const wrap = document.getElementById('wavewrap');
-    wrap.innerHTML = '<span class="wlbl">WAVES</span>' + (d.waves || []).map(w => {
+    const sel = document.getElementById('wsel');
+    sel.innerHTML = (d.waves || []).map(w => {
       const running = (w.counts.running || 0) + (w.counts.queued || 0) + (w.counts.pending || 0);
       const accepted = (w.counts.accepted || 0) + (w.counts.done || 0);
-      const cur = w.wave === WAVE;
-      const cls = 'wchip' + (cur ? ' cur' : '') + (w.active ? ' act' : ' idle');
-      const dot = '<span class="wdot ' + (w.active ? 'on' : 'off') + '"></span>';
-      const stat = w.active ? (running ? running + ' 在跑' : '待派发') : '✓ ' + accepted + '/' + w.total;
-      return '<button class="' + cls + '" data-w="' + w.wave + '" title="' + esc(w.title || w.wave) + '">'
-        + dot + w.wave.replace(/^wave/i, 'Wave ') + '<span class="wstat">' + stat + '</span></button>';
+      const mark = w.active ? '●' : '✓';
+      const stat = w.active ? running + ' 在跑' : accepted + '/' + w.total;
+      return '<option value="' + w.wave + '"' + (w.wave === WAVE ? ' selected' : '') + '>'
+        + mark + ' ' + w.wave.replace(/^wave/i, 'Wave ') + ' · ' + stat + '</option>';
     }).join('');
-    wrap.querySelectorAll('.wchip').forEach(b => b.onclick = () => { location.href = '/?wave=' + b.dataset.w; });
+    sel.onchange = e => { location.href = '/?wave=' + e.target.value; };
   } catch (e) { /* 忽略 */ }
 }
 loadWaves();

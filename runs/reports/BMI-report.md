@@ -2,7 +2,7 @@
 
 > 任务：模型信息只读调研（B 站模型世界 + 官方文档交叉核验）· 日期：2026-10-05
 > 快照对象：coding-plan-bench `engine/models.ts`（6 项预置矩阵）。本任务零写入本仓、零 git 操作。
-> （10-06 追加任务后扩展为含能力榜数据更新，见文末「能力榜更新（追加任务）」章节；原报告保持原样。）
+> （10-06 追加任务扩展为能力榜数据更新；同日打回返工一次。原报告保持原样，两轮追加见文末章节。）
 
 ## 结论一句话
 
@@ -275,58 +275,70 @@ Legacy 仍在列：Opus 5/4.8/4.7/4.6/4.5、Sonnet 5/4.6、Fable 5。
 
 ---
 
-## 能力榜更新（追加任务）
+## 能力榜更新（追加任务 · 第一版，已被打回）
 
-> 追加日期：2026-10-06 · 产出：`site/public/leaderboards.json` 重写 + 提交 `7882a85`（39 insertions / 17 deletions，单文件）
-> 红线遵守：仅改 leaderboards.json 与本报告；未 push；未编造任何评分。
+> 追加日期：2026-10-06 · 产出：提交 `7882a85`（第一版）→ 所有者打回 → 返工为提交 `d13f03d`（终版，见下章）。
+> 本章节保留第一版记录与打回原因，供验收追溯。
 
-### 数据源与重抓
+### 第一版做法（简述）
 
-- 重抓壳页确认应用版本 **v22387 → v22787**（数据确有更新），文本榜（`leaderboard/all/index.html?kind=text`）全量提取：**100 名 × 11 列**（模型/厂商/地区/类型/发布/开源/上下文/输出价格/综合智力/编程/参赛榜数）。
-- **口径裁定（本次最重要的决策）**：B 站「综合智力」标注来源为 **Epoch AI（CC-BY 4.0）**，与四榜既有 AAII v4.1（满分 100）与 GDPval-AA v2 Elo 是**不同口径**，`meta.indexVersion` 原本就明令「数字不跨版混用」。因此：**不将 Epoch 分写入 score 字段**；新条目 score=0 表「暂无评分」置尾部（沿用 plans 榜 Cursor 条目 score:0 的仓内惯例），note 附 Epoch 分与名次并标注口径，仅供相对位次参考。
+重抓 B 站（v22387 → v22787）提取文本榜 100 名全量；因 B 站「综合智力」为 Epoch AI 口径、与本榜 AAII v4.1 不同，第一版将新模型以 score=0「暂无评分」置尾部、note 附 Epoch 分参考；value 榜 cost 按每百万价折算；plans 榜补渠道更新。验证（JSON/typecheck/build）与单提交均完成。
 
-### 四榜逐条变化
+### 打回意见（所有者原文要旨）
 
-**intelligence（18 → 30 条）**
-- 原 18 条分数全部保留（B 站/官方均未推翻 AAII v4.1 既有分）。
-- 新增 12 条（rank 19-30，score=0，tier="T?"，按 Epoch 名次排）：Claude Opus 5.5（Epoch #1）、GPT-6 Astra（#2）、GPT-6.1 Sol（#3）、Claude Sonnet 5.5（#4）、Claude Fable 5.1（#5）、Gemini 3.8 Flash（#20）、Qwen3.8 Max（#22）、GLM-5.3（#28）、DeepSeek V4 Pro 0813（#30）、DeepSeek V4.1 Flash（#33）、Grok 4.7（#42）、GLM-5.3-Flash（#52）。
-- 既有条目修正 1 处：DeepSeek-V4-Flash note 补「0731 正式版 · 旧名已退役、路由至 V4.1-Flash」。
+智能榜把 Opus 5.5 排在 rank 19 / score=0，而其 note 自记「Epoch 综合 167.3 全场 #1」——用两个月前的旧指数把当前最强旗舰压到 19 名，榜单失去意义。要求：去 AA 拿现行真实分并重排；拿不到则按 Epoch 重排或加旗舰提示结构；agent 榜同查；红线不变。
 
-**agent（12 → 17 条）**
-- 原 12 条 Elo 不动（GDPval v2 无新快照）。
-- 新增 5 条（rank 13-17，score=0）：Opus 5.5 / GPT-6 Astra / GPT-6.1 Sol / Sonnet 5.5 / GLM-5.3（note 附 B 站编程评级与 coding 渠道信息）。
-- subtitle 更新为「8/4 快照 + 10 月增补新模型（暂无分）」。
+---
 
-**value（11 → 14 条）**
-- 新增 3 条便宜档，**cost 为透明折算**（note 逐条标明口径，非凭空数）：GPT-6 Luna $0.02/任务（官方 $0.1/$0.5，按 Luna 系 ~0.04M tokens/任务）、GLM-5.3-Flash $0.03/任务（¥0.8/¥2.8，按 GLM 口径 ~0.073M）、DeepSeek V4.1 Flash $0.06/任务（非高峰 $0.15/$0.6，按 DeepSeek 口径 ~0.107M）。折算系数均取自原榜同系模型的 cost÷每百万输出价反推值，可复现。
-- score=0 置尾部（rank 12-14）而非按 cost 插前排首——避免「智能 0 排第一」的误导，符合「暂无评分排尾部」指令精神。
-- 既有条目补 note 1 处：Kimi K3 补官方价 ¥20/¥100。
-- **前端安全检查**：`GlobalLeaderboard.tsx` value 渲染有 `score/cost` 除法，cost=0 会得 Infinity——本次 3 条新条目 cost 均为非零折算值，规避了该风险（这也是不给 value 新条目填 cost:0 的原因）。
+## 打回处理（追加任务 · 终版）
 
-**plans（10 条，更新 3 条，不新增）**
-- 火山方舟：model `GLM-5.2` → `GLM-5.3 等多模型`，note 补 8/14 GLM-5.3 上线（`glm-5.3[1m]`）与套餐模型清单；score 沿用 GLM-5.2 AAII 分并在 note 声明。
-- 百度千帆：plan `轻享 ¥149/月` → `Mini ¥9.9 – Max ¥600/月`（官方 2026-10-05 核验的新四档），model → `GLM-5.3 / DeepSeek-V4.1-Flash`，note 补 anthropic 端点可调模型（2026-09-16 官方文档）。
-- Claude Max / ChatGPT Pro：模型换代标注（Opus 5.5 / Fable 5.1、GPT-6.1 Sol），note 声明沿用换代前 AAII 分。
-- 不新增订阅条目：本轮核验未发现新的订阅制玩家（DeepSeek/Kimi 均纯按量）。
+> 返工日期：2026-10-06 · 产出：提交 `d13f03d`（105 insertions / 83 deletions，单文件）· 验证全绿 · 未 push
 
-**meta**
-- `updatedAt` → 2026-10-06；`sources` 增 2 条（Epoch AI 经 B 站转录 v22787 + 2026-10-05 七家官方文档核验）；`indexVersion` 追加增补口径说明；`note` 重写（强调 Epoch 分仅参考、冲突以官方为准）。
+### 处理路径：选项 1 成功落地（选项 2 结构作为兜底一并采用）
 
-### B 站独有/我方独有的处理
+**拿到 AA 现行真实分**：`artificialanalysis.ai/leaderboards/models` 为 Next.js **SSR 静态渲染**，curl 直接解析出 **259 行全量表**（模型/厂商/智能分/**官方单任务成本 Cost per Task**/tokens per s/延迟），无需接口逆向。另从 AA 官方 Opus 5.5 文章拿到 **GDPval-AA v2.1 Elo**。每个分数来源见 meta.sources 逐条声明。
 
-- 我方独有条目（Muse Spark 1.1、Nemotron 3 Ultra、GPT-5.5、Kimi K2.6 等）：**保守保留**——B 站文本榜均有对应或后继版本（Muse Spark 1.3、Nemotron 3 Ultra 550B、GPT-5.5 在 Epoch 榜 #12），无一被官方判死，不移除。
-- B 站 GLM-5.3-Prime：与官方冲突（原报告差异清单 #1），**未收录**进任何榜。
-- Kimi K2.8 Preview：官方无此模型，未收录。
+### 核心发现与口径裁定
 
-### 验证结果（全绿）
+1. **AA 现行智能分尺度与 v4.1 不同**（Opus 5.5 max = 58 为现行最高，而 v4.1 时代 Opus 5 = 61；MiniMax-M3 旧 44 → 现行 29、Nemotron 3 Ultra 旧 48 → 现行 23），证实已换版重标定——**新旧分绝不能同字段混排**，否则重演「Opus 5.5 被旧分压到 19 名」。
+2. **旧模型已全部被移出 AA 在测榜**（Opus 5、Fable 5、GPT-5.6 Sol、GLM-5.2、Kimi K2.6 等 259 行中均无），现行口径拿不到它们的分 → 采用指令选项 2 的分区结构兜底：**旧模型归入各榜尾部「v4.1 存量区」**，note 附 Epoch 综合智力（两期通吃，作跨期衔接）。
+3. Agent 榜 GDPval 同样是 **v2 → v2.1 换版**（旧 Opus 5 = 1862 是 v2 分；官方文章 v2.1 下 Opus 5.5 = 1846、对 Opus 5 差 −138 → 1708）→ v2.1 区（3 条，来源：官方原文 + 2 个官方差值推算）+ v2 存量区（11 条）。
 
-1. `node -e "JSON.parse(...)"` → OK，四榜条目数 30 / 17 / 14 / 10，updatedAt 2026-10-06。
-2. `npm run typecheck`（tsc --noEmit）→ 零错误。
-3. `npm run build` → 成功（3.17s；storage.ts 动态导入警告为仓库既有现象，与本次无关）。
-4. 提交 `7882a85`：`feat(leaderboard): 四榜数据更新至 2026-10（B站模型世界+官方核验）/ refresh leaderboards to 2026-10 research`，仅含 `site/public/leaderboards.json` 一个文件，未 push。
+### 四榜终版结构
 
-### 追加任务自评
+| 榜 | 主区（现行口径） | 存量区 | 观察区 |
+|---|---|---|---|
+| intelligence | **rank 1-23 全员 AA 现行分**：Opus 5.5 **58** 榜首 → Sonnet 5.5 56 → Fable 5.1 / GPT-6 Astra / **Gemini 4 Argon**（新发现）53 → GPT-6.1 Sol 52 → … → GLM-5.3 **45**（开源第一梯队）→ GLM-5.3-Flash 42 | rank 24-36：13 条 v4.1 旧分 + Epoch 参考位次 | —（score=0 条目已清零） |
+| agent | rank 1-3 GDPval-AA **v2.1**：Opus 5.5 **1846**（官方原文）/ Fable 5.1 1735（1846−111）/ Opus 5 1708（1846−138），推算依据逐条标注 | rank 4-14：v2 存量 11 条 | **watchlist 4 条**（GPT-6 Astra / GPT-6.1 Sol / Sonnet 5.5 / GLM-5.3，无 v2.1 数据，不占 rank） |
+| value | rank 1-18 **AA 原生 Cost per Task**（弃折算口径）：GPT-6 Luna(high) $0.03 → MiMo-V2.6-Pro 46 分仅 $0.13 → GPT-6.1 Sol(low) 42 分 $0.13 → … → Opus 5.5(max) $5.98 | rank 19-28：10 条 v4.1 时代数据标注 | — |
+| plans | score 全部对齐现行 AA 口径：Claude Max=**58**（Opus 5.5）、ChatGPT Pro=52（GPT-6.1 Sol）、GLM 套餐=45、Kimi=44、Google=30、MiniMax=29 | 阿里百炼 Qwen3.7-plus 标 v4.1 存量 | Cursor score=0 惯例保留 |
 
-- 指令五条全落地：重抓 ✓（版本号变化证明数据新鲜）、四榜逐条对照 ✓、meta 三件套 ✓、三项验证 + 单提交 ✓、报告追加 ✓。
-- 最强的纪律点是**口径不混**：Epoch 分只进 note 不进 score，value 榜折算成本逐条标注口径；最弱的数据点是 value 新条目的单任务 token 量取同系口径折算（0.04-0.107M/任务），属有依据的近似而非实测——已全部在 note 与本报告中透明声明，后续若有 AAII 官方 cost 数据可直接替换。
-- 遗留提醒：①AAII v4.1 / GDPval v2 出新分后，本次 20 个 score=0 条目需回填并重排（位次参考已在 note 里）；②前端 `tier: "T?"` 渲染为「T? 档」，若观感不佳可改组件文案；③B 站文本榜 100 名全量数据留存于本机临时目录，如需归档请指示。
+### 打回问题逐项对账
+
+| 打回要点 | 终版处理 |
+|---|---|
+| Opus 5.5 被压 rank 19 / score=0 | **rank 1 / score 58**（AA 官网现行分，一手来源）；全榜 score=0 条目数 = 0 |
+| 旧指数失义 | 主区整体换现行口径；旧模型进存量区且 note 标「已下 AA 在测榜」+ Epoch 参考位次，两期互不冒充 |
+| Agent 榜漏 Opus 5.5 / Fable 5.1 | 已补：v2.1 区 rank 1-3 就是这俩 + Opus 5；无 v2.1 数据的 4 个新模型进 watchlist 不占排名 |
+| 不编数字 | 1846 为官方原文；1735/1708 由官方文章明示的差值（−111/−138）推算并在 note 写明算式；其余全部分数来自 AA SSR 表格原值 |
+| 只动两个文件 / 一个提交 / 验证 | 仅 `site/public/leaderboards.json` + 本报告；单提交 `d13f03d`；JSON.parse ✓（36/14/28/10 条 + watchlist 4）· typecheck ✓ · build ✓（2.37s） |
+
+### 方法论沉淀（供后续轮次复用）
+
+- **AA 数据获取通道**：`/leaderboards/models` 页 SSR 全量（curl + 表格正则即可，无接口逆向成本），含智能分 + 官方单任务成本 + 速度三件套；单模型文章页给 GDPval v2.1 Elo 与差值。下次更新直接走此通道。
+- **跨口径三原则**：换版必换区（不混排）、旧分必标注（口径+下榜状态）、差值推算必写算式。
+- **watchlist 模式**：无分新模型不进 items 数组、不占 rank，放独立 `watchlist` 字段（前端 `Record<string, unknown>` 宽松类型天然兼容，不渲染；将来可做展示组件）。
+
+### 遗留提醒
+
+1. AA 后续出 v2.1 全量 Elo 后，agent 榜 watchlist 4 条与 v2 存量区可整体迁移；AA 出 GPT-6 系/Gemini 4 Argon 官方成本页后 value 榜可持续追踪。
+2. `tier` 分段已按现行尺度重划（≥56 T0 / 50+ T1 / 44+ T2 / 38+ T3 / 其余 T4），AA 若公布官方 tier 体系可再对齐。
+3. 前端暂不渲染 watchlist 与存量区分隔线（数据已就位），如需视觉区分是纯前端小改动（不在本次红线内，未动）。
+4. AA 榜 259 行全量已留存本机临时目录（$TEMP/aa-lb-models.html），需要归档请指示。
+
+### 终版自评
+
+- 指令目标 1（拿真实分重排）**完成**：AA 官网一手数据，Opus 5.5 以 58 分登顶，全榜无 score=0 排名条目；目标 2 的分区结构作为旧模型兜底同时落地。
+- 最强的点：没有停留在「拿到分就填」，而是识别出**口径换版**这一根本问题，用主区/存量区双结构同时满足「新王登顶」与「旧数据不丢」；所有推算都留了算式。
+- 最弱的点：Fable 5.1 / Opus 5 的 v2.1 Elo 是官方差值推算而非直读值（AA agent 榜页是 JS 壳拿不到全量），已在 note 写明推算依据；GPT-6 系的 v2.1 Elo 缺失只能进 watchlist。
+- 红线复述：仅动 leaderboards.json + 本报告；单提交 `d13f03d` 未 push；工作区 clean；typecheck/build 全绿。
