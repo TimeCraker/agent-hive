@@ -4,12 +4,21 @@
   "tasks": [
     {
       "code": "FIXPSF",
-      "name": "修复主站部署脚本引号 bug（09-30 起每次部署必挂）",
-      "goal": "根因定位+最小修复 deploy-portfolio-safe.sh 远程段引号；bash -n 全绿；heredoc 透传文本与本地模拟断言步展开均验证正确；最小 diff 提交",
+      "name": "独立验收主站部署脚本引号修复 b6101c1（深夜会话产物未复核）",
+      "goal": "透传机制查明 + L175 远端形态提取验证 + bash -n + 最小等价复现三项留证；结论二选一：验收通过零改动，或最小补修+提交",
       "model": "glm-5.3[1m]",
       "cwd": "my-portfolio",
       "promptFile": "prompts/FIXPSF.md",
-      "status": "pending"
+      "status": "accepted",
+      "dispatchedAt": "2026-10-06T03:57:49.995Z",
+      "pid": 3756,
+      "settledAt": "2026-10-06T04:03:26.945Z",
+      "sessionId": "248b7d4f-bb53-460f-b143-c9b6b6ae4712",
+      "turns": 19,
+      "costUsd": 1.72047,
+      "outTok": 19640,
+      "acceptedAt": "2026-10-06T04:07:36.065Z",
+      "acceptNote": "主控独立复核5项全过:bash -n 经 Git Bash 全路径复跑 PASS;透传形态实证为 $SSH \"...\" 双引号参数(L129)而非heredoc,任务背景疑点被实证纠偏;L175 修复在位;git status clean 零改动零commit;HEAD=b6101c1。报告提取验证(pre/post恰好1行diff对应commit)与正负例等价复现(16.3.7==16.3.7 pass / ReferenceError+exit1)证据链闭合。"
     },
     {
       "code": "HSTSUP",
@@ -18,7 +27,16 @@
       "model": "glm-5.3[1m]",
       "cwd": "asterforge-deploy",
       "promptFile": "prompts/HSTSUP.md",
-      "status": "pending"
+      "status": "accepted",
+      "dispatchedAt": "2026-10-06T03:57:50.044Z",
+      "pid": 28436,
+      "settledAt": "2026-10-06T04:06:28.907Z",
+      "sessionId": "0643acbc-f968-435c-9fff-9f39e0eda36b",
+      "turns": 19,
+      "costUsd": 2.4260479999999998,
+      "outTok": 32125,
+      "acceptedAt": "2026-10-06T04:07:59.245Z",
+      "acceptNote": "主控本机独立复测:两站 Strict-Transport-Security=max-age=31536000 亲测确认;efd2987 在位且 git status 仅剩 docs/audits/ untracked(并行任务产物)。任务书604800口径被服务器实证纠偏(lekao原无HSTS/xfz原86400),按任务意图达成且偏差如实记录;lekao add_header继承切断的location级补全符合nginx语义并有NGXHRD先例;404场景always头+80口301保持为超范围加分验证。备份留档于/etc/nginx/根下避开sites-enabled通配include,"
     },
     {
       "code": "AUDGM",
@@ -27,7 +45,16 @@
       "model": "glm-5.3[1m]",
       "cwd": "games",
       "promptFile": "prompts/AUDGM.md",
-      "status": "pending"
+      "status": "accepted",
+      "dispatchedAt": "2026-10-06T03:57:50.071Z",
+      "pid": 10224,
+      "settledAt": "2026-10-06T04:07:48.953Z",
+      "sessionId": "65234a70-bc9b-4cf5-984e-3f8fdef09494",
+      "turns": 36,
+      "costUsd": 2.1829219999999996,
+      "outTok": 25016,
+      "acceptedAt": "2026-10-06T04:08:25.052Z",
+      "acceptNote": "主控独立实证三项P1断言全中:asternova-server 37.8MB被git追踪实测确认;modern_japan_neighborhood.glb三副本(art/v2/render-lab)且贴图家族双目录重复规模更甚报告所述;两份game.proto MD5实测F6B8B58 vs 9CAA304分叉确认。一致性七子项目判定、两次grep误报自纠(SceneTree/enet与src/api死代码误杀)体现取证严谨。git历史改写类建议(LFS/去重)正确留给用户拍板未擅动。"
     },
     {
       "code": "AUDVBS",
@@ -36,7 +63,16 @@
       "model": "glm-5.3[1m]",
       "cwd": "vibe-studio",
       "promptFile": "prompts/AUDVBS.md",
-      "status": "pending"
+      "status": "accepted",
+      "dispatchedAt": "2026-10-06T03:57:50.093Z",
+      "pid": 11716,
+      "settledAt": "2026-10-06T04:04:31.182Z",
+      "sessionId": "f6dd8ebd-28a4-4370-9d2f-da8d7c7d32b1",
+      "turns": 29,
+      "costUsd": 2.488616,
+      "outTok": 22206,
+      "acceptedAt": "2026-10-06T04:07:36.108Z",
+      "acceptNote": "主控独立实证P1三点全中:SKILL.md:109原文引用 src/cover-index.ts Cover;remotion-app/src 无 cover-index.ts(仅cover3-index.ts);Root.tsx 8个composition注册无Cover;cover3-index.ts仅注册CoverV3。7/7 skill三维度+8条衔接链路+30脚本语法检查,分级清单与backlog可执行性高,P0判定为无与实况相符。"
     },
     {
       "code": "AUDVSW",
@@ -45,7 +81,16 @@
       "model": "glm-5.3[1m]",
       "cwd": "video-script-workflow",
       "promptFile": "prompts/AUDVSW.md",
-      "status": "pending"
+      "status": "accepted",
+      "dispatchedAt": "2026-10-06T04:03:26.948Z",
+      "pid": 14032,
+      "settledAt": "2026-10-06T04:08:18.089Z",
+      "sessionId": "eada3f93-bcdc-4690-8153-40aa4deb1b10",
+      "turns": 26,
+      "costUsd": 1.7806980000000001,
+      "outTok": 17650,
+      "acceptedAt": "2026-10-06T04:08:47.643Z",
+      "acceptNote": "主控独立实证P2-1逐行命中:ui.html:7 meta/53 书架页眉/61 封面标题 Aster 残留与 app.js:2387 EPUB/2443 批注导出文件名 Aster 前缀全中;git status 实测 clean 证红线遵守。155vs200 DOM id 交叉核对+动态注入溯源、产物 mtime 秒级新鲜度比对、构建占位符全查等方法扎实;未运行 build.mjs 的零写入取舍正确。"
     },
     {
       "code": "AUDCFG",
@@ -54,7 +99,16 @@
       "model": "glm-5.3[1m]",
       "cwd": "config",
       "promptFile": "prompts/AUDCFG.md",
-      "status": "pending"
+      "status": "accepted",
+      "dispatchedAt": "2026-10-06T04:04:31.184Z",
+      "pid": 35356,
+      "settledAt": "2026-10-06T04:09:58.043Z",
+      "sessionId": "dafbe5a7-1ca3-497e-a141-6621d7a1e7c6",
+      "turns": 29,
+      "costUsd": 1.7784659999999999,
+      "outTok": 19996,
+      "acceptedAt": "2026-10-06T04:12:29.683Z",
+      "acceptNote": "主控零泄漏独立验证P0全中:cae6ca5:auth.json含tp-前缀key=True、6315777含refresh_token=True、工作树auth.json未被追踪(tracked=False,物理在仓内与P1-2一致)、origin/main包含涉事commit。19commit为快照命中口径与git log改动数6自洽。报告零密钥明文自检通过(仅前缀+长度形态)。P0处置建议(吊销+filter-repo重写+登出所有设备)已转达用户亲自执行。"
     },
     {
       "code": "AUDLKS",
@@ -63,7 +117,16 @@
       "model": "glm-5.3[1m]",
       "cwd": "lekao",
       "promptFile": "prompts/AUDLKS.md",
-      "status": "pending"
+      "status": "accepted",
+      "dispatchedAt": "2026-10-06T04:06:28.910Z",
+      "pid": 14640,
+      "settledAt": "2026-10-06T04:12:45.606Z",
+      "sessionId": "21937574-def5-4628-8a8a-9961bba93c9c",
+      "turns": 45,
+      "costUsd": 2.1239820000000003,
+      "outTok": 19472,
+      "acceptedAt": "2026-10-06T04:13:22.924Z",
+      "acceptNote": "主控独立实证四项:tcoin/adjust L44-46内存计算后写绝对值(P2-4反模式确认);release.keystore被git追踪(P2-2确认);checkin @@unique([userId,dayKey]) schema.prisma:253在位;admin users [id] route.ts:11-12 ADMIN守卫在位且L20 role白名单与P2-3无审计断言互证。36/36鉴权矩阵+签到三重防护(事务+P2002兜底+原子increment)证据链完整,审计依赖镜像失败换官方registry的重试纪律符合仓规。"
     },
     {
       "code": "AUDAFD",
@@ -72,7 +135,16 @@
       "model": "glm-5.3[1m]",
       "cwd": "asterforge-deploy",
       "promptFile": "prompts/AUDAFD.md",
-      "status": "pending"
+      "status": "accepted",
+      "dispatchedAt": "2026-10-06T04:07:49.176Z",
+      "pid": 8272,
+      "settledAt": "2026-10-06T04:13:40.267Z",
+      "sessionId": "186fa106-2708-44fb-8f5b-b0a0866c3e4f",
+      "turns": 31,
+      "costUsd": 2.160108,
+      "outTok": 24890,
+      "acceptedAt": "2026-10-06T04:16:42.376Z",
+      "acceptNote": "主控独立实证三条核心偏差:D07 timer文件实测OnCalendar=*:*:00/5(每5秒)vs描述every 5 minutes;D02 deploy-tencent.ps1实测引用ResumeAIX/main land/deploy-artifacts死路径;D01 主控SSH亲测df -h /=81%(31G/40G)越过手册自设80%治理线。服务表22端口/16unit/9证书/timers四类全覆盖,死脚本与现役脚本双向盘点(D02-D05)正中任务种子线索。D01+D07(每5秒12倍频率加剧磁盘膨胀)为最高行动价值遗留,建议下一波处置。"
     },
     {
       "code": "AUDDEBT",
@@ -81,7 +153,16 @@
       "model": "glm-5.3[1m]",
       "cwd": ".",
       "promptFile": "prompts/AUDDEBT.md",
-      "status": "pending"
+      "status": "accepted",
+      "dispatchedAt": "2026-10-06T04:08:18.092Z",
+      "pid": 16060,
+      "settledAt": "2026-10-06T04:12:08.339Z",
+      "sessionId": "cc93f90e-04cb-4c34-955e-2a8bf09923a1",
+      "turns": 16,
+      "costUsd": 1.319328,
+      "outTok": 16211,
+      "acceptedAt": "2026-10-06T04:12:53.099Z",
+      "acceptNote": "主控独立实证:P1-1 vault-auth.ts:29-41 getSecret() 静默退化逻辑逐行核实(注释自述弱密钥+console.error不fail-fast+return链);xiaofanzhuo XXXX误报定性核实(order-no.ts:2-3为订单号规格占位符)。29命中全定性无悬置,五仓四项检查留证,clash包49.6MB凭证疑点主动排除(指南明示订阅不入包)的排查质量高。"
     }
   ]
 }

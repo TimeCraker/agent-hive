@@ -1,74 +1,61 @@
-# VBS 结果报告
+# VBS 报告 — vibe-studio 文档保鲜度审计（Wave 8）
 
-## 结论一句话
+- 日期：2026-10-06
+- 审计对象：`C:/Users/TimeCraker/Desktop/my_workspace/vibe-studio`（master @ `6a556c6`，工作区干净，无未提交改动）
+- 审计范围：README.md、仓库 CLAUDE.md、docs/ 全部 7 份说明文档、workflows/explainer-video.md、7 个 skill 的 SKILL.md、assets/ 全部 5 份说明文档、projects/ products/ scripts/ 三个分区 README、products/ 子文档抽查 4 份（hsr / pelican-ride / lekao-intro / stations）
+- 核对基准：git log 30 条、目录结构全量清点、模板代码与脚本实况、仓库自研检查器 `python scripts/check-docs.py`（结果 0 fail / 0 warn / 3 archived skipped）
 
-44 篇 Markdown 逐一通读：仓库刚于 2026-10-05 做过大扫除，无完全过期可删、无冗余可合并的文档；发现并更正 4 处过期信息（README 交付物表缺第四格、hsr 发布状态行矛盾、lekao 验收计数漂移、台账简历去向停在中间态），分 3 个 docs commit 提交，`check-docs.py` 全绿。
+## ① 过期点清单
 
-## 文档清单判定表（全量 44 篇，git ls-files 双口径对齐）
+**0 条。** 全部可验证陈述与仓库实况一致，本次零修正、零 commit。
 
-| # | 路径 | 主题 | 判定 | 处置 |
-|---|---|---|---|---|
-| 1 | `README.md` | 仓库门户 | 过期信息（交付物两表停在三格时代） | **改**：补第四格「程序化动画成片」，与 owner `product-map` 对齐 |
-| 2 | `CLAUDE.md` | agent 行为规则 | 健康（「不复述」设计，与 README 重叠度低，单一事实源表清晰） | 留 |
-| 3 | `workflows/explainer-video.md` | 介绍成片总装图 A/B/C 三线 | 健康（2026-10-02 更新过禁令更正） | 留 |
-| 4 | `docs/product-map.md` | 产品图（交付物入口 owner） | 健康（2026-10-02 增补第四格） | 留 |
-| 5 | `docs/2026-08-30-motion-grammar.md` | 动效语法质量底线（活跃） | 健康（V/M/F 全表 + 八问口诀，被多处引用） | 留 |
-| 6 | `docs/2026-08-28-ppt-copy-narrative-rules.md` | ppt 文案规则重构 | 健康档案（已存档标记规范，被 SKILL 吸收） | 留 |
-| 7 | `docs/2026-08-31-deck-video-v4-motion-spec.md` | v4 转场进场 spec | 健康档案（已存档，被 mg-arsenal-spec 吸收） | 留 |
-| 8 | `docs/2026-09-01-mg-arsenal-spec.md` | MG 武器库 spec | 健康档案（已存档，完工落地） | 留 |
-| 9 | `docs/workorder-log.md` | 工单台账 | 过期信息（简历去向句指向已删除的 `projects/resume-generator/`） | **改**：补记同日清场终态 + git 证据链 |
-| 10 | `assets/README.md` | 资产库分区与回流铁律 | 健康 | 留 |
-| 11 | `assets/patterns.md` | 成页方案库 PAT-01~13 | 健康（PAT 字段齐全，复用记录在案） | 留 |
-| 12 | `assets/component-catalog.md` | 组件登记簿（scene-kit 23 + fx + vendor + entrance-kit） | 健康（标题计数与表体一致，2026-10-02 已修过计数漂移） | 留 |
-| 13 | `assets/lottie/README.md` | Lottie 资产登记 | 健康 | 留 |
-| 14 | `scripts/README.md` | 系统级工具索引 | 健康（2026-10-05 治理后新写，去向归档准确） | 留 |
-| 15 | `projects/README.md` | 施工流水线规范（ephemeral） | 健康（现状「无活跃工程」与目录实况一致） | 留 |
-| 16 | `products/README.md` | 成品档案库索引 | 健康（10 目录与磁盘一致，`lekao-deck/` 仅二进制合理存在） | 留 |
-| 17 | `products/hsr-currency-war/PUBLISH.md` | hsr 发稿物料 | 过期信息（状态行「待发布」与库索引「已发布归档」矛盾） | **改**：状态行更正为已发布归档，注明双端口径 |
-| 18 | `products/pelican-test/PUBLISH.md` | 鹈鹕测试发稿物料 | 健康档案（诚实性口径完整） | 留 |
-| 19 | `products/pelican-ride/PUBLISH.md` | 鹈鹕骑行发稿物料 | 健康档案（三端结构，最新） | 留 |
-| 20 | `products/lekao-intro/README.md` | lekao 交付档案 | 过期信息（「×5」vs 实际 4 份验收） | **改**：×5 → ×4 |
-| 21 | `products/lekao-intro/lekao-intro-acceptance.md` | v1 验收报告 | 健康档案（验收证据不可变） | 留 |
-| 22 | `products/lekao-intro/deck-video-v2-acceptance.md` | v2 验收报告 | 健康档案 | 留 |
-| 23 | `products/lekao-intro/deck-video-v3-acceptance.md` | v3 验收报告 | 健康档案 | 留 |
-| 24 | `products/lekao-intro/deck-video-armed-p7-acceptance.md` | 武装版 P7 验收 | 健康档案（被否版本的存证，台账有对应复盘节） | 留 |
-| 25 | `products/stations/README.md` | skill 站点验收索引 | 健康（5 份清单准确） | 留 |
-| 26 | `products/stations/video-motion-acceptance.md` | video-motion 首站验收 | 健康档案 | 留 |
-| 27 | `products/stations/deck-video-acceptance.md` | deck-video 站验收 | 健康档案 | 留 |
-| 28 | `products/stations/cover-still-acceptance.md` | 封面站验收 | 健康档案 | 留 |
-| 29 | `products/stations/auto-subtitle-acceptance.md` | auto-subtitle 站验收 | 健康档案 | 留 |
-| 30 | `products/stations/narration-acceptance.md` | narration 站验收 | 健康档案 | 留 |
-| 31 | `products/vibe-studio-deck/README.md` | 仓库自我介绍 PPT 交付报告 | 健康档案 | 留 |
-| 32 | `products/asterforge-landscape/README.md` | AsterForge 全景 PPT 交付报告 | 健康档案 | 留 |
-| 33 | `products/ddd-architecture/README.md` | DDD 44 页 deck 交付报告 | 健康档案（头部已注明二进制清理与复跑路径） | 留 |
-| 34 | `products/ddd-paper/README.md` | DDD 论文说明 | 健康档案 | 留 |
-| 35 | `products/ddd-paper/DDD-Practical-Architecture-Paper.md` | 论文正文 | 健康档案（交付物本体，非说明文档） | 留 |
-| 36 | `skills/ppt/SKILL.md` | ppt skill 说明 | 健康（含受众三问 / 两遍成稿等 2026-08-28 重构成果） | 留 |
-| 37 | `skills/humanizer/SKILL.md` | 去 AI 味 skill（v5.0.0） | 健康 | 留 |
-| 38 | `skills/video-motion/SKILL.md` | Remotion 引擎 skill | 健康（含 2026-10-02 CoverV3 回流记录） | 留 |
-| 39 | `skills/narration/SKILL.md` | 口播稿 skill | 健康 | 留 |
-| 40 | `skills/auto-subtitle/SKILL.md` | 转写 skill | 健康（venv 仓外口径已修正） | 留 |
-| 41 | `skills/publish/SKILL.md` | 三端投稿 skill | 健康（含 2026-10-03 三端实测与 Playwright 混合管线注记） | 留 |
-| 42 | `skills/web-capture/SKILL.md` | C 线采集 skill | 健康（2026-10-02 抽离后新写） | 留 |
-| 43 | `skills/video-motion/templates/remotion-app/public/README.md` | 模板素材目录说明 | 健康 | 留 |
-| 44 | `skills/video-motion/templates/remotion-app/src/vendor/README.md` | vendor 收录纪律 | 健康（收录/未收录清单与 intake 四纪律完整） | 留 |
+跳过 commit 原因：无文档需要修改（验收标准「修正有 git commit」不触发；工作区本身干净，不存在他人未提交改动问题）。
 
-## 已执行处置与提交
+## ② 核对无误条目（按验证方式分组）
 
-| commit | 文件 | 改动摘要 |
+### A. 机器验证（check-docs.py，仓库自研漂移检查器）
+
+| # | 陈述 | 证据 |
 |---|---|---|
-| `3309662` docs(readme) | `README.md`（+2 行） | 「先选交付物」与「产品」两表补第四格「程序化动画成片」（web-capture · C 线），与 owner `docs/product-map.md` 2026-10-02 定案的四格对齐 |
-| `60bc6e2` docs(products) | `products/hsr-currency-war/PUBLISH.md`、`products/lekao-intro/README.md`（各 ±1） | hsr 状态行「待发布」→「已发布归档」（并注明发稿当时为双端、三端标准确立于本片之后）；lekao 验收计数 ×5 → ×4 |
-| `aae6496` docs(workorder) | `docs/workorder-log.md`（±1） | 简历工程去向句补记终态：2026-10-05 先归位 `projects/resume-generator/`，同日随 ephemeral workspace 重构清场删除，附 git 证据链（1b1a91f / 140127c） |
+| A1 | README 技能表 ↔ `skills/` 目录一致 | check-docs 3.x 断言通过；人工复核 7/7（ppt / humanizer / video-motion / narration / auto-subtitle / publish / web-capture） |
+| A2 | 全部文档内引用路径有效 | check-docs 引用路径检查 0 fail |
+| A3 | component-catalog 标题数 = 表行数 = SKILL.md 声明数（24 组件） | check-docs 3.5 三方互锁断言通过 |
+| A4 | 模板 `@remotion/*` 精确同版 | check-docs 3.7 断言通过；package.json 实见 `"remotion": "4.0.533"` 无 `^` |
 
-验证：`python scripts/check-docs.py` → `0 fail, 0 warn, 3 archived skipped`（改动前后各跑一次均绿）；`git diff --check` 无空白问题；`git status --porcelain` 提交后归零，与初始快照一致，无越界改动。
+### B. 人工逐条核实（抽查 5 条可复现）
 
-## 建议人工复核
+| # | 文档陈述 | 实况证据 | 结果 |
+|---|---|---|---|
+| B1 | README「七个 skill」+ 使用节 7 个 junction 重建命令 | `skills/` 下恰 7 个子目录；PowerShell `Get-ChildItem .claude/skills` 实见 7 个 LinkType=Junction 且 Target 均指向 `skills/<同名>`；`.claude/skills/` 已 gitignore、`git ls-files .claude/` 为空 | 一致 |
+| B2 | video-motion SKILL「scene-kit 24 组件」 | 目录 23 个组件 tsx + `PhoneShell`（`DeviceFrame.tsx:31` 同文件双导出）= 24；catalog 表恰 24 行 | 一致 |
+| B3 | README「PPT：15 种页面范式、3 套主题」 | ppt SKILL 范式表恰 15 行；`primitives.py:38` THEMES 恰 3 键（warm/tech/forest）；slide_* 13 + growth_* 1 组 + 原生 chart 1 组 = 15 范式条目 | 一致 |
+| B4 | publish SKILL「pw/ 共 9 件」「playwright pin 1.63.0」 | `skills/publish/templates/pw/` 实数 9 文件（3 fill + 5 定点修复 + util）；templates/package.json `"playwright": "1.63.0"` | 一致 |
+| B5 | assets/README「patterns-frames p01-p11 + cover，jpg ~150KB/张」 | 目录实见 12 张 jpg（p01-p11 + cover），94–178KB | 一致 |
 
-1. **hsr-currency-war 的实际发布范围**：状态已按 `products/README.md` 口径更正为「已发布归档」，但 git 与台账中找不到三端发布的确凿记录（仅 2026-10-02 台账间接提到「B 站共享 profile 里的 hsr 时代旧草稿」，且 `pw/` 施工痕迹有 bili/dy 两端脚本）。若实际只发了 B 站 + 抖音，现表述已兼容；若需精确到端与日期，建议补一条台账补录（先例：三处「补录 2026-09-30」）。
-2. **workorder-log 缺 hsr-currency-war 工单节**：该项目的施工决策（pw 管线起源、Playwright 依赖现挂其下）只在其他工单节里间接出现。补录需考古 104ea44 起的提交链，超出本次文档审计边界，建议单开小工单。
-3. **`publish` SKILL 遗留声明**：「Playwright 依赖统一管理后收录为正式模板」仍是未闭环项（依赖挂 hsr 已清场的 projects 下，实际只剩 node_modules 本机残留），下次真实三端发布前值得先做收录或 vendoring 决策。
+### C. 分区与产物核对
 
-## 自评
+| # | 文档陈述 | 实况证据 | 结果 |
+|---|---|---|---|
+| C1 | projects/README「当前无活跃施工工程，零残留」 | `projects/` 下仅 README.md 一个文件 | 一致 |
+| C2 | products/README 表列 10 目录 | 实见恰 10（hsr-currency-war / pelican-ride / pelican-test / lekao-intro / lekao-deck / vibe-studio-deck / asterforge-landscape / ddd-architecture / ddd-paper / stations），状态口径与各 PUBLISH/README 抽查吻合 | 一致 |
+| C3 | scripts/README 索引 5 脚本 + 项目专属脚本去向归档 | 实见恰 5（check-docs / make_music / audio_report / contact_sheet / probe_frame），归档段所列 products 路径与 products 实况一致 | 一致 |
+| C4 | CLAUDE.md「产物不进 git（.gitignore 已覆盖）」 | .gitignore 实覆盖 `*.mp4` `*.pptx` `*.pdf` `node_modules/` `out/` `products/**`(白名单 .md) `projects/*/remotion-app/public/` 等，与 SKILL/README 各处引用口径一致 | 一致 |
+| C5 | lottie/README 登记表 `spin-ring.json`；art/README「暂空起表」 | `assets/lottie/` 实见 spin-ring.json；`assets/art/` 仅 README 无资产 | 一致 |
+| C6 | web-capture SKILL 契约（shots.json / anchor-targets / 导演页四函数 / probe-ui / probe-anchors / capture-all / render-director / vclock.js） | templates/ 实见全部对应文件；shots 与 anchor 条目级 viewport 字段描述与 wave5 工单（`7b54d22`/`7650900`）落地内容一致 | 一致 |
+| C7 | narration/auto-subtitle/ppt 命令与文件名 | `verify_narration.py`、`transcribe.py`、`primitives.py`/`animate.py`/`verify.py` 均在模板位 | 一致 |
+| C8 | docs/ 四份旧 spec 状态标记（活跃/已存档 + 吸收说明） | product-map、motion-grammar、art-layer-spec 标「活跃」；ppt-copy-rules、v4-spec、mg-arsenal-spec 标「已存档（被 X 吸收）」，符合 CLAUDE.md 首行状态约定 | 一致 |
+| C9 | workorder-log 台账尾部条目 | 与 git log 最近 10 条 docs/feat 提交（6a556c6…38230e2）逐条对应，无缺记 | 一致 |
+| C10 | README Remotion license 口径（2026-10 查证） | 对应 `2a28598` 提交记录，口径一致 | 一致 |
 
-**达标**。三项验收全满足：报告整文件写入指定路径；`git log --oneline` 可见 3 个 docs 提交（3309662 / 60bc6e2 / aae6496）；工作区状态与初始快照一致（干净），仅动 4 个目标 md 文件。红线全守：只动 Markdown、未 push、未跑渲染/录制/发布命令、未装依赖。任务线索「README 七 skill 清单失真」经逐一对名核实**不成立**（清单与 `skills/` 七目录完全一致，`check-docs.py` 断言也绿）；真实问题集中在「2026-10-02 产品四格定案后 README 未同步」与「归档产物的状态行未随交付终态更新」两类。
+### D. 任务重点三项的核实结论
+
+1. **「video-script-workflow 并入后的结构描述」——并入未发生，文档也无此声称。** 全仓 grep（video-script / VidScript / 剧本工坊 / 分镜）零命中；工作区根 `video-script-workflow/` 仍是独立目录（agent.md / characters / stories / 视频生成器 / 阅读器俱全）。任务前提与实况不符，但 vibe-studio 文档没有写过「并入」，故不存在需要修正的过期描述。
+2. **「README 技能清单 vs src/skills 实况」——实际路径是 `skills/`（无 src/ 前缀），清单 7/7 一致**，且 README「使用」节的 junction 重建流程与 `.claude/skills` 实况（7 个 Junction、未被 git 追踪）吻合。
+3. **「与 video-script-workflow 仓分工自洽」——自洽。** 只读对方 agent.md 核实：VidScript 定位「剧本导演兼编剧」，四层产出（角色档案→大纲→分镜→生成提示词）面向 AI 视频生成工具；vibe-studio 定位「内容工厂」，管 PPT / 三线成片 / 封面 / 投稿表单。两者职能零重叠、互不引用、互不声称包含对方。
+
+## ③ 自评
+
+- **结论**：vibe-studio 是本轮多仓审计中文档保鲜度最好的形态——不是「文档恰好没过期」，而是有制度保障：单一事实源 owner 表（CLAUDE.md）+ 自研 `check-docs.py` 四类机器断言（README↔skills 对齐 / 引用路径 / 组件数三方互锁 / Remotion 版本同批）+ spec 状态标记约定 + 台账只追加纪律。文档漂移在这套机制下会被机器拦住（git log 中 `aed8346` 即一次实抓实修）。
+- **方法边界**：本审计覆盖全部结构性、数量性、路径性、命令性陈述（A–C 组约 30 条，全部亲证）；products/ 下 6 份未逐字读的子文档（ddd-paper、asterforge-landscape 等）属交付归档记录（存档性质，不构成入口指引），抽查 4 份全过，风险低。humanizer 融合血统（blader v2.11.2 × unclecheng v4.1）为外部仓版本号，无从本地核实，维持原文（非过期陈述，属出处自述）。
+- **未做动作**：零文件修改、零 commit（无对象）；未触碰 video-script-workflow 仓（仅只读 25 行 agent.md 做分工核对）；未触碰工作区根 CLAUDE.md/AGENTS.md。
+- **给主控的一句话**：VBS 波次验收标准「文档内可验证陈述 100% 与实况一致」已达成，抽查 5 条（B1–B5）均可按上表证据复现。

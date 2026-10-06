@@ -1,46 +1,40 @@
-# CPB 结果报告
+# CPB · coding-plan-bench 文档保鲜度审计报告（Wave 8）
 
-## 结论一句话
+> 日期：2026-10-06 ｜ 审计基线：main@0eb9460 ｜ 修正提交：5d46bd7（main，未 push）
+> 范围：README.md、PLAN-v2.md、results/2026-10-05-glm-5.3-matrix.md、site/design-system/MASTER.md、docs/ai-delivery/ 五件套
+> 红线遵守：仅改 3 个 .md，未触碰任何代码/配置/依赖/锁文件/.git 历史
 
-11 篇 Markdown 全量通读并逐项核实链接/地址/scripts 真实性：删除 2 篇被完全取代的文档（PLAN.md v1、根目录 design-system 副本）、就地更正 1 篇失真状态（PLAN-v2 标注已实施存档），其余 8 篇健康保留，2 个本地 commit，工作区与初始快照一致。
+## ① 过期点清单（5 项已修，commit 5d46bd7）
 
-## 文档清单判定表（全量文档，每篇一行：路径|主题|判定|处置）
+| # | 文档位置 | 改前 | 改后 | 证据 |
+|---|---------|------|------|------|
+| 1 | README.md 技术栈表 | 前端含「Framer Motion」 | 「纯 CSS 动效；framer-motion 已移除（T-11 减重，初始 JS gzip 83.5KB，check:bundle ≤100KB 门禁）」 | package.json 无该依赖；全仓 grep framer 零命中（site/src）；globals.css:123 注释原文「入场/循环动画（替代 framer-motion 的 CSS 实现…）」；tasks T-011 Evidence「framer-motion 依赖整体移除（124KB→85.7KB gzip），6 个组件动画改纯 CSS」 |
+| 2 | README.md 质量命令块 | 缺 `npm run verify`（T-011 落地的发布级验收单入口） | 补一行：verify = typecheck→lint→全部测试→build→check:bundle/check:clean 串行 | package.json scripts.verify 存在；tasks T-011 DoD「`npm run verify` 是自动验收单入口」；加命令后 `npm run test:docs` 6/6 通过（README 命令真实性门禁） |
+| 3 | README.md 项目结构 | engine/ 列表缺 types.ts；server/ 括号缺 node.ts | 补 `types.ts # 共享类型契约`；server 括号补 node | `ls engine/`（10 文件含 types.ts）；`ls server/`（5 文件含 node.ts） |
+| 4 | results/2026-10-05-glm-5.3-matrix.md 末段 | 「v1 实测见 [site/public/results.json](../site/public/results.json)」死链 | 改为：文件已随 v1 数据路径清理删除，`git show 0e83d57~1:site/public/results.json` 可查 | `ls site/public/results.json` → No such file；`git log --follow -- site/public/results.json`：524cb71 引入、0e83d57（T-008）删除 |
+| 5 | site/design-system/MASTER.md 组件清单 + 动效规范 | v1 组件清单 StatCard/ComparisonBar/MetricToggle（layout 动画 shared layoutId）/TrendLine/DetailTable/Skeleton；缓动含「spring」 | 更新为 S01 实际 9 组件（Sidebar/SecurityBanner/TransportSelector/BenchForm/RunProgress/ResultCard/Leaderboard/GlobalLeaderboard/Methodology）；去 spring；补注「T-011 起动效为纯 CSS 实现」 | `ls site/src/components/` 实际 9 文件，v1 六组件 grep 零命中（仅 GlobalLeaderboard.tsx 内置 Skeleton 函数）；layoutId/spring 为 framer-motion 概念（见 #1 证据） |
 
-| 路径 | 主题 | 判定 | 处置 |
-|---|---|---|---|
-| `PLAN.md`（335 行） | v1 计划：静态 GitHub Pages + results.json 三家固定对比站 | 完全过期——架构未实施即被 PLAN-v2 三端架构取代；PRD AUD-022 已登记「PLAN/PLAN-v2/README 互相冲突」 | 已删除（git 历史即归档，无独有档案价值；其核心决策 CORS/Key 安全在 v2 与 README 均有体现） |
-| `PLAN-v2.md`（214 行） | v2 实施计划：同构引擎 + Hono + Tauri 三端架构（现行架构蓝图） | 过期信息——头部仍写「待用户确认后开干」，实际已实施上线；「GitHub Pages 部署」等细节与最终实现（Cloudflare Pages）有出入 | 已更正：头部标注「已实施完成（superseded，决策存档）」，指向 README 为事实源，声明已知偏差；正文保留历史原貌（流量策略/安全模型/动效规范仍有参考价值） |
-| `README.md`（196 行） | 项目使用文档（三端架构/命令/部署，事实源） | 健康——逐项核实全部通过：在线地址、Worker 地址 `coding-plan-bench-api.timecraker-ace.workers.dev`（与 deploy-cloudflare.yml 的 VITE_API_BASE 一致）、「Build Windows App」workflow 名、scripts（dev/build/server/bench:matrix/tauri 均存在于 package.json）、8787/5173 端口、vite proxy、Tauri 产物名、`results/` 与 `engine/models.ts` 等所有引用路径均真实存在 | 留（唯一存疑项见「建议人工复核」第 1 条） |
-| `design-system/coding-plan-bench/MASTER.md`（188 行） | ui-ux-pro-max skill `--persist` 原始输出：通用「Hero + Features + CTA」landing page 模板 | 内容冗余 + 方向冲突——与 `site/` 版「dashboard 非 landing page」定位冲突（正是 PRD AUD-015 冲突根源之一）；全仓无任何链接/代码依赖它 | 已删除（保留 `site/` 项目定制版为单一事实源，与 T-009「合并设计系统为一个事实源」方向一致） |
-| `site/design-system/MASTER.md`（82 行） | 项目定制设计系统：dashboard 定位、色板、动效铁律、组件清单 | 健康——与实际实现（亮色、Inter/JetBrains Mono、slate 色板）一致 | 留 |
-| `docs/ai-delivery/prd/trusted-benchmark.prd.md`（315 行） | S01「可信测速」PRD：22 项审计问题 + FR/NFR/AC 体系 | 健康——待执行的规划包；其 AUD-022/T-010 正是本次清理佐证 | 留，未改动（blob 被 prompt 冻结，见下） |
-| `docs/ai-delivery/stages/S01-trusted-benchmark.spec.md`（365 行） | S01 Stage Spec：模块边界/实现契约/验证矩阵 | 健康——同上，与 PRD/Tasks/Handoff/Prompt 构成冻结规格包 | 留，未改动 |
-| `docs/ai-delivery/tasks/S01-trusted-benchmark.tasks.md`（147 行） | S01 任务清单 T-001..T-012（全部 `[ ]` 未开始） | 健康——待执行状态真实 | 留，未改动 |
-| `docs/ai-delivery/handoffs/S01-trusted-benchmark.md`（36 行） | S01 交付 Handoff（State: READY，Next: Budget implementation） | 健康——待执行状态真实 | 留，未改动 |
-| `docs/ai-delivery/prompts/impl-s01-20260731-01.implementation.md`（149 行） | S01 实施提示词（Implementer 契约） | 健康——待派发状态真实 | 留，未改动 |
-| `results/2026-10-05-glm-5.3-matrix.md`（68 行） | glm-5.3 vs Flash 实测报告（档案） | 档案（不审计内容）——仅核对引用：`data/2026-10-05-model-matrix.json`、`../engine/models.ts`、`../bench/prompts.ts`、`../site/public/results.json` 全部有效 | 不动 |
+## ② 核对无误条目（抽查可复现，全部亲眼验证）
 
-盘点口径：`git ls-files '*.md'` 与文件系统 `find` 双口径一致（11 篇，无未跟踪 md；`bench/`、`engine/` 下无 md 文档）。
+1. **PLAN-v2 归档指向**（重点核对项）：顶部「已实施完成（superseded，决策存档）…事实源是 README.md」标注存在（d13c431 提交）；内文 Node sidecar/GitHub Pages 等历史差异已由该声明覆盖 → 不改存档正文。
+2. **README 模型矩阵表**：6 行（智谱 5.3/flash/flashx、方舟 glm-5.3[1m]、千帆 glm-5.3+deepseek-v4.1-flash、DeepSeek deepseek-flash、Kimi kimi-k3，envVar 逐一）与 engine/models.ts 完全一致；「2026-10-06 依官方文档调研更新」与 models.ts 头注释一致；GLM-5.2 三渠道存量对照存在。
+3. **三端架构 vs 实际目录**（重点核对项）：engine（同构）/server（Hono）/src/worker.ts（Worker 入口）/site（前端）/src-tauri（Tauri 2）全部存在；transports 三实现（browser-direct/trusted-proxy/tauri-local）与 README 结构图一致。
+4. **部署拓扑**：deploy-site.yml（push main→production、PR→preview-N、显式 VITE_API_BASE、_headers 校验步骤）与 deploy-worker.yml（--var CORS_ALLOWED_ORIGINS/ALLOWED_UPSTREAMS、先 typecheck+test:security）与 README 表述一致；「项目代理仅放行智谱」与 wrangler.toml + deploy-worker.yml 一致。
+5. **指标口径**：cpb-standard@1（温度 0 / max_tokens 1024 / prompt sha256）与 engine/profiles.ts 及 T-002 Evidence 一致；「12 个稳定错误码」= engine/errors.ts ERROR_CODES 恰 12 项。
+6. **质量命令**：README 全部 17 条 npm run 命令存在于 package.json scripts（test:docs 门禁 6/6 通过）；typecheck 注释「engine/server/src/site/tests」与 tsconfig include 一致；e2e「默认系统 Edge」= playwright channel msedge；responsive 375/768/1024/1440、visual light/dark + reduced-motion 与 spec 文件一致。
+7. **实测数字**：README L81「19.9s/89 TPS、Flash 34.7s/64 TPS、32/32、质量打平」与 results 报告逐字一致；原始 JSON（results/data/2026-10-05-model-matrix.json）存在。
+8. **Windows 状态**：build-windows.yml 存在（workflow_dispatch + tauri-action）；「外部验证证据由 owner 补齐（T-012）」与 tasks T-012 `[ ]` pending 一致；release v0.1.0 真实存在（gh release list），README 下载链接有效。
+9. **安全表述**：_headers（CSP/HSTS/nosniff/X-Frame-Options DENY）、server/node.ts DNS rebinding 校验、vite proxy /api→8787、wrangler.toml vars 与 README 各对应段落一致。
+10. **docs/ai-delivery/ 五件套**（PRD/Spec/Tasks/Handoff/Prompt）：带 baseline_sha + 输入 blob hash 冻结的交付契约，「当前代码事实」章节描述的是基线 00e9543 时点状态，属设计使然的不可变存档 → 不适用保鲜修正（Tasks 的 checkbox/Evidence 已如实记录至 T-011 done、T-012 pending）。
 
-## 已执行处置与提交（含 commit hash 与改动摘要）
+## 发现但未动（红线/代码侧，待人工确认）
 
-| Commit | 类型 | 改动 |
-|---|---|---|
-| `63f309d` | docs（删除被取代文档） | 删 `PLAN.md` + `design-system/coding-plan-bench/MASTER.md`，2 files，-523 行；空目录 `design-system/` 随之消失 |
-| `d13c431` | docs(plan)（过期信息就地更正） | `PLAN-v2.md` 头部状态行更正：待确认→已实施（superseded 存档），指向 README 事实源并声明 Cloudflare Pages 偏差，1 file，+1/-1 |
+- `engine/models.ts` L83 注释仍引用已删除的 `site/public/results.json`（代码文件，本次红线只许改 .md；一行注释修正即可）。
+- `site/src/lib/useCountUp.ts` 导出无任何调用者（疑似 T-011 清理遗留死代码；MASTER.md 动效表保留 count-up 规范描述因 hook 本体存在）。
+- `npm run test:deploy-config` 本机失败（esbuild Temp Access denied）：**stash 基线对照证明改动前同样失败**，为 Tasks T-006 已记载的宿主断电环境噪音；其 6 个断言本体全 passed，失败仅在 beforeAll `npm run build`。
 
-- 均为本地 commit，**未 push、未触发部署**。
-- 删除后死链检查：全仓 grep 无任何文档链接指向被删文件（唯一文本命中是 Tasks T-009 的 Files 清单，非链接且属冻结规划包）。
-- `git status --porcelain` 终态为空，与初始快照（空）一致，无额外改动。
-- 红线遵守：仅动 2+1 个 md；`results/` 档案零触碰；未动代码/配置/`.env.example`/锁文件/`src-tauri/`；`tsconfig.tsbuildinfo` 未动（见复核第 3 条）。
+## ③ 自评
 
-## 建议人工复核
-
-1. **README「本地版 Key 全程在你自己电脑」声明与实现可能不符**：`src-tauri/src/lib.rs` 是空壳（无本地 HTTP 适配/无 sidecar），本地版测速实际仍走浏览器直调或 Worker 兜底（CORS 失败时 key 经 Worker）。这正是 S01 PRD AUD-008/AC-008 已登记的问题，属 T-006/T-007 代码任务范围，本次按红线未改 README 文案——建议随 S01 一并裁决。
-2. **S01 规划包（docs/ai-delivery 五篇）是否仍按计划执行**：Tasks 全部未勾选、Handoff 为 READY 待实施，但规划后 git 上先走了侧边栏/能力榜/矩阵等另一条线。若 S01 仍要做，本次删根目录 MASTER.md 与 PLAN-v2 标注已替 T-009/T-010 完成部分前置；若 S01 搁置，建议另行决策（该包 blob 被 implementation prompt 冻结，本次一律未动）。
-3. **`tsconfig.tsbuildinfo` 已被 git 跟踪**（84 B 增量构建缓存，非文档，按任务要求未动）：T-001 已登记「移除被跟踪的增量产物」；若 S01 不做，建议单独 `git rm --cached` + `.gitignore` 处理。
-4. PLAN-v2 正文仍保留「Node sidecar」等历史细节（与 S01 冻结的「Tauri HTTP 插件」方向不同）——已用头部声明「以 README 与代码为准」覆盖，未逐条改写历史计划正文，如需逐条订正请人工裁决。
-
-## 自评
-
-**达标**。理由：报告含五段结构整文件写入指定路径；`git log --oneline -10` 可见 2 个 docs 提交（63f309d、d13c431）；`git status` 与初始快照一致（均为空），全部处置严格限定在 *.md 且 results/ 档案零触碰；每篇文档均有判定依据（判定表 11/11 覆盖，含核实证据）；拿不准项（README 安全声明、S01 去留、tsbuildinfo）全部保守保留/未动并列入人工复核，符合「不确定是否过期→保守保留」红线。
+- 可验证陈述 100% 与实况对齐：修正 5 处、确认无误 10 组；抽查 5 条复现路径见上表证据列（models.ts diff、git log --follow、ls components、test:docs、globals.css:123）。
+- 验证闭环：`git diff --check` 干净；`npm run test:docs` 6/6 通过；deploy-config 失败经基线对照排除回归；commit 5d46bd7 已按仓库规范（Conventional Commits 中英对照）落库，未 push（遵守红线）。
+- 遗留风险：PLAN-v2 存档正文与实现的差异靠顶部声明覆盖（存档性质，刻意不改）；GitHub release v0.1.0 为 S01 重构前产物，README 未声明版本对应关系，属产品发布叙事而非文档错误，未处理。

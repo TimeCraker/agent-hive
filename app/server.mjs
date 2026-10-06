@@ -150,7 +150,26 @@ function buildStatus(wave) {
   });
   const counts = { accepted: 0, reported: 0, failed: 0, rejected: 0, running: 0, queued: 0, pending: 0, done: 0, cancelled: 0 };
   tasks.forEach(t => { counts[t.status] = (counts[t.status] || 0) + 1; });
-  return { wave, dispatchedAt: batch.dispatchedAt, title: batch.title, now, counts, total: tasks.length, tasks, maxConcurrent: MAX_CONCURRENT };
+
+  // ── 项目 Git 动态：直接扫工作区全部 git 仓（与任务 cwd 解耦，任何波次都看全仓动态）──
+  let repos = [];
+  try {
+    const wsRoot = path.dirname(ROOT);
+    const cutoff = now - 14 * 864e5;   // 只展示最近 14 天有提交的仓
+    for (const d of fs.readdirSync(wsRoot, { withFileTypes: true })) {
+      if (!d.isDirectory() || d.name.startsWith('.') || d.name.startsWith('_') || d.name.startsWith('$')) continue;
+      const gitDir = path.join(wsRoot, d.name, '.git');
+      if (!fs.existsSync(path.join(gitDir, 'logs', 'HEAD'))) continue;
+      try {
+        const cs = readCommits(gitDir, 4);
+        if (cs.length && cs[0].ts > cutoff) repos.push({ name: d.name, commits: cs });
+      } catch (e) { /* 个别仓读取失败不拖垮整体 */ }
+    }
+    repos.sort((a, b) => b.commits[0].ts - a.commits[0].ts);
+    repos = repos.slice(0, 10);
+  } catch (e) { /* 工作区枚举失败不拖垮状态 */ }
+
+  return { wave, dispatchedAt: batch.dispatchedAt, title: batch.title, now, counts, total: tasks.length, tasks, maxConcurrent: MAX_CONCURRENT, repos };
 }
 
 // ── API: logs 尾读（字节偏移增量）──

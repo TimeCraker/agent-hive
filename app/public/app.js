@@ -124,31 +124,19 @@ function render(d) {
   }).join('') || '<div class="empty">无匹配条目</div>';
   bindActs();
 
-  // Git 动态按实际仓库去重：同 cwd 的多个任务共用一份提交历史，合并为一组（组名 = 仓库目录名）
-  const repoMap = new Map();
-  for (const t of d.tasks) {
-    if (!t.commits || !t.commits.length) continue;
-    const key = t.cwd || t.code;
-    const cur = repoMap.get(key);
-    if (!cur) { repoMap.set(key, { rep: t, codes: [t.code] }); continue; }
-    cur.codes.push(t.code);
-    if ((t.commits[0]?.ts || 0) > (cur.rep.commits[0]?.ts || 0)) cur.rep = t;
-  }
-  const gitTasks = [...repoMap.values()].sort((a, b) => (b.rep.commits[0]?.ts || 0) - (a.rep.commits[0]?.ts || 0));
-  document.getElementById('gitlist').innerHTML = gitTasks.map(g => {
-    const t = g.rep;
-    const repoName = String(t.cwd || t.code).replace(/[\\/]+$/, '').split(/[\\/]/).pop() || t.code;
-    const rows = t.commits.slice(0, 4).map(cm =>
+  // Git 动态：服务端直接扫工作区全部 git 仓（与任务 cwd 解耦）——d.repos 每项 = { name, commits[] }
+  const gitRepos = d.repos || [];
+  document.getElementById('gitlist').innerHTML = gitRepos.map(r => {
+    const rows = r.commits.slice(0, 4).map(cm =>
       '<div class="cmt' + (cm.kind === 'op' ? ' op' : '') + '">'
       + '<span class="w">' + fmtAgo(Math.floor((d.now - cm.ts) / 1000)) + '</span>'
       + '<span class="s">' + esc(cm.subject) + '</span>'
       + '<span class="h">' + cm.h + '</span></div>'
     ).join('');
     return '<div class="pj"><div class="pj-head">'
-      + '<span class="pj-dot" style="background:var(--st-' + (isGreen(t) ? 'accepted' : 'running') + ')"></span>'
-      + '<span class="pj-name">' + esc(repoName) + '</span>'
-      + '<span class="pj-code">' + g.codes.join(' · ') + '</span>'
-      + '<span class="pj-when">最近提交 ' + fmtAgo(Math.floor((d.now - t.commits[0].ts) / 1000)) + '</span>'
+      + '<span class="pj-dot" style="background:var(--st-done)"></span>'
+      + '<span class="pj-name">' + esc(r.name) + '</span>'
+      + '<span class="pj-when">最近提交 ' + fmtAgo(Math.floor((d.now - r.commits[0].ts) / 1000)) + '</span>'
       + '</div><div class="pj-commits">' + rows + '</div></div>';
   }).join('') || '<div class="empty">暂无提交</div>';
 }

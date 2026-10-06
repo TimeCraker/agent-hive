@@ -2,6 +2,7 @@
 
 > 任务：模型信息只读调研（B 站模型世界 + 官方文档交叉核验）· 日期：2026-10-05
 > 快照对象：coding-plan-bench `engine/models.ts`（6 项预置矩阵）。本任务零写入本仓、零 git 操作。
+> （10-06 追加任务后扩展为含能力榜数据更新，见文末「能力榜更新（追加任务）」章节；原报告保持原样。）
 
 ## 结论一句话
 
@@ -271,3 +272,61 @@ Legacy 仍在列：Opus 5/4.8/4.7/4.6/4.5、Sonnet 5/4.6、Fable 5。
 - **红线遵守**：本仓零写入（报告写在 agent-hive 指定路径）；临时抓取物全部在系统临时目录（$TEMP/bili-*）；无付费 API 调用；无密钥输出；每源重试 ≤3（火山文档壳重试 2 次即转替代源）。
 - **诚实声明**：engine/ 读取时 S01 并行会话在途，快照时间 2026-10-05 20:45 前后，读到的是语法完整的 85 行版本；若 S01 已改结构（如 ModelTarget 加字段），MXU 需以彼时 HEAD 为准做字段对齐。智谱 anthropic 端点、千帆/方舟端点均与矩阵现值一致，未被推翻。
 - **量化规模**：B 站 76 模型清单全提取、20 个重点模型逐字段核验；官方文档 9 个页面直接抓取 + 4 条搜索佐证；覆盖本台声称的全部 6 家厂商。
+
+---
+
+## 能力榜更新（追加任务）
+
+> 追加日期：2026-10-06 · 产出：`site/public/leaderboards.json` 重写 + 提交 `7882a85`（39 insertions / 17 deletions，单文件）
+> 红线遵守：仅改 leaderboards.json 与本报告；未 push；未编造任何评分。
+
+### 数据源与重抓
+
+- 重抓壳页确认应用版本 **v22387 → v22787**（数据确有更新），文本榜（`leaderboard/all/index.html?kind=text`）全量提取：**100 名 × 11 列**（模型/厂商/地区/类型/发布/开源/上下文/输出价格/综合智力/编程/参赛榜数）。
+- **口径裁定（本次最重要的决策）**：B 站「综合智力」标注来源为 **Epoch AI（CC-BY 4.0）**，与四榜既有 AAII v4.1（满分 100）与 GDPval-AA v2 Elo 是**不同口径**，`meta.indexVersion` 原本就明令「数字不跨版混用」。因此：**不将 Epoch 分写入 score 字段**；新条目 score=0 表「暂无评分」置尾部（沿用 plans 榜 Cursor 条目 score:0 的仓内惯例），note 附 Epoch 分与名次并标注口径，仅供相对位次参考。
+
+### 四榜逐条变化
+
+**intelligence（18 → 30 条）**
+- 原 18 条分数全部保留（B 站/官方均未推翻 AAII v4.1 既有分）。
+- 新增 12 条（rank 19-30，score=0，tier="T?"，按 Epoch 名次排）：Claude Opus 5.5（Epoch #1）、GPT-6 Astra（#2）、GPT-6.1 Sol（#3）、Claude Sonnet 5.5（#4）、Claude Fable 5.1（#5）、Gemini 3.8 Flash（#20）、Qwen3.8 Max（#22）、GLM-5.3（#28）、DeepSeek V4 Pro 0813（#30）、DeepSeek V4.1 Flash（#33）、Grok 4.7（#42）、GLM-5.3-Flash（#52）。
+- 既有条目修正 1 处：DeepSeek-V4-Flash note 补「0731 正式版 · 旧名已退役、路由至 V4.1-Flash」。
+
+**agent（12 → 17 条）**
+- 原 12 条 Elo 不动（GDPval v2 无新快照）。
+- 新增 5 条（rank 13-17，score=0）：Opus 5.5 / GPT-6 Astra / GPT-6.1 Sol / Sonnet 5.5 / GLM-5.3（note 附 B 站编程评级与 coding 渠道信息）。
+- subtitle 更新为「8/4 快照 + 10 月增补新模型（暂无分）」。
+
+**value（11 → 14 条）**
+- 新增 3 条便宜档，**cost 为透明折算**（note 逐条标明口径，非凭空数）：GPT-6 Luna $0.02/任务（官方 $0.1/$0.5，按 Luna 系 ~0.04M tokens/任务）、GLM-5.3-Flash $0.03/任务（¥0.8/¥2.8，按 GLM 口径 ~0.073M）、DeepSeek V4.1 Flash $0.06/任务（非高峰 $0.15/$0.6，按 DeepSeek 口径 ~0.107M）。折算系数均取自原榜同系模型的 cost÷每百万输出价反推值，可复现。
+- score=0 置尾部（rank 12-14）而非按 cost 插前排首——避免「智能 0 排第一」的误导，符合「暂无评分排尾部」指令精神。
+- 既有条目补 note 1 处：Kimi K3 补官方价 ¥20/¥100。
+- **前端安全检查**：`GlobalLeaderboard.tsx` value 渲染有 `score/cost` 除法，cost=0 会得 Infinity——本次 3 条新条目 cost 均为非零折算值，规避了该风险（这也是不给 value 新条目填 cost:0 的原因）。
+
+**plans（10 条，更新 3 条，不新增）**
+- 火山方舟：model `GLM-5.2` → `GLM-5.3 等多模型`，note 补 8/14 GLM-5.3 上线（`glm-5.3[1m]`）与套餐模型清单；score 沿用 GLM-5.2 AAII 分并在 note 声明。
+- 百度千帆：plan `轻享 ¥149/月` → `Mini ¥9.9 – Max ¥600/月`（官方 2026-10-05 核验的新四档），model → `GLM-5.3 / DeepSeek-V4.1-Flash`，note 补 anthropic 端点可调模型（2026-09-16 官方文档）。
+- Claude Max / ChatGPT Pro：模型换代标注（Opus 5.5 / Fable 5.1、GPT-6.1 Sol），note 声明沿用换代前 AAII 分。
+- 不新增订阅条目：本轮核验未发现新的订阅制玩家（DeepSeek/Kimi 均纯按量）。
+
+**meta**
+- `updatedAt` → 2026-10-06；`sources` 增 2 条（Epoch AI 经 B 站转录 v22787 + 2026-10-05 七家官方文档核验）；`indexVersion` 追加增补口径说明；`note` 重写（强调 Epoch 分仅参考、冲突以官方为准）。
+
+### B 站独有/我方独有的处理
+
+- 我方独有条目（Muse Spark 1.1、Nemotron 3 Ultra、GPT-5.5、Kimi K2.6 等）：**保守保留**——B 站文本榜均有对应或后继版本（Muse Spark 1.3、Nemotron 3 Ultra 550B、GPT-5.5 在 Epoch 榜 #12），无一被官方判死，不移除。
+- B 站 GLM-5.3-Prime：与官方冲突（原报告差异清单 #1），**未收录**进任何榜。
+- Kimi K2.8 Preview：官方无此模型，未收录。
+
+### 验证结果（全绿）
+
+1. `node -e "JSON.parse(...)"` → OK，四榜条目数 30 / 17 / 14 / 10，updatedAt 2026-10-06。
+2. `npm run typecheck`（tsc --noEmit）→ 零错误。
+3. `npm run build` → 成功（3.17s；storage.ts 动态导入警告为仓库既有现象，与本次无关）。
+4. 提交 `7882a85`：`feat(leaderboard): 四榜数据更新至 2026-10（B站模型世界+官方核验）/ refresh leaderboards to 2026-10 research`，仅含 `site/public/leaderboards.json` 一个文件，未 push。
+
+### 追加任务自评
+
+- 指令五条全落地：重抓 ✓（版本号变化证明数据新鲜）、四榜逐条对照 ✓、meta 三件套 ✓、三项验证 + 单提交 ✓、报告追加 ✓。
+- 最强的纪律点是**口径不混**：Epoch 分只进 note 不进 score，value 榜折算成本逐条标注口径；最弱的数据点是 value 新条目的单任务 token 量取同系口径折算（0.04-0.107M/任务），属有依据的近似而非实测——已全部在 note 与本报告中透明声明，后续若有 AAII 官方 cost 数据可直接替换。
+- 遗留提醒：①AAII v4.1 / GDPval v2 出新分后，本次 20 个 score=0 条目需回填并重排（位次参考已在 note 里）；②前端 `tier: "T?"` 渲染为「T? 档」，若观感不佳可改组件文案；③B 站文本榜 100 名全量数据留存于本机临时目录，如需归档请指示。

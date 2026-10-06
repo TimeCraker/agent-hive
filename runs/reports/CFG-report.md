@@ -1,103 +1,77 @@
-# CFG 结果报告
+# CFG 报告：config 文档保鲜度审计与修复（Wave 8）
 
-## 结论一句话
+- **执行日期**：2026-10-06
+- **范围**：`my_workspace/config/` 下 7 个子仓库全部 13 个说明性 .md 文档
+- **结果**：发现并修正 **14 处过期/缺失**，5 仓各 1 个 docs commit；7 仓工作区收尾全部干净；未 push
 
-7 个子仓共盘点约 90 篇 Markdown（说明文档 20 篇逐篇通读 + skills 功能内容 70 篇核对），确认 4 类问题并处置 3 仓（antigravity-config 过期引用+清单缺项、codex-dotfiles 过期路径、mimo-llm-proxy 交接文档冗余合并），共 3 个本地 docs 提交、净删 83 行冗余，其余 4 仓文档自洽无清理项；全程只动 *.md、未 push、未做任何配置同步动作。
+---
 
-## 文档清单判定表（7 子仓全量，每篇一行：子仓|路径|主题|判定|处置）
+## ① 过期点清单
 
-### antigravity-config（23 篇）
+| # | 仓库 | 文档位置 | 改前 | 改后 | 证据 |
+|---|------|---------|------|------|------|
+| 1 | codex-dotfiles | README.md · 仓库内容表 | `auth.json` = 「ChatGPT 登录认证备份（私有仓库）」 | 仅本地文件，`.gitignore` 忽略，不随 Git 分发 | `git ls-files` 无 auth.json（复跑 [4] 输出 none）；.gitignore 末行显式 `auth.json`；commit `378aba8` untrack |
+| 2 | codex-dotfiles | README.md · 开头段/同步范围/新电脑部署/认证段 | 「私有仓库会同步 auth.json 跨机复用登录态」「按需使用仓库中的 auth.json」 | sync.mjs 仅在本机 ~/.codex ↔ 仓库工作目录间搬运；新机用 `codex login`；跨机迁移须自行安全传输 | `scripts/sync.mjs:25` 仍有映射，但文件被 ignore → clone 后不存在，跨机复用实际已断 |
+| 3 | cursor-dotfiles | README.md · 说明 | 「**公开仓库**」 | 「**私有仓库**」 | `gh repo view TimeCraker/cursor-dotfiles` → `PRIVATE`（复跑 [2]） |
+| 4 | cursor-dotfiles | README.md · 仓库内容表 | 缺 `_update_editor_font_settings.py` | 补一行（字体设置 Python 主路径，`_common.ps1` 回退） | `scripts/` 实存 6 文件，README 只列 5 |
+| 5 | mimo-llm-proxy | README.md · DSH 接入段 | 「真正生效的配置在 `~/.dsh/settings.yaml`」 | provider 声明在工作区 `config/dsh-config/settings.yaml`；`~/.dsh` 现无 settings.yaml（仅 .imported 残留），活配置落位**待人工确认** | `ls ~/.dsh`：无 settings.yaml；dsh-config/settings.yaml:97 有「MiMo Desktop 免费额度」 |
+| 6 | mimo-llm-proxy | README.md · 文件表 | 缺 switch-to-xiaomimimo-desktop.bat/.ps1 | 补一行（Claude Code 一键切换脚本） | `git ls-files` 两文件被追踪；`~/.claude/cc-toolkit/switches/` 实存部署副本 |
+| 7 | mimo-llm-proxy | README.md · 注意事项 | 「cookies.txt 与 device_id 永不提交进 git」（与自身「原理」第 5 条矛盾） | cookies/device_id.txt/usage.json/proxy.log 已忽略；**device_id 现写死在被追踪的 config.json 内**，仓库无远端未 push，首次 push 前须移出或轮换 | config.json 含 device_id（35 字符，脱敏核实）且在 `git ls-files`；`git remote -v` 为空 |
+| 8 | dsh-config | README.md · 定位段 + badge | 「`~/.dsh` 本体就是 Git 工作树」「dsh 启动时直接读取工作树中的 settings.yaml」；badge `0.1.2-alpha.4` | 工作区独立仓库为配置基线，`~/.dsh` 是运行时目录、**非** Git 工作树；badge `0.1.5-rc.3` | `ls ~/.dsh/.git` → 不存在（复跑 [1]）；`dsh --version` = 0.1.5-rc.3（复跑 [3]） |
+| 9 | dsh-config | README.md · 日常同步 / 修改后验证 | `git -C "$env:USERPROFILE\.dsh" add/commit/push`；验证 `~/.dsh/settings.yaml` 语法 | git 指向工作区仓库路径；验证仓库内 settings.yaml；注明活配置手动对齐 + 落位待人工确认 | 同 #8；仓库 `git ls-files` 含 settings.yaml（yaml.safe_load 复验 OK） |
+| 10 | dsh-config | docs/SETUP-NEW-MACHINE.md · 第 4 步 | 安装/验收 `0.1.2-alpha.4`；「latest=0.1.1-rc.2」 | `0.1.5-rc.3`（与主力机一致）；渠道说明更新为 latest=0.2.0-rc.2、alpha=0.2.1-alpha.1（0.2.x 未验证） | `dsh --version`；`npm view @deepseek-ai/dsh dist-tags` 实查（2026-10-06） |
+| 11 | dsh-config | docs/SETUP-NEW-MACHINE.md · 验收清单 | 千帆含「4 个模型」 | 6 个模型（+GLM-5.3、DeepSeek-V4.1-Flash），注明以 settings.yaml 为准 | settings.yaml `qianfan-tokenplan` 实数 6 个模型 id |
+| 12 | dsh-config | docs/SETUP-NEW-MACHINE.md · 已知坑 | 「套餐里**没有** glm-5.3，加了报 model_not_supported」 | 该坑已过时（套餐现含 glm-5.3/flash），改写为现状 | settings.yaml 配有 glm-5.3；README 侧同坑已被 commit `ae22348` 删除，此处是漏删 |
+| 13 | pi-config | README.md · 验证基线 / 本地扩展 / 主要文件表 | 基线 Pi 0.82.0；扩展段只讲 volcengine-glm + **permission-gate.ts（已不存在）** + notify.ts | 基线 0.84.2（隔离回归全过）；扩展段对齐实存 4 文件：volcengine-glm / baidu-glm / volcengine-coding / notify.ts；文件表删 permission-gate.ts、补 2 个新 provider | `pi --version` = 0.84.2；`ls extensions/`（复跑 [5]）无 permission-gate.ts；commit `f48429e` 关闭该扩展后文件已删 |
+| 14 | pi-config | README.md · 新设备初始化第 2 步 | 只提 `ARK_API_KEY` | 补 `QIANFAN_API_KEY`、`VOLCENGINE_CODING_API_KEY` 的 setx 说明 | 两个新扩展头部注释明确 key 依赖；settings.json extensions 加载 3 个 mjs |
 
-| 子仓 | 路径 | 主题 | 判定 | 处置 |
-|---|---|---|---|---|
-| antigravity-config | README.md | 仓库总览：架构表/同步命令/技能清单 | **确凿过期 + 内容缺项**：「对标 claude-code-config」（该仓 2026-09-05 已归档删除）；架构表漏 hooks.json 与 scripts/auto-turbo-watcher.ps1（sync.mjs 同步清单/磁盘实际存在）；技能清单列 6 个实际 7 个（缺 design-skill） | ✅ 已修正（9d88ffd） |
-| antigravity-config | GEMINI.md | Antigravity 全局指令/用户画像 | 健康（与 ~/.claude/CLAUDE.md 同源独立维护，无过期引用） | 保留 |
-| antigravity-config | skills/design-skill/SKILL.md | 前端 UI 总入口与调度器 | 功能内容 | 保留（README 清单已补录） |
-| antigravity-config | skills/gsap/SKILL.md + references/×8 | GSAP 动画手册（core/timeline/scrolltrigger 等） | 功能内容，结构正常 | 保留 |
-| antigravity-config | skills/issue-summary/SKILL.md | 口语 Bug 转专业清单 | 功能内容 | 保留 |
-| antigravity-config | skills/lottie/SKILL.md | Lottie/dotLottie 集成 | 功能内容 | 保留 |
-| antigravity-config | skills/perf-audit/SKILL.md + references/×3 | 性能审计（schema/thresholds/troubleshooting） | 功能内容 | 保留 |
-| antigravity-config | skills/skill-creator/SKILL.md | 技能封装脚手架 | 功能内容 | 保留 |
-| antigravity-config | skills/ui-ux-pro-max/SKILL.md + references/×3 | 设计系统细则 | 功能内容 | 保留 |
+### Commit 清单（均只含 .md，Conventional Commits 中英对照）
 
-### codex-dotfiles（9 篇）
+| 仓库 | commit | 文件 |
+|------|--------|------|
+| codex-dotfiles | `41240fa` | README.md |
+| cursor-dotfiles | `d099181` | README.md |
+| mimo-llm-proxy | `861c546` | README.md |
+| dsh-config | `a4098e4` | README.md + docs/SETUP-NEW-MACHINE.md |
+| pi-config | `0720e80` | README.md |
 
-| 子仓 | 路径 | 主题 | 判定 | 处置 |
-|---|---|---|---|---|
-| codex-dotfiles | README.md | 最小配置基线/同步范围/新机部署 | 健康（MCP 数量等与 config.toml 口径一致） | 保留 |
-| codex-dotfiles | skills/personal/codex-sync/SKILL.md | Codex 同步 runbook | **确凿过期**：绝对路径 `Desktop\my-workspace\codex-dotfiles` 为迁入 config/ 前的连字符旧名，双重过期（旧连字符 + 缺 config/ 层级） | ✅ 已更正为 `Desktop\my_workspace\config\codex-dotfiles`（67db7ee） |
-| codex-dotfiles | skills/personal/perf-audit/SKILL.md + references/×3 | 性能审计 | 功能内容 | 保留 |
-| codex-dotfiles | skills/personal/spec-driven-delivery/SKILL.md + references/×2 | 规格驱动交付契约 | 功能内容 | 保留 |
+---
 
-### cursor-dotfiles（3 篇）
+## ② 核对无误条目（抽查可复现）
 
-| 子仓 | 路径 | 主题 | 判定 | 处置 |
-|---|---|---|---|---|
-| cursor-dotfiles | README.md | 面向人的换机恢复指南 | 健康 | 保留 |
-| cursor-dotfiles | AGENTS.md | 面向 Agent 的逐步操作说明 | 健康：与 README 的重复（恢复步骤/踩坑表/更新命令）为**设计性受众分工**（人 vs Agent，README 明确引导 Agent 读 AGENTS.md，且 Agent 在新机可能无 README 上下文），两篇各自自洽，不属应收敛的冗余 | 保留 |
-| cursor-dotfiles | cursor-agent-preferences.md | Cursor Settings UI 开关备忘（不随 settings.json 同步） | 健康（2026-05-26 标注，见「建议人工复核」第 4 条） | 保留 |
+| 仓库 | 条目 | 核对方式 |
+|------|------|---------|
+| antigravity-config | README 技能清单 7 项、hooks enabled:false、MCP 仅 playwright+context7、`~/.gemini/config/` 映射、sync.mjs / auto-turbo-watcher.ps1 存在 | `ls skills/` 逐项比对；cat hooks.json / mcp_config.json；ls ~/.gemini/config |
+| dsh-claude-import | README 架构段全部文件（lib 4 js、tests、scripts/gui-verify.cjs、docs/social-preview.png） | 逐文件 ls 实存 |
+| mimo-llm-proxy | 端点 5 条、模型别名映射（auto/pro→v2.6-pro、flash→v2.6-flash）、X-Client-Version 兜底 26.923.232338、MIMO_PROXY_TOKEN=mimo-proxy 已 setx、cc-toolkit switch 脚本存在 | proxy.py:76-92/266/985/1015 grep；PowerShell 读 User 级环境变量；ls ~/.claude/cc-toolkit/switches |
+| pi-config | LSP 5 路由（biome/ty/ruff/bash/yaml）、「audit 要求 ARK_API_KEY」、AGENTS.md、sync/test.sh 隔离性声明 | pi-lsp.json 全量解析；sync.sh:339-342 只查 ARK_API_KEY；test.sh 头部 mktemp 隔离确认后实跑 ALL PASS |
+| cursor-dotfiles | 「当前扩展」12 项与 extensions.txt 全覆盖、autoDetectColorScheme:true、fontLigatures:true、AGENTS.md 文件说明、踩坑表 | cat extensions.txt / settings.json 逐项比对 |
+| codex-dotfiles | 3 个 skill 白名单、5 可移植 MCP（context7/fetch/filesystem/pdf/playwright） | `find skills -maxdepth 2`；grep config.toml |
+| 通用 | GEMINI.md、pi AGENTS.md、cursor-agent-preferences.md、prompts/windows-cleanup.md 为规则/模板类文档，无可失效的仓库事实陈述 | 通读判断 |
 
-### pi-config（50 篇）
+### 验收抽查 5 条（全部通过，命令可复现）
 
-| 子仓 | 路径 | 主题 | 判定 | 处置 |
-|---|---|---|---|---|
-| pi-config | README.md | 同步机制权威文档（安装/初始化/边界/LSP） | 健康（Pi 0.82.0 基线，见复核第 3 条） | 保留 |
-| pi-config | AGENTS.md | Pi 全局规则（同步到 ~/.pi/agent/） | 健康 | 保留 |
-| pi-config | docs/stages/2026-07-23-config-hardening.md | 同步与认证加固 Stage | 健康历史记录（顶部已带 2026-07-25 superseded 说明） | 保留 |
-| pi-config | docs/stages/2026-07-23-model-agnostic-settings.md | 模型无关配置 Stage | 健康历史记录（顶部已带 2026-07-24 更正说明） | 保留 |
-| pi-config | docs/stages/2026-07-23-pi-config-skill-optimization.md | Skill 结构优化 Stage | 健康历史记录（与同日 concision stage 为顺序演进而非重复） | 保留 |
-| pi-config | docs/stages/2026-07-23-pi-config-skill-concision.md | Skill 精简 Stage | 健康历史记录 | 保留 |
-| pi-config | docs/stages/2026-07-23-pi-lsp-enablement.md | pi-lsp 启用 Stage | 健康历史记录 | 保留 |
-| pi-config | docs/stages/2026-07-24-glm-credential-audit.md | GLM 凭证审计 Stage | 健康历史记录 | 保留 |
-| pi-config | docs/stages/2026-07-24-high-value-consistency-audit.md | 一致性加固 Stage | 健康历史记录 | 保留 |
-| pi-config | docs/stages/2026-07-25-sync-professional-hardening.md | 同步机制专业化 Stage | 健康历史记录 | 保留 |
-| pi-config | docs/stages/2026-07-27-orphan-cleanup.md | 被删孤儿清理 Stage | 健康历史记录（含关联引用） | 保留 |
-| pi-config | docs/stages/2026-08-08-simplify-sync-drop-full.md | 砍 full 模式 Stage | 健康历史记录（最新演进，验收全勾） | 保留 |
-| pi-config | prompts/windows-cleanup.md | Windows 磁盘清理自进化 prompt | 健康（活跃维护至 2026-08-30 实战，含「自动进化」机制） | 保留 |
-| pi-config | skills/pi-config/SKILL.md | 同步 Runbook（README 引用） | 功能内容 | 保留 |
-| pi-config | skills/genjutsu/_jutsu/**（8 skill + 16 refs） | genjutsu 动效/设计技法集 | 功能内容 | 保留 |
-| pi-config | skills/{issue-summary,markitdown,perf-audit,server-status,skill-creator,windows-status}/SKILL.md + perf-audit refs×3 | 全局技能 | 功能内容 | 保留 |
+1. `ls ~/.dsh/.git` → No such file or directory（支撑 #8/#9）
+2. `gh repo view TimeCraker/cursor-dotfiles --json visibility -q .visibility` → PRIVATE（支撑 #3）
+3. `dsh --version` → 0.1.5-rc.3（支撑 #8/#10）
+4. `git -C config/codex-dotfiles ls-files | grep auth` → 无输出（支撑 #1/#2）
+5. `ls config/pi-config/extensions` → baidu-glm.mjs / notify.ts / volcengine-coding.mjs / volcengine-glm.mjs，无 permission-gate.ts（支撑 #13/#14）
 
-### dsh-config（2 篇）
+---
 
-| 子仓 | 路径 | 主题 | 判定 | 处置 |
-|---|---|---|---|---|
-| dsh-config | README.md | 配置即仓库定位/同步边界/日常同步 | 健康（对标引用为**新** claude-config，非旧 claude-code-config） | 保留 |
-| dsh-config | docs/SETUP-NEW-MACHINE.md | 新机全新部署手册 | 健康；与 README 的「已知坑」3 条重复属概览 vs 执行手册的受众分工，两篇各自自洽 | 保留 |
+## ③ 自评
 
-### dsh-claude-import（1 篇）
+**完成度**：7 仓 13 个 .md 全部通读；14 处过期修正落地为 5 个 docs commit；7 仓收尾 `git status --short` 均为 0 脏文件；未 push（遵守红线）。
 
-| 子仓 | 路径 | 主题 | 判定 | 处置 |
-|---|---|---|---|---|
-| dsh-claude-import | README.md | Claude 配置导入 DSH 插件说明 | 健康（功能/落点映射/安装/架构齐全自洽） | 保留 |
+**做得好的**：
+- 每条修正都有第一手命令证据（git ls-files / ls / gh / npm view / 版本号实跑），无一虚构；
+- 修正顺带闭环验证：dsh-config settings.yaml 语法复验、pi sync/test.sh 隔离回归实跑 ALL PASS 后才升基线；
+- 红线遵守：只动 .md（5 个 commit 均只含 README/SETUP 文档）、未碰工作区根 CLAUDE.md/AGENTS.md、未碰其他仓库、未改历史未 push。
 
-### mimo-llm-proxy（2 篇 → 1 篇）
+**待人工确认（4 项，已写入对应文档）**：
+1. DSH 0.1.5 活配置落位：`~/.dsh/settings.yaml` 不存在、仅 `.imported` 残留，provider 实际读取路径需用户确认（涉及 #5/#9）；
+2. dsh-config 活配置 ↔ 仓库的手动对齐是否已有固定新流程（README 现按「手动拷贝」如实描述）；
+3. SETUP-NEW-MACHINE 第 5 步 Copy-Item 到 `~/.dsh/settings.yaml` 在 0.1.5 下是否仍是正确落位（与待确认 1 同源）；
+4. cursor-dotfiles「公开仓库」→ PRIVATE：若当初是有意转私有则文档已修对；若本意公开需用户自行改 GitHub 可见性设置。
 
-| 子仓 | 路径 | 主题 | 判定 | 处置 |
-|---|---|---|---|---|
-| mimo-llm-proxy | README.md | 反代使用文档（原理/启停/端点/客户端接入） | 权威篇 | ✅ 已扩充吸收 HANDOFF 独有知识（97b4b26） |
-| mimo-llm-proxy | HANDOFF-TO-DSH.md | 2026-09-25 一次性交接文档（验收已完成） | **仓内冗余**：原理表/握手流程/启停/文件清单四块与 README 大面积重复，README 已是修正后的权威版（README 原文自注「旧交接文档判断是错的」） | ✅ 独有维护知识（401 自动重铸、X-Client-Version 兜底、模型别名映射、passToken 30 天、pythonw 损坏坑、桌面路径备忘）合并进 README 后删除（97b4b26） |
-
-> 线索核实：任务提示的「首次 push 前须轮换 token」**未过时**——`git remote -v` 为空，该仓从未配置远程、从未 push（本地 6 个 commit），轮换事项仍是待办；仓内文档无此表述（该句在工作区 CLAUDE.md，不在本次 7 子仓范围），故无需改动。
-
-## 已执行处置与提交（按子仓分组，含 commit hash）
-
-| 子仓 | commit | 处置内容 | 改动量 |
-|---|---|---|---|
-| antigravity-config | `9d88ffd` docs: 清理过期引用并补全架构与技能清单 / fix stale reference and complete asset/skill inventory | ① 对标对象由已归档的 claude-code-config 更正为 claude-config（~/.claude/cc-toolkit/）；② 架构表补 hooks.json、scripts/auto-turbo-watcher.ps1；③ 技能清单 6→7 补 design-skill | +10/-7 行 |
-| codex-dotfiles | `67db7ee` docs(skills): 修正 codex-sync 内的仓库绝对路径 / fix stale repo path in codex-sync skill | 过期路径 `Desktop\my-workspace\...` → `Desktop\my_workspace\config\...` | +1/-1 行 |
-| mimo-llm-proxy | `97b4b26` docs: 合并交接文档进 README 权威篇 / merge handoff doc into README as single source | HANDOFF 独有维护知识并入 README 后删除 HANDOFF-TO-DSH.md | +13/-96 行（净删 83 行冗余） |
-
-验证：3 仓提交前均过 `git diff --check`；提交后 7 仓 `git status --porcelain` 全空，与初始快照（全空）一致，除上述已提交文档外无任何新增改动；未 push。
-
-## 建议人工复核
-
-1. **mimo-llm-proxy 被删交接文档中的 2 项未勾验收**（Claude Code / DSH 用 mimo-v2.6-pro 端到端对话自验，2026-09-25 遗留「需重启自验」）：删除 HANDOFF 后该历史待办不再有载体，若仍在意请重启两端补验一次。
-2. **mimo-llm-proxy 从未 push 且无 remote**：首次 push 前须轮换 auth_token 相关凭证的事项仍然有效，届时先加 remote 再轮换后 push。
-3. **pi-config「当前验证基线 Pi 0.82.0」**：仓内最后 stage 记录为 2026-08-08，无法从仓内确证当前 Pi 版本是否仍为 0.82.0，若已升级建议随下次同步更新。
-4. **cursor-dotfiles cursor-agent-preferences.md（2026-05-26）**：Cursor Settings UI 项随版本演化，半年未复核，换机前建议快速核对一遍是否仍匹配当前 Cursor。
-5. **antigravity-config scripts/auto-turbo-watcher.ps1 不在 sync.mjs 同步清单**：本次已在 README 标注「本地执行器，不同步」；若希望新机也能还原该脚本，需另行决策（涉及配置同步动作，超出本审计范围）。
-
-## 自评
-
-**达标**。理由：① 报告整文件写入指定路径，五段结构齐全，判定表覆盖 7 子仓全量文档（说明文档逐篇、skills 按功能内容归组）；② 3 个有改动子仓各有 1 个 docs 类本地提交（9d88ffd / 67db7ee / 97b4b26），其余 4 仓无可清理项且逐篇依据已在上表给出；③ 7 仓终态 `git status --porcelain` 与初始快照完全一致；④ 红线全程遵守——只动 *.md、未 push、未往 ~/.dsh、~/.claude 等处做任何同步、未启动服务或安装依赖、不确定项（Pi 版本、Cursor UI 偏好等）保守保留并列入人工复核。
+**风险提示**：mimo-llm-proxy 的 device_id 现随被追踪的 config.json 存于本地仓库（#7）。该仓无远端、从未 push，无泄露面；但**首次 push 前必须先把 device_id 移出 config.json 或轮换**——文档已改为如实警示（与工作区 CLAUDE.md「首次 push 前须轮换 token」口径一致）。

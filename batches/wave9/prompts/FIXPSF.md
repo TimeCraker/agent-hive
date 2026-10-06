@@ -1,43 +1,42 @@
-# 任务 FIXPSF:修复主站部署脚本引号 bug
+# 任务 FIXPSF:独立验收主站部署脚本引号修复(b6101c1)
 
-一句话任务:定位并修复 `scripts/deploy-portfolio-safe.sh` 远程执行段的嵌套引号 bug(2026-09-30 起每次部署必挂在 next 版本断言步),本地验证修复正确性,最小 diff 提交。**不执行真实部署、不碰服务器。**
+一句话任务:独立验证已提交的 `scripts/deploy-portfolio-safe.sh` 引号修复(commit `b6101c1`,2026-10-06 00:00,深夜无监督会话产物,从未被独立复核)——验证通过则出验收留证;发现修复不正确/不完整则补修。**不执行真实部署、不碰服务器。**
 
 ## 背景(已核实事实,勿重新考古)
 
-- 本仓是 TimeCraker 个人主站 asterforge.top(Next.js 16 standalone + Prisma/SQLite,腾讯云 Ubuntu + nginx + systemd)。**push ≠ 部署**,部署是手动跑 `scripts/deploy-portfolio-safe.sh`(上传 tarball → 远程解压 → pnpm install → next 版本断言 → prisma 同步 → build → 重启 → 7 项验证)。
-- 脚本把一段 bash 命令经 heredoc/SSH 透传到远端执行。**L173-180 的 next 版本断言步存在嵌套引号 bug**:L175 `INSTALLED_NEXT=\$(node -p 'require(\"next/package.json\").version')` 这类写法在透传后远端收到的命令引号失衡/语义错误,导致断言步每次中断。
-- 证据链:2026-09-30 实录(next 16.2.9 残留上线后补此断言);2026-10-03、2026-10-05 两次部署均"在 next 版本断言步因嵌套引号中断,已手动补完"(见 asterforge-deploy/backups/production/perf-baselines/retests/RETEST-2026-10.md L71)。wave7 验收记录将其列为立项修复待办。
-- 全脚本结构参考:L1-149 为本地段(打包/scp),L150 起为透传远端的命令段(注意 `\$`、`\"` 是为透传而做的转义层)。
+- 本仓是 TimeCraker 个人主站 asterforge.top(Next.js 16 standalone + Prisma/SQLite,腾讯云)。**push ≠ 部署**,部署是手动跑 `scripts/deploy-portfolio-safe.sh`(本地段打包/scp → 远程段解压/装依赖/断言/构建/重启/验证)。
+- 原始 bug:脚本把一段 bash 经 heredoc/SSH 透传远端执行,**L175 next 版本断言行引号转义缺失**,2026-09-30 起每次部署必挂在断言步,10-03/10-05 两次部署均靠人工手动补完(asterforge-deploy/backups/production/perf-baselines/retests/RETEST-2026-10.md L71 佐证)。
+- 已有修复:commit `b6101c1` 将 L175 `require("next/package.json")` 改为 `require(\"next/package.json\")`(1 行 diff)。
+- **修复正确性存疑点(你要查的核心)**:远端段由 heredoc 透传,`\"` 在远端变成 `"` 的前提是 heredoc 定界符**未加引号**;若定界符带引号(如 `<<'EOF'`),`\"` 会字面透传,远端收到的反而是错的。深夜会话未留任何验证留证,正确性没人复核过。
+- 结构参考:L1-149 为本地段(打包/scp),L150 起为透传远端的命令段(`\$`、`\"` 是透传转义层)。
 
 ## 步骤
 
-1. **读懂结构**:通读全脚本,搞清远端命令段如何透传(heredoc 定界符是否加引号、转义层数),在报告里用 3-5 句话说明透传机制。
-2. **复现根因**:用只读方式提取远端段文本(如模拟 heredoc 展开后输出到临时文件),展示 L173-180 断言步在远端实际收到的命令文本,指出引号失衡的确切位置。
-3. **最小修复**:只改引号/转义相关字符,使远端收到的断言命令语义正确。**禁止顺手重构其他部分**;每行改动必须能对应到本 bug。
-4. **验证(全部本地,不部署)**:
-   - `bash -n scripts/deploy-portfolio-safe.sh` 语法全绿;
-   - heredoc 展开验证:再次提取修复后的远端段文本,断言步命令文本经 `bash -n` 通过;
-   - 最小等价复现:在系统临时目录(如 `$env:TEMP`)写一个小脚本模拟"透传→远端执行"(本地 bash 扮演远端),证明 `node -p 'require("next/package.json").version'` 在透传后能正确输出版本号字符串。临时文件用完即删。
-5. **提交**:检查 `git status` 只提交本脚本改动,Conventional Commits 中英对照,如 `fix(deploy): 修复部署脚本远程段引号 / fix quoting in remote deploy script`。仓内有 husky/commitlint 钩子,遵守即可。**不得混入任何无关文件。**
+1. **读懂透传机制**:通读脚本,确认远端段的 heredoc 定界符形态(加引号与否)、转义层数,报告用 3-5 句话说清。
+2. **提取验证(修复后)**:以与脚本相同的方式提取远端段文本,检查 L175 断言行在远端实际收到的形态是否为语法正确的 `node -p 'require("next/package.json").version'`;对提取文本跑 `bash -n`。
+3. **语法**:`bash -n scripts/deploy-portfolio-safe.sh` 全绿。
+4. **最小等价复现**:在系统临时目录写小脚本模拟"heredoc 透传 → 远端执行"(本地 bash 扮演远端,可用本仓 node_modules 的 next 真实版本号),证明透传后版本断言能取到值且比较逻辑可走通。临时文件用完即删。
+5. **结论二选一**:
+   - ✅ 修复正确 → 报告出验收留证,零代码改动,不 commit;
+   - ❌ 修复不正确/不完整 → 最小补修(只动引号/转义相关字符),重复步骤 2-4 验证,提交 Conventional Commits 中英对照如 `fix(deploy): 补正远程段引号透传 / correct remote quoting passthrough`。
 
 ## 红线
 
-- **不执行真实部署、不 SSH 服务器、不触发任何生产变更**;修复只落在本仓脚本文件。
-- 不改 `my-portfolio/.next/standalone/` 下的任何文件(构建产物,build 时自动再生,手改无效且污染)。
-- 仓内可能有所有者未提交的改动:`git status` 发现后**原样保留**,只提交自己修复的文件。
-- Windows 11 + PowerShell;bash 命令走 Git Bash 语法。
-- 提交前 `git diff --cached` 自查无密钥、无无关文件。
+- **不执行真实部署、不 SSH 服务器、不触发任何生产变更。**
+- 修复正确时不做任何代码改动、不 commit(验收留证写进报告即可);只有发现实际缺陷才允许最小 diff。
+- 仓内有所有者/并行会话未提交改动时原样保留,只提交自己的最小修复(如需)。
+- 不改 `my-portfolio/.next/` 下任何文件(构建产物)。
+- Windows 11 + PowerShell;bash 走 Git Bash 语法;提交前 `git diff --cached` 自查。
 
 ## 验收标准
 
-1. 复现证据:修复前远端段断言步的失衡命令文本(报告引用);
-2. 修复后三项验证全绿(语法/展开/最小复现)各有命令与输出留证;
-3. `git diff` 只含引号修复相关改动(预期 <10 行);
-4. commit 落库,工作区干净(除所有者原有改动)。
+1. 透传机制说明 + L175 远端实际收到形态的提取证据(命令与输出留证);
+2. 三项验证(bash -n / 提取文本 bash -n / 最小等价复现)各留证;
+3. 明确结论:修复正确(验收通过)或补修 diff + 提交哈希。
 
 ## 报告要求
 
 完成后**整文件覆盖写入**:
 `C:\Users\TimeCraker\Desktop\my_workspace\agent-hive\runs\reports\FIXPSF-report.md`
 
-模板:`# FIXPSF 结果报告` / `## 结论一句话` / `## 透传机制说明` / `## 根因复现(修复前)` / `## 修复内容` / `## 验证留证` / `## 提交记录` / `## 自评`
+模板:`# FIXPSF 结果报告` / `## 结论一句话` / `## 透传机制说明` / `## L175 远端形态提取验证` / `## 三项验证留证` / `## 结论(验收通过 / 补修记录)` / `## 自评`

@@ -1,108 +1,62 @@
-# MPF 结果报告
+# MPF-report — my-portfolio 文档保鲜度审计与修复（Wave 8）
 
-> 任务：my-portfolio 文档审计与清理（2026-10-05）· 范围：仓内全部 86 篇 git 追踪 Markdown · 红线遵守：只动 *.md、未 push、未跑 install/build
+- 日期：2026-10-06
+- 执行：文档保鲜度审计 Agent（MPF）
+- 对象：`C:/Users/TimeCraker/Desktop/my_workspace/my-portfolio`（master @ b6101c1，工作区干净无他人改动）
+- 产出：修正 4 份文档 24 处过期陈述，commit `41fd7ba`（docs 前缀，中英对照，husky lint-staged + commitlint 全过）
 
-## 结论一句话
+## ① 过期点清单
 
-86 篇文档中 6 篇完全过期已删除（旧阿里云部署文档 ×2、他仓错位计划 ×3、UTF-16 损坏空文 ×1），README/CLAUDE/SKILL/archive 共 21 处过期信息已就地更正，hub 侧 7 篇未回灌的指南镜像已同步 + 1 篇缺失补齐，其余判定健康；3 个独立 commit，工作区收尾干净。
+| # | 文档位置 | 改前 | 改后 | 证据 |
+|---|---|---|---|---|
+| 1 | README 概览 | 5 个项目"各有独立叙事详情页" | 4 个有详情页，AI 简历走外链（残骸 2026-09-22 清理） | `find src/app/projects -name page.tsx` 仅 4 静态页；删除提交 `4daf69d chore(projects): 清理简历详情页残骸`（2026-09-22） |
+| 2 | README 特性表 | 项目详情页 ×5，`/projects/{game,resume,…}` | ×4，去 resume | 同上 |
+| 3 | README 架构图 | "Next.js standalone (pnpm next start)" | "(node server.js)" | asterforge-deploy systemd 备份 `ExecStart=/usr/local/node20/bin/node …/.next/standalone/server.js` |
+| 4 | README 技术栈表 | Prisma "9 个 model" | 14 个 | `grep -c "^model " prisma/schema.prisma` = 14（README 数据模型节本就写 14，自相矛盾已消除） |
+| 5 | README 项目结构 | "5 静态详情页" | 4 静态详情页 | find 结果 4 静态 + [slug] |
+| 6 | README 项目结构 | sections "13 个 section 组件" | 14 | `ls src/components/sections/` = 14 tsx（16 文件 − 2 module.css） |
+| 7 | README 项目结构 | game-detail "11 组件" | 14 | `ls` = 14 文件 |
+| 8 | README 项目结构 | mockups "11 个" | 12 | `ls` = 12 文件 |
+| 9 | README 项目结构 | ui "30 个" | 34 | `ls` = 34 tsx（35 文件 − 1 module.css） |
+| 10 | README 项目结构 | lib "30 个工具" | 34 | `ls src/lib/` = 34 |
+| 11 | README 项目结构 | data "5 个项目详情 hardcode data" | 4 | `ls src/data/project-details/` = 4（game/genesis/interview/rag） |
+| 12 | README 项目结构 | schema.prisma "9 个 model" | 14 | 同 #4 |
+| 13 | README 路由表 | `/projects/resume` 整行（3600s） | 删除 | 路由不存在，请求将落 [slug] 动态段或 404 |
+| 14 | README 路由注 | "静态段 projects/resume > 动态段，5 个静态详情页" | "静态段 projects/game 等，4 个" | 同 #1 |
+| 15 | README 徽章 | "mobile 80+ / a11y 100" | "mobile 89 / LCP 2.5s" | A2 复测 Perf 89；a11y 100 无 2026-10 证据（见 #17） |
+| 16 | README Lighthouse 表 | 标注"2026-10-03 A2 复测"却含 TBT ~60ms / CLS 0.008 / a11y·BP·SEO 100 / "此前 4-run 80~88 / LCP ~3.4s" | A2 可溯源数据：Perf 89（次轮 81）/ LCP 2.46–2.72s / TBT 0.27–0.53s / 桌面 98–99；pre 改"同日两轮 47–81 / 3.1–5.9s"；BP/SEO/CLS 标注 2026-07 后未复测待人工确认 | asterforge-deploy `perf-baselines/retests/RETEST-2026-10.md` 补充节：post 仅测 Perf/LCP/TBT/桌面；TBT 移动 270-527ms；"~60ms/0.008"全仓无出处 |
+| 17 | README 可访问性段 | "Lighthouse a11y 满分 100" | 97（2026-10-03 基线；对比度项制作人拍板保持现状，A5 未做） | stage-2026-10-landing-perf.md：基线 A11y 97；验收标准"a11y 97→100（若做 A5）"，A5 已拍板不做 |
+| 18 | CLAUDE.md 这是什么 | "5 个静态项目详情页" | 4 个（列名 game/interview/genesis/rag） | 同 #1 |
+| 19 | CLAUDE.md 三层数据源 | "5 个项目详情 project-details/*.ts" | 4 个 | 同 #11 |
+| 20 | CLAUDE.md 组件与数据流 | "主页 13 段" | 14 段 | 同 #6 |
+| 21 | CLAUDE.md 路由优先级 | "5 个静态段（game/resume/…）" | 4 个，注明 resume 已清理走外链 | 同 #1 |
+| 22 | DESIGN.md 星图装饰色四档 | starline-strong 0.07 / starline-mid 0.05 | 0.1 / 0.07 | `src/app/globals.css:145-146` |
+| 23 | DESIGN.md z 令牌 | `--z-overlay:9998`（漏列两档） | `--z-modal:9998 / --z-modal-top:9999 / --z-admin-modal:10000` 补齐 | `globals.css:136-141`；与 motion.ts 顶部表镜像注释一致 |
+| 24 | SKILL.md 部署原子操作注 | "服务器实际跑 `pnpm exec next start -p 3000`" | systemd unit ExecStart = `node …/.next/standalone/server.js`（standalone 产物） | 同 #3；README/package.json `start` 三处互证 |
 
-## 文档清单判定表（全量 86 篇，路径|主题|判定|处置）
+## ② 核对无误条目（抽样可复现）
 
-### 根与 docs/ 根（13 篇）
+- **版本徽章/技术栈表**：Next 16.3.7 / React 19.2.4 / TS 5.9.3 / Tailwind 4.1.8 / Motion 12.15 / three 0.184 / lucide 0.511 / dnd-kit 6.3——package.json + pnpm-lock 逐一相符（Prisma 行 "6.9" 为 manifest semver 下限口径，实际装 6.19.3，范围内）
+- **48 个 route handler**：`find src/app/api -name route.ts` = 48
+- **8 章节叙事**：`home-chapters.ts` HOME_CHAPTERS 恰 8 章（INTRO…CONNECT），TechMarquee 为插曲不算章
+- **20 份安装指南**：`ls public/config/guides/*.md` = 20；**"20+ 工具配置包"**：分发包实况 21 个 zip/exe
+- **90+ 格式白名单**：`vault.ts` EXT_MAP 95 keys；**密码解锁 2h**：`vault-auth.ts:16 SESSION_TTL_MS = 2*60*60*1000`
+- **admin 7 tab**：7 个 tab 组件 + AdminConsole 壳 + 辅助 Modal；**project-detail "30+"**：实况 33
+- **部署事实链**：`scripts/deploy-portfolio-safe.sh` 存在；systemd unit（asterforge-deploy R54 巡检同步备份）验证端口 3000、路径 /home/ubuntu/my-portfolio、EnvironmentFile .env；`scripts/archive/README.md` 归档清单与"现行权威路径"表文件逐一存在
+- **CLAUDE.md**：pnpm-workspace.yaml 仅 `packages: - .`（hub 不被吸收 ✓，hub/package-lock.json 存在即 npm ✓）；scripts 表与 package.json 一致；`tsconfig` 排除 hub 佐证"不碰它"
+- **DESIGN.md 色板 13 项**与 globals.css 亮色定义全部一致（canvas/parchment/ink/ink-muted/ink-subtle/signal/signal-text/signal-solid/signal-on-dark/surface-band/page-dark/surface-band-card/hairline/genesis-accent）；圆角四档、ease/dur 曲线、starline-accent/faint 一致
+- **rules.md**：令牌比值表、三层纪律、z 表（与 motion.ts 顶部表一致）；`--signal-hover` 确存（globals.css:48）
+- **stage-2026-10-landing-perf.md**：§6 实施提交表 6 笔 hash（437349a/f62b13c/47b1c38/c28d74c/bad821f/635812f）与 git log 全部对上
+- **hub/ 版本表述（重点项）**：hub 版本仅存于 `tauri.conf.json`（0.1.18），全部文档未硬编码版本号；17 篇 resources README 抽查 3 篇（claude-code/gh/uv）版本均为泛指命令输出，无过期风险（b2d2eac 已于近期回灌 7 篇 + 补 antigravity）
+- **docs/CynosDB-初始化步骤.md**：为 asternova 后端（game_dev 库）操作快照，非本站数据库声明，与 SQLite 陈述不冲突 → 保留
+- **ICP 备案号 / 域名 / 邮箱**：外部事实，本地不可核实，保留原样
 
-| 路径 | 主题 | 判定 | 处置 |
-| --- | --- | --- | --- |
-| README.md | 权威总览 | 过期（详情页 ×4 漏 rag、缺 /config 与 hub、admin 5 tab、model 9、API 25、npm install、Lighthouse 旧值、Lenis 死依赖、env 缺 2 项） | 已更正 4ec32ab |
-| CLAUDE.md | Agent 指引 | 过期（stages 写死 5 个实际 19、引用已删的 DEPLOY/FRESH_INSTALL） | 已更正 aefb499+4ec32ab |
-| docs/DEPLOY.md | 阿里云 Docker 部署指南 | **完全过期**（阿里云+docker compose+cursoruse.pem+`NEXT_PUBLIC_ADMIN_PASSWORD` 暴露密码反模式+一次性 Cursor 排障；现权威为 SKILL.md+asterforge-deploy 仓） | **已删除** aefb499 |
-| docs/FRESH_INSTALL.md | 旧服务器从零部署 | **完全过期**（/home/admin 旧机、阿里云 deploy key、deploy-light Docker 形态、旧 game 仓库；冷启动权威=asterforge-deploy COLD-START） | **已删除** aefb499 |
-| docs/DESIGN.md | 星图制图台视觉单一事实源（更新至 09-30） | 健康 | 留 |
-| docs/HANDOFF-vault-phase2.md | vault 二期交接（2026-08-21） | 一次性使命终结（stage 17/17 全勾），但第 2 章「架构铁律」（三级 token/next.config 覆盖/pagehide beacon）有长期价值 | 留·建议人工复核 |
-| docs/CynosDB-初始化步骤.md | 游戏后端 CynosDB MySQL 初始化 | 过期+错位（服务已封存、「Resume 在阿里云」失实、属 games 域不属本仓） | 留·建议人工复核 |
-| docs/2026-08-29-nextjs16-upgrade-spec.md | Next16 升级 spec | 健康（历史留痕，配对 report） | 留 |
-| docs/2026-08-29-nextjs16-upgrade-report.md | 升级验收报告（版本对照+坑） | 健康（知识沉淀） | 留 |
-| docs/2026-08-29-guides-uplift-zcode-spec.md | 指南扩写 spec（含 GuideModal 白名单） | 健康（历史留痕，配对 acceptance） | 留 |
-| docs/guides-uplift-acceptance.md | 扩写验收留痕（脚本行号事实源） | 健康 | 留 |
-| docs/ui-polish/AUDIT.md | 永续 UI 审计台账 | 健康（活跃） | 留 |
-| docs/ui-polish/rules.md | UI 规则台账（DESIGN.md 唯一登记处） | 健康 | 留 |
+**按快照性质豁免未改**：`docs/stages/*`（18 篇历史 Stage Spec）、`docs/2026-08-29-*`（升级报告/spec）、HANDOFF、guides-uplift-acceptance、`.claude/plans/*`、AUDIT.md——内容自带时点标注，属历史记录而非现状陈述。
 
-### docs/stages/（19 篇，仓库惯例保留的历史 spec）
+## ③ 自评
 
-| 路径 | 主题 | 判定 | 处置 |
-| --- | --- | --- | --- |
-| stage-2026-07-brand-presence.md | 品牌存在感 | 健康（历史） | 留 |
-| stage-2026-07-cinematic-visual-upgrade.md | 电影感视觉升级 | 健康（已完成） | 留 |
-| stage-2026-07-portfolio-refinement.md | 主站精修 | 健康（历史） | 留 |
-| stage-2026-07-timecraker-master-mark.md | 品牌标记 | 健康（历史） | 留 |
-| stage-2026-07-visual-universe-rebuild.md | 视觉宇宙重建 | 状态行挂起（[~] 进行中，后续 spec 已实际接棒） | 留·建议人工复核（收尾状态行） |
-| stage-2026-08-cloud-vault.md | vault 一期立项 | 状态行挂起（「待确认」，实际已上线） | 留·建议人工复核 |
-| stage-2026-08-config-wave2.md | /config 第二波 | 健康（历史） | 留 |
-| stage-2026-08-homepage-polish.md | 主页暗色修复 | 健康（历史） | 留 |
-| stage-2026-08-project-pages-redesign.md | 详情页改版 | 健康（历史） | 留 |
-| stage-2026-08-site-uplift.md | 站点升级批 | 健康（历史） | 留 |
-| stage-2026-08-tool-config-center.md | /config 中心本体 | 健康（历史） | 留 |
-| stage-2026-08-tool-config-upgrade.md | Hub exe+指南弹层 | 健康（历史） | 留 |
-| stage-2026-08-vault-folders.md | vault 文件夹 | 健康（历史） | 留 |
-| stage-2026-08-vault-phase2.md | vault 二期（17/17 全勾） | 健康（已完成） | 留 |
-| stage-2026-08-vault-ux-polish.md | vault 30 项 UX | 健康（历史） | 留 |
-| stage-2026-09-art-upgrade.md | 美术 S0-S9 | 健康（已完成） | 留 |
-| stage-2026-09-art-upgrade-2.md | 显影轮 T1-T6 | 健康（已完成） | 留 |
-| stage-2026-09-tail-features.md | 小尾巴 4 项+新功能 | 健康（历史） | 留 |
-| stage-2026-10-landing-perf.md | 落地页性能（当日活跃） | 健康 | 留 |
-
-### skills / plans（15 篇）
-
-| 路径 | 主题 | 判定 | 处置 |
-| --- | --- | --- | --- |
-| .agents/skills/my-portfolio/SKILL.md | 运维单一真相源 | 过期（「npm（本地）」、两处「npm ci」，服务器实况 pnpm install --frozen-lockfile） | 已更正 4ec32ab |
-| .agents/skills/add-tool-config/SKILL.md | 新增工具流程 | 过期（指南模板仍四段，08-29 已落地五段骨架） | 留·建议人工复核（与 .claude 双份联动） |
-| .claude/skills/add-tool-config/SKILL.md | 同上（与 .agents 逐字节双份） | 同上 | 同上 |
-| .claude/skills/avant-garde-design/SKILL.md | 前卫设计禁忌 | 健康 | 留 |
-| .claude/skills/avant-garde-design/RULES.md | 配套验证规则 | 健康 | 留 |
-| .claude/skills/awwwards-3d.md | 3D 方法论 | 健康 | 留 |
-| .claude/skills/cinematic-frontend/SKILL.md | 电影感方法论 | 健康（版本声明 Next 15 为 skill 锁定口径，不改） | 留 |
-| .claude/skills/cinematic-frontend/CHECKLIST.md | 配套清单 | 健康 | 留 |
-| .claude/skills/cinematic-frontend/MOTION-RECIPES.md | 动效配方 | 健康 | 留 |
-| .claude/skills/cinematic-frontend/PITFALLS.md | 坑清单 | 健康 | 留 |
-| .claude/skills/three/SKILL.md | Three.js 方法论 | 健康 | 留 |
-| .claude/plans/detail-scroll-layout-fix.md | 详情页滚动修复方案 | 一次性已实施（Lenis 已移除获代码证实） | 留·建议人工复核（是否留痕） |
-| .cursor/plans/写完_9_个_stage_spec_1eb6f8bf.plan.md | ResumeAIX 仓规划 | **完全过期+错位**（规划对象是 ResumeAIX/docx/stages） | **已删除** aefb499 |
-| .cursor/plans/商业矩阵开源复用规划_86813991.plan.md | ResumeAIX 矩阵规划 | **完全过期+错位**（同上） | **已删除** aefb499 |
-| .cursor/plans/封板落地收尾_d2f09f5c.plan.md | 6 月封板收尾 | **完全过期**（引用已消失的 deploy-artifacts、旧部署形态） | **已删除** aefb499 |
-
-### hub / public / scripts（38 篇）
-
-| 路径 | 主题 | 判定 | 处置 |
-| --- | --- | --- | --- |
-| hub/src-tauri/resources/{dbeaver,steam,chrome,nanazip,vlc,terminal,git}/README.md ×7 | Hub 内嵌指南镜像 | **过期**（停在 08-14~08-17 快照，08-29 五段重写未回灌；engine.rs 契约与主站同源） | **已同步** b2d2eac（cmp 逐字节一致） |
-| hub/src-tauri/resources/antigravity/README.md | （原缺失） | **结构缺陷**（descriptor 已注册+脚本在库，缺 README 致 Hub 指南面板空） | **已补齐** b2d2eac |
-| hub/src-tauri/resources/{claude-code,dsh,docker,gh,pi,uv,volume-keys,vscode,wsl}/README.md ×9 | Hub 内嵌指南镜像 | 健康（与 guides 逐字节相同） | 留 |
-| public/config/README.md | 分发包目录约定 | 健康 | 留 |
-| public/config/guides/ 20 篇（vscode-install/wsl/antigravity/vlc/uu-remote/terminal-config/steam-install/nanazip/git-config/dbeaver-install/chrome-install/volume-keys/uv/github-cli/docker-desktop/hibit-uninstaller/deepseek-harness/pi/claude-code/clash） | 站点安装指南 | 健康（20 slug 全被 tool-configs.ts 引用，无孤儿无重复） | 留（clash/claude-code/pi 星号语法遗留见复核） |
-| public/game-assets/README.md | （UTF-16 损坏） | **完全过期**（编码损坏，内容仅一行目录名零信息量） | **已删除** aefb499 |
-| scripts/archive/README.md | 退役脚本归档说明 | 引用悬空（表引用已删的 DEPLOY/FRESH_INSTALL） | 已更正 aefb499 |
-
-## 已执行处置与提交
-
-| commit | 类型 | 改动摘要 |
-| --- | --- | --- |
-| aefb499 | docs: 删除 | 6 文件 -1728 行：DEPLOY.md、FRESH_INSTALL.md、.cursor/plans ×3、game-assets/README；同步修复 CLAUDE.md/README.md/scripts/archive/README.md 三处引用 |
-| 4ec32ab | docs: 更正 | README 15 处（×5 详情页、/config+vault+hub 补全、7 tab、model 14、API 48、pnpm、Lighthouse Perf 89/LCP ~2.5s、删 Lenis 行、env +2）、CLAUDE stages 去写死、SKILL pnpm 实况 ×3 |
-| b2d2eac | docs(hub): 同步 | 7 篇 README 回灌 + antigravity 新增（+406 -76），提交前后两轮 cmp 校验 8 对全部与 guides 逐字节一致 |
-
-验证：`git status --porcelain` 收尾为空（对比初始快照仅多上述已提交文档改动）；`git log --oneline -5` 见 3 个 docs 提交；未 push、未触碰任何非 md 文件。
-
-## 建议人工复核
-
-1. **docs/HANDOFF-vault-phase2.md**：交接使命已终结，建议把第 2 章「架构铁律」（vault 三级 token 前缀隔离、next.config headers 覆盖、pagehide beacon、FALLBACK）迁入 SKILL.md 或 DESIGN.md 后删除全文。
-2. **docs/CynosDB-初始化步骤.md**：游戏后端已封存且属 games 域，建议迁至 games/asternova 或 asterforge-deploy 仓，或确认 CynosDB 集群退役后删除。
-3. **add-tool-config SKILL（.claude+.agents 双份）**：指南模板仍是旧四段，与 08-29 落地的五段骨架（多「包里有什么」「卸载与回滚」）脱节，需拍板新模板口径后两份同步改。
-4. **guides 星号语法遗留**：clash.md（10 处）、claude-code.md（11 处）、pi.md（1 处）含 GuideModal 不支持的 `**粗体**`（星号原样露出）；pi.md 版本硬编码 0.82.0。
-5. **两篇 stage 状态行挂起**：stage-2026-07-visual-universe-rebuild（[~] 进行中）、stage-2026-08-cloud-vault（待确认）实际均已被后续工作接棒/上线，建议补收尾状态。
-6. **scripts/deploy.sh 与 nginx-site.conf**：原引用方（DEPLOY/FRESH_INSTALL）已删，二者现无文档引用（deploy.sh 自述仍为阿里云 Docker），建议评估移入 scripts/archive/（动脚本超出本次只动 md 的红线，未处理）。
-7. **.claude/plans/detail-scroll-layout-fix.md**：一次性修复方案已实施（代码证实 Lenis 已移除），留痕价值低，可删可留。
-8. **hub 双端同步无脚本保障**：本次人工回灌后，clash/hibit-uninstaller/uu-remote 三个 web-only 工具刻意不在 hub（descriptor 未注册，非缺陷）；建议后续在 add-tool-config SKILL 或 hub 构建流程加同步校验，防再次分叉。
-
-## 自评
-
-**达标**。理由：报告五段结构完整写入指定路径；3 个 docs 类 commit 可见于 `git log`（删除/更正/同步三类各自独立可回滚）；`git status` 与初始快照对比无越界改动（只动 *.md、未 push、未装依赖）；全量 86 篇逐篇判定有据（每处更正均先以代码/脚本/目录现状核实，如 admin 7 tab、model 14、路由 48、pnpm install 实况、guides 双端 git 历史取证）；不确定项全部保守保留并列 8 条人工复核，未发生误删。
+- **覆盖度**：任务点名 3 份（README / DESIGN.md / ui-polish/rules.md）逐条核对完毕；CLAUDE.md、SKILL.md、config/archive README 同步全查；stages 与验收报告按历史快照豁免；hub resources 抽查 3/17。最大发现是 resume 详情页删除（4daf69d，2026-09-22）后 README/CLAUDE 连带 6 处未回灌，以及 Lighthouse 表把无出处数据（TBT ~60ms/CLS 0.008/a11y 100）挂在 A2 复测名下。
+- **证据纪律**：24 处修正每条对应命令输出 / git 提交 / 权威配置备份；asterforge-deploy 仓仅只读核实，未做任何修改。
+- **保守取舍**：Lighthouse 表收窄为可溯源数据并显式标注"待人工确认"（BP/SEO/CLS 自 2026-07 后未复测），宁可信息量下降也不保留无据数字——符合"不虚构"红线。
+- **遗留待人工确认**：① BP/SEO/CLS 建议跑一轮线上复测回填；② `public/og-resume.png` 已无代码引用（资产残骸，超出本次 .md 红线，建议代码侧评估清理）；③ hub resources 剩余 14 篇未逐篇深查。
+- **提交**：`41fd7ba docs: 修正过期陈述——详情页数/计数/Lighthouse/令牌 / fix stale doc claims`（4 文件 +44/−45，含 lint-staged prettier 表格重排；首次提交因 header 超 100 字符被 commitlint 拒绝，压缩后通过）。

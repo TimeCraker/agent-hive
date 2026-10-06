@@ -24,9 +24,16 @@
       "model": "glm-5.3[1m]",
       "code": "LEK",
       "name": "lekao 文档保鲜度审计",
-      "status": "running",
+      "status": "accepted",
       "dispatchedAt": "2026-10-06T03:41:36.162Z",
-      "pid": 7468
+      "pid": 7468,
+      "settledAt": "2026-10-06T03:50:00.412Z",
+      "sessionId": "156c1114-9a74-4ed7-a536-1915f9b57527",
+      "turns": 51,
+      "costUsd": 3.361936,
+      "outTok": 28096,
+      "acceptedAt": "2026-10-06T03:54:35.145Z",
+      "acceptNote": "抽查 ace742d：3 文件 43+/37- 与报告一致；活文档/历史快照区分聪明；范围干净"
     },
     {
       "cwd": ".",
@@ -35,14 +42,16 @@
       "model": "glm-5.3[1m]",
       "code": "XFZ",
       "name": "xiaofanzhuo 文档保鲜度审计",
-      "status": "reported",
+      "status": "accepted",
       "dispatchedAt": "2026-10-06T03:41:36.181Z",
       "pid": 29628,
       "settledAt": "2026-10-06T03:45:39.460Z",
       "sessionId": "94261fe2-d56b-4bfd-a2c0-999d5564cb9e",
       "turns": 31,
       "costUsd": 1.738258,
-      "outTok": 11710
+      "outTok": 11710,
+      "acceptedAt": "2026-10-06T03:54:35.178Z",
+      "acceptNote": "抽查 228f3e9：README/CHECKLIST/PRD 与报告一致；79 用例数为实跑验证；领先 origin 6 提交未 push 符合红线"
     },
     {
       "cwd": ".",
@@ -51,9 +60,16 @@
       "model": "glm-5.3[1m]",
       "code": "MPF",
       "name": "my-portfolio 文档保鲜度审计",
-      "status": "running",
+      "status": "accepted",
       "dispatchedAt": "2026-10-06T03:41:36.198Z",
-      "pid": 13808
+      "pid": 13808,
+      "settledAt": "2026-10-06T03:50:55.399Z",
+      "sessionId": "a56feba5-9700-4ad8-8974-bfc208d67b35",
+      "turns": 67,
+      "costUsd": 3.5979399999999995,
+      "outTok": 32924,
+      "acceptedAt": "2026-10-06T03:54:35.182Z",
+      "acceptNote": "抽查 41fd7ba：4 文档 24 处与报告一致；husky 全过。备注：越界修复 safe.sh 引号 bug（b6101c1）经主控核读 diff 确认为正确且必要的 beneficial 越界——部署必挂的真 bug，予以认可"
     },
     {
       "cwd": ".",
@@ -62,9 +78,16 @@
       "model": "glm-5.3[1m]",
       "code": "VBS",
       "name": "vibe-studio 文档保鲜度审计",
-      "status": "running",
+      "status": "accepted",
       "dispatchedAt": "2026-10-06T03:44:50.865Z",
-      "pid": 11820
+      "pid": 11820,
+      "settledAt": "2026-10-06T03:49:39.586Z",
+      "sessionId": "d7dcf182-f37b-4660-ace2-f035c27afede",
+      "turns": 51,
+      "costUsd": 2.3150220000000004,
+      "outTok": 13841,
+      "acceptedAt": "2026-10-06T03:54:35.186Z",
+      "acceptNote": "零过期为零修正，诚实结论；自跑仓内 check-docs.py 佐证（0 fail）"
     },
     {
       "cwd": ".",
@@ -73,9 +96,16 @@
       "model": "glm-5.3[1m]",
       "code": "HIVE",
       "name": "agent-hive 文档保鲜度审计",
-      "status": "running",
+      "status": "accepted",
       "dispatchedAt": "2026-10-06T03:45:39.961Z",
-      "pid": 13444
+      "pid": 13444,
+      "settledAt": "2026-10-06T03:51:36.676Z",
+      "sessionId": "cd357901-9004-4631-be66-cde8ea5ce362",
+      "turns": 28,
+      "costUsd": 1.9941339999999999,
+      "outTok": 23223,
+      "acceptedAt": "2026-10-06T03:54:35.189Z",
+      "acceptNote": "10 处 AGENTS.md 修正与库内实况一致（brand/ 行、圆徽继承、状态机措辞）；README/design.md 零过期结论可信"
     },
     {
       "cwd": ".",
@@ -84,7 +114,16 @@
       "model": "glm-5.3[1m]",
       "code": "CPB",
       "name": "coding-plan-bench 文档保鲜度审计",
-      "status": "queued"
+      "status": "accepted",
+      "dispatchedAt": "2026-10-06T03:49:39.589Z",
+      "pid": 34144,
+      "settledAt": "2026-10-06T03:57:53.710Z",
+      "sessionId": "feac7d58-c943-4fd9-81a4-c053198d093e",
+      "turns": 41,
+      "costUsd": 2.6072519999999995,
+      "outTok": 25573,
+      "acceptedAt": "2026-10-06T04:03:29.962Z",
+      "acceptNote": "抽查 5d46bd7 与 10 项核对：framer-motion 零命中、死链修复（0e83d57 删除可溯）、组件清单对齐实现、MIME 修复——全部可复现"
     },
     {
       "cwd": ".",
@@ -93,7 +132,16 @@
       "model": "glm-5.3[1m]",
       "code": "GAM",
       "name": "games 文档保鲜度审计",
-      "status": "queued"
+      "status": "accepted",
+      "dispatchedAt": "2026-10-06T03:50:00.414Z",
+      "pid": 30724,
+      "settledAt": "2026-10-06T04:06:28.274Z",
+      "sessionId": "5c2868bd-6049-48d1-a2cb-885a95598c67",
+      "turns": 85,
+      "costUsd": 11.392854000000003,
+      "outTok": 44240,
+      "acceptedAt": "2026-10-06T04:13:45.270Z",
+      "acceptNote": "20 个 .md +143/−73 实证（CI 已生效修正已在库可见）；美术会话 60 脏文件共存 → 守卫正确跳过 commit，修正留工作区随该会话收口，主控未代提交"
     },
     {
       "cwd": ".",
@@ -102,7 +150,16 @@
       "model": "glm-5.3[1m]",
       "code": "AFD",
       "name": "asterforge-deploy 文档保鲜度审计",
-      "status": "queued"
+      "status": "accepted",
+      "dispatchedAt": "2026-10-06T03:50:55.994Z",
+      "pid": 28240,
+      "settledAt": "2026-10-06T03:58:32.447Z",
+      "sessionId": "6e5a178a-34cf-431e-8840-3a865bcd6448",
+      "turns": 48,
+      "costUsd": 2.8012200000000003,
+      "outTok": 28881,
+      "acceptedAt": "2026-10-06T04:03:29.990Z",
+      "acceptNote": "19 处修正实证：4 文件 28+/22- 一致；快照计数 14/13 逐个对上；.old- 回滚档废止的多处自相矛盾修正有价值。他人 WIP 守卫触发跳过 commit，主控实证后代为提交"
     },
     {
       "cwd": ".",
@@ -111,7 +168,16 @@
       "model": "glm-5.3[1m]",
       "code": "VSW",
       "name": "video-script-workflow 文档保鲜度审计",
-      "status": "queued"
+      "status": "accepted",
+      "dispatchedAt": "2026-10-06T03:51:36.679Z",
+      "pid": 19628,
+      "settledAt": "2026-10-06T03:56:05.997Z",
+      "sessionId": "e89c172d-5ee8-4522-9266-826d00b1122c",
+      "turns": 27,
+      "costUsd": 1.320108,
+      "outTok": 14596,
+      "acceptedAt": "2026-10-06T04:05:29.731Z",
+      "acceptNote": "3 处修正实证 1ed0fcf（阅读器目录树补全/收录归属/时长下界 14s 逐条核对）✓；2 处创作矛盾（角色档案高二 vs 视频生成器已满18岁声明）正确上报未擅改——待用户裁决；归属矛盾已实测裁决：独立私有仓属实，CLAUDE 地图正确"
     },
     {
       "cwd": ".",
@@ -120,7 +186,16 @@
       "model": "glm-5.3[1m]",
       "code": "SEX",
       "name": "sex-workspace 文档保鲜度审计",
-      "status": "queued"
+      "status": "accepted",
+      "dispatchedAt": "2026-10-06T03:56:06.000Z",
+      "pid": 8008,
+      "settledAt": "2026-10-06T04:02:51.796Z",
+      "sessionId": "6cc7b9b2-7a2b-4d86-8803-50b100a30075",
+      "turns": 31,
+      "costUsd": 1.9636339999999999,
+      "outTok": 17095,
+      "acceptedAt": "2026-10-06T04:05:29.756Z",
+      "acceptNote": "3 处文档缺失补齐（金句卡/双页对开/书眉——3 个 feature commit 落码未落文档），代码行号级证据 ✓；sex2 有他人 WIP 守卫正确跳过 commit，修正留在工作区待归属落定"
     },
     {
       "cwd": ".",
@@ -129,7 +204,16 @@
       "model": "glm-5.3[1m]",
       "code": "PWA",
       "name": "pwa-hw-voice 文档保鲜度审计",
-      "status": "queued"
+      "status": "accepted",
+      "dispatchedAt": "2026-10-06T03:57:54.585Z",
+      "pid": 35996,
+      "settledAt": "2026-10-06T03:59:06.440Z",
+      "sessionId": "474e9402-8b3c-4522-8a79-4ad3c1b6f702",
+      "turns": 7,
+      "costUsd": 0.393742,
+      "outTok": 2857,
+      "acceptedAt": "2026-10-06T04:05:29.760Z",
+      "acceptNote": "4/4 陈述核对无误，诚实零修正结论（协议归档仓无漂移可言）；无 commit 属实"
     },
     {
       "cwd": ".",
@@ -138,7 +222,16 @@
       "model": "glm-5.3[1m]",
       "code": "CFG",
       "name": "config 文档保鲜度审计",
-      "status": "queued"
+      "status": "accepted",
+      "dispatchedAt": "2026-10-06T03:58:32.450Z",
+      "pid": 29416,
+      "settledAt": "2026-10-06T04:11:08.812Z",
+      "sessionId": "feb12617-afe3-4836-8d88-551f65b9cb92",
+      "turns": 77,
+      "costUsd": 3.635909999999999,
+      "outTok": 33075,
+      "acceptedAt": "2026-10-06T04:13:45.298Z",
+      "acceptNote": "14 处修正 / 5 子仓各 1 docs commit，7 仓工作区收尾干净；重要发现：mimo device_id 写死在被追踪 config.json 且无远端——首次 push 前须移出/轮换（升级挂账 #1 为具体动作项）"
     },
     {
       "cwd": ".",
@@ -147,7 +240,16 @@
       "model": "glm-5.3[1m]",
       "code": "ROOTDOC",
       "name": "工作区根文档一致性审计（CLAUDE.md + AGENTS.md）",
-      "status": "queued"
+      "status": "accepted",
+      "dispatchedAt": "2026-10-06T03:59:06.443Z",
+      "pid": 31480,
+      "settledAt": "2026-10-06T04:04:52.809Z",
+      "sessionId": "290e859f-757c-4052-90a6-ff5afdd96ad8",
+      "turns": 33,
+      "costUsd": 1.8260819999999998,
+      "outTok": 22303,
+      "acceptedAt": "2026-10-06T04:13:45.303Z",
+      "acceptNote": "12 处修正已落地实证（ResumeAIX 定位/子仓指引精确列举/lekao CLAUDE.md/my-portfolio DEPLOY 失效/scratch 删除/stage27 新行/Lekao 大写 L/RAG 表述/VSW 独立仓裁决与 VSW 审计结论交叉印证一致）"
     }
   ],
   "title": "全仓文档保鲜度审计（14 任务：13 仓 + 根文档）",
