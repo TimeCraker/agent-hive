@@ -63,6 +63,23 @@ h1 .thin::before{content:'·';margin-right:8px;color:var(--ink3)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 @media (prefers-reduced-motion:reduce){.live{animation:none}}
 
+/* ═══ Wave 切换条：活跃在前，完结置灰，点击跳转 ═══ */
+.wavewrap{margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.wavewrap .wlbl{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;color:var(--ink3);margin-right:4px}
+.wchip{font-family:var(--mono);font-size:11px;color:var(--ink2);background:transparent;
+  border:1px solid var(--line2);padding:6px 13px;cursor:pointer;display:inline-flex;
+  align-items:center;gap:8px;transition:all .15s var(--ease);white-space:nowrap}
+.wchip:hover{border-color:var(--ink3);color:var(--ink)}
+.wchip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wchip.cur{background:var(--ink);border-color:var(--ink);color:#F3F2ED}
+.wchip.cur .wstat{color:#C9C8BE}
+.wchip.idle{opacity:.45}
+.wdot{width:7px;height:7px;border-radius:50%;flex:0 0 auto}
+.wdot.on{background:var(--st-running);animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}
+.wdot.off{background:var(--st-done)}
+.wstat{font-size:10px;color:var(--ink3);font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:reduce){.wdot.on{animation:none}}
+
 /* ═══ 统计带 ═══ */
 .statsband{display:flex;align-items:stretch;background:var(--panel);border:1px solid var(--line-strong);
   margin-top:20px;box-shadow:3px 3px 0 rgba(26,26,24,.06)}

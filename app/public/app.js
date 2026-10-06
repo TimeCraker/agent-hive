@@ -294,6 +294,27 @@ function updateUsageFooter(t) {
   document.getElementById('d-bytes').textContent = bits.join(' · ');
 }
 
+// ── Wave 切换条：活跃在前，完结置灰，点击跳转 ──
+async function loadWaves() {
+  try {
+    const r = await fetch('/api/waves');
+    const d = await r.json();
+    const wrap = document.getElementById('wavewrap');
+    wrap.innerHTML = '<span class="wlbl">WAVES</span>' + (d.waves || []).map(w => {
+      const running = (w.counts.running || 0) + (w.counts.queued || 0) + (w.counts.pending || 0);
+      const accepted = (w.counts.accepted || 0) + (w.counts.done || 0);
+      const cur = w.wave === WAVE;
+      const cls = 'wchip' + (cur ? ' cur' : '') + (w.active ? ' act' : ' idle');
+      const dot = '<span class="wdot ' + (w.active ? 'on' : 'off') + '"></span>';
+      const stat = w.active ? (running ? running + ' 在跑' : '待派发') : '✓ ' + accepted + '/' + w.total;
+      return '<button class="' + cls + '" data-w="' + w.wave + '" title="' + esc(w.title || w.wave) + '">'
+        + dot + w.wave.replace(/^wave/i, 'Wave ') + '<span class="wstat">' + stat + '</span></button>';
+    }).join('');
+    wrap.querySelectorAll('.wchip').forEach(b => b.onclick = () => { location.href = '/?wave=' + b.dataset.w; });
+  } catch (e) { /* 忽略 */ }
+}
+loadWaves();
+
 // ── 事件绑定 ──
 document.getElementById('d-close').onclick = closeTerminal;
 document.getElementById('scrim').onclick = closeTerminal;

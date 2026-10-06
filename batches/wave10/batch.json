@@ -1,0 +1,17 @@
+{
+  "wave": "wave10",
+  "title": "第十波 · ~/.claude 配置仓审计（1 任务）",
+  "tasks": [
+    {
+      "code": "AUDCLD",
+      "name": "C:/Users/TimeCraker/.claude 配置仓安全与卫生审计（只读）",
+      "goal": "被追踪 settings/switch 脚本零密钥实证 + git 全历史扫描留证 + README/rules/skills 一致性抽查 + 磁盘体积台账（禁读会话转录），分级清单 P0-P3",
+      "model": "glm-5.3[1m]",
+      "cwd": "C:\\Users\\TimeCraker\\.claude",
+      "promptFile": "prompts/AUDCLD.md",
+      "status": "running",
+      "dispatchedAt": "2026-10-06T04:19:48.806Z",
+      "pid": 19368
+    }
+  ]
+}

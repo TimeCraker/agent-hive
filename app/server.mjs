@@ -415,6 +415,26 @@ setInterval(() => {
 
 const server = http.createServer((req, res) => {
   const u = new URL(req.url, 'http://x');
+  if (u.pathname === '/api/waves') {
+    // 波次清单：活跃（有 running/queued/pending）在前，完结在后
+    try {
+      const list = [];
+      for (const d of fs.readdirSync(path.join(ROOT, 'batches'), { withFileTypes: true })) {
+        if (!d.isDirectory() || !WAVE_RE.test(d.name)) continue;
+        try {
+          const b = JSON.parse(fs.readFileSync(path.join(ROOT, 'batches', d.name, 'batch.json'), 'utf8'));
+          const c = {};
+          for (const t of b.tasks || []) c[t.status] = (c[t.status] || 0) + 1;
+          const active = ((c.running || 0) + (c.queued || 0) + (c.pending || 0)) > 0;
+          list.push({ wave: d.name, title: b.title || '', total: (b.tasks || []).length, counts: c, active });
+        } catch (e) { /* 坏 batch 跳过 */ }
+      }
+      list.sort((a, b) => (b.active - a.active) || a.wave.localeCompare(b.wave, undefined, { numeric: true }));
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ waves: list }));
+    } catch (e) { res.writeHead(500); res.end('{"error":"scan failed"}'); }
+    return;
+  }
   if (u.pathname === '/api/events') {
     // SSE：握手后由 ticker/watch 推送；客户端断开自动清理
     const w = u.searchParams.get('wave') || 'wave1';
