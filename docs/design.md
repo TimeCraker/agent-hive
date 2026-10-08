@@ -90,3 +90,9 @@
 - 增长实测：logs ~26MB/波，batches ~50KB/波，reports ~300KB/波 → 只需要管 logs
 - `app/archive.ps1`：波全终态压缩至 `runs/archive/<wave>-logs.zip` 并删原目录；内置活跃任务守卫（running/queued/pending 存在即拒绝）
 - 铁律 #8 入章；用户拍板：当前直接清理（22.1MB→0），归档模式留给想留底的场景
+
+## 2026-10-07 · v4（wave12-17 CPB 三波实战 · 健壮性三件套）
+
+1. **思考看门狗**：GLOBE 两次陷入「27k+ tokens 连续思考、零工具调用」死循环（被迫 kill + fresh 重派）。修法：`tailLog` 解析 `thinking_tokens` 系统事件收获最近思考块 tokens，超 `HIVE_OVERTHINK_TOK`（默认 20000）且 8KB 尾窗零 say/tool 产出 → 状态带 `overthink`，面板 LIVE 列显示「⚠ 深思 Nk · 近窗零产出」。只告警不自动杀——阈值内深思考是 effort=max 正常形态（FORM 16.5k 思考后产出优质），干预归主控。
+2. **sessionId 增量落盘**：原只在收档（result 事件）时收获 sessionId——服务重启连带杀会话时 result 永不出现，resume 能力随进程蒸发（wave17 EYE 任务实犯：被迫放弃续派改 fresh）。修法：流式期即从任意带 session_id 的系统事件收获并即时写 batch.json。
+3. **孤儿收档自愈**：原自愈只覆盖「日志已有 result 而 batch 仍 running」；新增「进程死亡（pid 探活失败）+ 日志停更超 HIVE_STALE_MINUTES + 无 result」→ `/api/status` 扫描就地收档 `failed`（failReason=`server-restart-orphaned`），batch.json 不再出现永久卡死的 running。

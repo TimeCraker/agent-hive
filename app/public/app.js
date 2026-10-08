@@ -82,7 +82,8 @@ function render(d) {
     // 实时预览列每行都渲染（列宽固定，行行对齐）；无事件时显示占位
     const last = t.events && t.events.length ? [...t.events].reverse().find(e => e.s != null) : null;
     let liveInner;
-    if (last) liveInner = '<div class="lv-title">LIVE</div><div class="lv-line"><b>' + (last.k === 'tool' ? '⚙' : '💬') + '</b> ' + esc(last.s).slice(0, 80) + '</div>';
+    if (t.overthink) liveInner = '<div class="lv-title">LIVE</div><div class="lv-line"><b style="color:var(--st-reported)">⚠</b> 深思 ' + Math.round((t.thinkTok || 0) / 1000) + 'k · 近窗零产出</div>';
+    else if (last) liveInner = '<div class="lv-title">LIVE</div><div class="lv-line"><b>' + (last.k === 'tool' ? '⚙' : '💬') + '</b> ' + esc(last.s).slice(0, 80) + '</div>';
     else if (t.legacy) liveInner = '<div class="lv-title">LEGACY</div><div class="lv-line">旧版派发，无流式日志</div>';
     else liveInner = '<div class="lv-title">LIVE</div><div class="lv-line">—</div>';
     const live = '<div class="rc-live">' + liveInner + '</div>';

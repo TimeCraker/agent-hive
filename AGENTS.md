@@ -56,6 +56,8 @@ wave1 起实际数据中另有以下扩展字段（观测/回填用，派发不�
 - `sessionId` / `turns` / `costUsd` / `outTok`：会话收档时自动从 result 事件收获——sessionId 是 resume 续派的原料，turns/costUsd/outTok 是成本台账（outTok 为输出 tok，抽屉 tok/s 的分子）
 - `resumeCount` / `followUp`：续派深度（上限 3）与最近一次续派指令
 - `pid`：本次 spawn 的进程号（`/api/kill` 的目标）
+- `thinkTok` / `overthink`：思考看门狗遥测——当前思考块 tokens 与超阈标记（`HIVE_OVERTHINK_TOK` 默认 20000，且 8KB 尾窗零 say/tool 产出才触发）；面板 LIVE 列显示「⚠ 深思 Nk · 近窗零产出」，干预仍归主控（kill + fresh 重派或接管直改）
+- `sessionId` 增量落盘：流式期即从系统事件收获（不等收档），服务重启后 resume 能力不丢；另有孤儿自愈——running 任务进程死亡 + 日志停更 + 无 result 时 `/api/status` 就地收档 `failed`（failReason=`server-restart-orphaned`）
 - `failReason`：failed 时的机器判定（`no-result-event` / `no-report` / API 错误摘要）
 - `acceptedAt`·`acceptNote` / `rejectedAt`·`rejectNote`：验收记录（rejectNote 会作为续派提示词预填）
 - `settledAt` / `killedAt`：收档与强制结束的时间戳

@@ -17,6 +17,12 @@ const CLAUDE_EXE = path.join(process.env.APPDATA, 'npm', 'node_modules', '@anthr
 const MAX_CONCURRENT = Number(process.env.HIVE_MAX_CONCURRENT || 4);
 // running 且日志无增长超过此时长 → 面板标 stale（仅提示，不改状态；处置走 /api/kill）
 const STALE_AFTER_MS = Number(process.env.HIVE_STALE_MINUTES || 5) * 60 * 1000;
+// 思考看门狗阈值：当前思考块超此 tokens 且近窗（8KB 尾部）零工具/文本产出 → 面板标 overthink（wave12 GLOBE 两次 27k+ 沉思死循环教训）
+const OVERTHINK_TOK = Number(process.env.HIVE_OVERTHINK_TOK || 20000);
+// 进程存活探测（孤儿收档用）
+function pidAlive(pid) {
+  try { process.kill(pid, 0); return true; } catch (e) { return false; }
+}
 
 function readZhipuKey() {
   try {
@@ -136,6 +142,15 @@ function buildStatus(wave) {
       base.events = tail.events.filter(e => e.k !== 'usage').slice(-3);
       base.staleFor = logMtime ? Math.round((now - logMtime) / 1000) : null;
       base.stale = logMtime ? (now - logMtime > STALE_AFTER_MS) : false;   // 日志停更提示
+      // 思考看门狗：当前思考块超阈值且近窗零工具/文本产出 → 标记（主控据此早干预，防沉思死循环烧钱）
+      base.thinkTok = tail.thinkTok || null;
+      base.overthink = !!tail.thinkTok && tail.thinkTok >= OVERTHINK_TOK && !tail.events.some(e => e.k === 'tool' || e.k === 'say');
+      // sessionId 增量落盘：流式期就收获（不等收档），服务重启后 resume 能力不丢
+      if (!t.sessionId && tail.sid) {
+        const b2 = loadBatch(wave);
+        const bt2 = b2.tasks.find(x => x.code === t.code);
+        if (bt2 && bt2.status === 'running' && !bt2.sessionId) { bt2.sessionId = tail.sid; saveBatch(wave, b2); }
+      }
       // 自愈：exit 回调丢失（如服务重启）时，日志出现 result 事件而 batch 仍 running → 就地收档
       const res = tail.events.find(e => e.k === 'result');
       if (res) {
@@ -143,6 +158,18 @@ function buildStatus(wave) {
         const bt = b.tasks.find(x => x.code === t.code);
         if (bt && bt.status === 'running') { settleTask(bt, res); saveBatch(wave, b); }
         base.state = res.err ? 'failed' : 'reported';
+      } else if (base.stale && t.pid && !pidAlive(t.pid)) {
+        // 孤儿自愈：进程已死 + 日志停更 + 无 result（服务重启连带杀会话场景）→ failed，并保住已收获的 sessionId
+        const b = loadBatch(wave);
+        const bt = b.tasks.find(x => x.code === t.code);
+        if (bt && bt.status === 'running') {
+          bt.settledAt = new Date().toISOString();
+          if (tail.sid) bt.sessionId = tail.sid;
+          bt.status = 'failed';
+          bt.failReason = 'server-restart-orphaned: 进程死亡且日志停更（服务重启连带杀会话，exit 回调丢失）';
+          saveBatch(wave, b);
+        }
+        base.state = 'failed';
       }
     }
     if (!base.state) base.state = 'running';
@@ -186,10 +213,14 @@ function tailLog(wave, code, since) {
   const text = buf.toString('utf8');
   const lines = text.split('\n').filter(Boolean);
   const events = [];
+  let sid = null;        // 增量收获 session_id（thinking_tokens 等系统事件携带；防服务重启丢失 resume 能力）
+  let thinkTok = 0;      // 最近一次思考块 estimated_tokens（看门狗遥测）
   const complete = text.endsWith('\n') ? lines : lines.slice(0, -1);
   for (const line of complete) {
     try {
       const j = JSON.parse(line);
+      if (!sid && j.session_id) sid = j.session_id;
+      if (j.type === 'system' && j.subtype === 'thinking_tokens' && typeof j.estimated_tokens === 'number') thinkTok = j.estimated_tokens;
       const msg = j.message || {};
       const content = Array.isArray(msg.content) ? msg.content : [];
       for (const c of content) {
@@ -219,7 +250,7 @@ function tailLog(wave, code, since) {
   } else {
     consumed = from;
   }
-  return { bytes: consumed, events, exists: true };
+  return { bytes: consumed, events, exists: true, sid, thinkTok };
 }
 
 // ── 会话收档：依据 result 事件把 running 落定为 reported / failed，并收获 sessionId/轮数/成本 ──
