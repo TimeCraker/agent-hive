@@ -1,0 +1,24 @@
+{
+  "wave": "wave18",
+  "title": "Vibe 消息问答区分 · 答案片段内联高亮",
+  "tasks": [
+    {
+      "code": "QA",
+      "name": "问答内容视觉区分（答案片段高亮）",
+      "goal": "AI 消息里「：」后的答案片段渲染为内联高亮条，与问句正文明确区分，双气泡适配，防误伤",
+      "model": "glm-5.3[1m]",
+      "cwd": "ResumeAIX",
+      "promptFile": "prompts/QA.md",
+      "status": "accepted",
+      "dispatchedAt": "2026-10-07T12:00:13.571Z",
+      "pid": 22652,
+      "settledAt": "2026-10-07T12:08:41.165Z",
+      "sessionId": "5616fa7c-3fb3-47a5-9182-dfac7ccd4019",
+      "turns": 18,
+      "costUsd": 1.5257519999999998,
+      "outTok": 13702,
+      "acceptedAt": "2026-10-07T12:14:13.225Z",
+      "acceptNote": "规格全落地（问号段落解析/60字限长/双气泡样式/残留剥离），门禁全绿，已部署 28dbc1f"
+    }
+  ]
+}
