@@ -9,9 +9,16 @@
       "model": "glm-5.3[1m]",
       "cwd": "ResumeAIX",
       "promptFile": "prompts/LOAD.md",
-      "status": "running",
+      "status": "accepted",
       "dispatchedAt": "2026-10-08T01:36:36.284Z",
-      "pid": 6664
+      "pid": 6664,
+      "settledAt": "2026-10-08T01:45:00.785Z",
+      "sessionId": "608deb2f-2967-476e-a874-4e15119efcff",
+      "turns": 25,
+      "costUsd": 2.313914,
+      "outTok": 24831,
+      "acceptedAt": "2026-10-08T01:50:51.664Z",
+      "acceptNote": "编排动画全落地（入场/书写/呼吸/省略号/reduce-motion 回退），门禁全绿，已部署 f9412eb"
     }
   ]
 }

@@ -1,0 +1,18 @@
+{
+  "wave": "wave21",
+  "title": "加载动画开场构图升级",
+  "tasks": [
+    {
+      "code": "OPEN",
+      "name": "加载动画开场帧构图丰富化",
+      "goal": "第一帧即完整构图（图纸网格背景+四角标记+mono 眉题+品牌圆徽+进度数字），消除开场过素",
+      "model": "glm-5.3[1m]",
+      "cwd": "ResumeAIX",
+      "promptFile": "prompts/OPEN.md",
+      "status": "cancelled",
+      "dispatchedAt": "2026-10-08T01:59:12.267Z",
+      "pid": 7988
+    }
+  ]
+}
+
