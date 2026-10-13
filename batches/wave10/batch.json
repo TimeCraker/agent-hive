@@ -19,6 +19,24 @@
       "outTok": 44448,
       "acceptedAt": "2026-10-06T05:07:42.248Z",
       "acceptNote": "主控零泄漏独立实证四项全中:根settings.json含1处真实Zhipu形态key;cc-toolkit/settings.zhipu.json为纯大写占位符;settings.previous.backup.json含同形态(P2-1确认);mcp-servers-shared.json零凭证。密钥全历史扫描(133 commits/3个Zhipu值溯源到引入提交)与926高熵串复核留证充分;自评如实声明history.jsonl解析事故(1行进入会话上下文未入报告)诚实。P1-1/2为私有仓已知接受风险,处置建议留用户拍板。"
+    },
+    {
+      "code": "SMKX",
+      "name": "FlashX 冒烟测试（新模型路由验证）",
+      "goal": "回复 SMOKE-OK glm-5.3-flashx 并写入报告；验证新模型路由与日志落盘",
+      "model": "glm-5.3-flashx[1m]",
+      "cwd": ".",
+      "promptFile": "prompts/SMKX.md",
+      "status": "accepted",
+      "dispatchedAt": "2026-10-13T01:52:41.488Z",
+      "pid": 17136,
+      "settledAt": "2026-10-13T01:53:01.869Z",
+      "sessionId": "3afb5c02-ad82-41e0-b1d1-3a3b4ed0fbf3",
+      "turns": 2,
+      "costUsd": 0.7047840000000001,
+      "outTok": 1095,
+      "acceptedAt": "2026-10-13T01:54:08.296Z",
+      "acceptNote": "冒烟通过：flashx[1m] 路由可用（.err 零警告、SMOKE-OK 回复、报告落盘、2 轮收档）；可入模型菜单"
     }
   ]
 }

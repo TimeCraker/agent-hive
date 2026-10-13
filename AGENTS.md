@@ -91,6 +91,7 @@ wave1 起实际数据中另有以下扩展字段（观测/回填用，派发不�
 2. **model 字段直书实际模型 ID**（声明即执行，spawn 原样传 `--model`，零映射零图例）：
    - `glm-5.3[1m]`：文本主力（编码 / 审计 / 续写 / 跑分）
    - `glm-5.3-flash[1m]`：多模态（截图目检 / 封面验收 / UI 走查）
+   - `glm-5.3-flashx[1m]`：flash 加速替代档（标称 200 TPS；SMKX 冒烟已验证路由可用）——与 flash 可互换选用
    - 后台轻任务（HAIKU / SMALL_FAST）固定走 `glm-5.3-flash[1m]`，与主模型解耦
 3. **prompt 必须走 argv 位置参数**：stdio[0]='ignore'，漏传会报「Input must be provided」秒退（实踩）。
 4. **stderr 必须落 `<log>.launcher.err` 文件**：claude 的警告（如 unrecognized_model）全在这里，是排障第一现场。
