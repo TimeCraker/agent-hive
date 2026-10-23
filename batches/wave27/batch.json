@@ -192,10 +192,16 @@
       "model": "glm-5.3[1m]",
       "cwd": "ResumeAIX",
       "promptFile": "prompts/FINAL.md",
-      "status": "running",
+      "status": "accepted",
       "dispatchedAt": "2026-10-13T01:42:13.777Z",
       "pid": 9352,
-      "sessionId": "a2bd5437-01a5-480e-a94f-bf7065368bae"
+      "sessionId": "a2bd5437-01a5-480e-a94f-bf7065368bae",
+      "settledAt": "2026-10-13T02:01:43.037Z",
+      "turns": 108,
+      "costUsd": 6.237867999999998,
+      "outTok": 36412,
+      "acceptedAt": "2026-10-13T02:02:37.284Z",
+      "acceptNote": "收口全过：28/28页面结论行+31/31台账终态逐行核对（7修+1复核定级+8交回+15观察）；8修复commit经DOM断言+截图+读图三重复测全过（EDIT-02大写Z路径级验证强于原口径）；lint/type-check/build全绿+五服务在线BUILD_ID Ta2NXP7g1YEv6fwQs2Att；PLAN_LIST 31.4真实勾选无虚勾；分享终态PRIVATE；admin提权复核后已回滚；夜间事件补记。台账主文档与九份报告留档完整。wave27十任务全部验收完成"
     }
   ]
 }
