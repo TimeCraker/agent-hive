@@ -72,10 +72,6 @@ function resolveCwd(cwd) {
   return path.isAbsolute(cwd) ? cwd : path.join(path.dirname(ROOT), cwd);
 }
 function logPath(wave, code) { return path.join(ROOT, 'runs', 'logs', wave, `${code}.ndjson`); }
-function readKey() {
-  const line = fs.readFileSync(KEY_FILE, 'utf8').split('\n').find(l => /^\s*ZHIPU_API_KEY\s*=/.test(l));
-  return line ? line.split('=')[1].trim().replace(/^["']|["']$/g, '') : '';
-}
 
 function readCommits(gitDir, n) {
   try {
@@ -104,38 +100,28 @@ function buildStatus(wave) {
   const tasks = batch.tasks.map(t => {
     const elapsed = Math.max(0, Math.floor((now - Date.parse(t.dispatchedAt || batch.dispatchedAt)) / 1000));
     const base = { ...t, elapsed };
-    const reportPath = path.join(ROOT, 'runs', 'reports', `${t.code}-report.md`);
-    try { base.reportMtime = fs.statSync(reportPath).mtimeMs; } catch (e) { base.reportMtime = null; }
     const live = t.status === 'running' || t.status === 'pending' || t.status === 'queued';
     if (!live) {
-      base.state = t.status; base.lastActivityAgo = null; base.touched = []; base.logBytes = 0; base.events = [];
-      // 终态好结局（accepted / 旧 done）带最近提交（Git 动态归档区展示用）
-      if (t.status === 'accepted' || t.status === 'done') {
-        const gd = path.join(resolveCwd(t.cwd), '.git');
-        if (fs.existsSync(gd)) base.commits = readCommits(gd, 5);
-      }
+      base.lastActivityAgo = null; base.touched = []; base.logBytes = 0; base.events = [];
       return base;
     }
     const abs = resolveCwd(t.cwd);
-    const repoExists = fs.existsSync(abs);
-    const gitDir = path.join(abs, '.git');
-    const commits = repoExists ? readCommits(gitDir, 5) : [];
-    if (!repoExists) {
-      base.state = t.status; base.lastActivityAgo = null; base.touched = []; base.commits = []; base.logBytes = 0; base.events = [];
+    if (!fs.existsSync(abs)) {
+      base.lastActivityAgo = null; base.touched = []; base.logBytes = 0; base.events = [];
       return base;
     }
+    const commits = readCommits(path.join(abs, '.git'), 5);
     const { newest, touched } = walkNewest(abs, 3, 600);
     const lastCommit = commits.find(c => c.kind === 'commit') || null;
     base.lastActivityAgo = newest ? Math.round((now - newest) / 1000) : null;
     base.touched = touched;
-    base.commits = commits;
     base.commit = lastCommit ? { subject: lastCommit.subject, ts: lastCommit.ts } : null;
     let lp = logPath(wave, t.code);
     let logBytes = 0, logMtime = 0;
     try { const st = fs.statSync(lp); logBytes = st.size; logMtime = st.mtimeMs; } catch (e) { /* none */ }
     base.logBytes = logBytes;
     base.events = [];
-    if (t.status !== 'running') { base.state = t.status; return base; }   // pending / queued：未起进程
+    if (t.status !== 'running') return base;   // pending / queued：未起进程
     if (logBytes > 0) {
       const tail = tailLog(wave, t.code, Math.max(0, logBytes - 8192));
       // usage 遥测只服务抽屉台账（/api/logs），卡片预览滤掉——否则 slice(-3) 窗口会被无文本事件占满显示成 —
@@ -152,12 +138,17 @@ function buildStatus(wave) {
         if (bt2 && bt2.status === 'running' && !bt2.sessionId) { bt2.sessionId = tail.sid; saveBatch(wave, b2); }
       }
       // 自愈：exit 回调丢失（如服务重启）时，日志出现 result 事件而 batch 仍 running → 就地收档
+      // 返回体 status / failReason 抄回收档结果，counts 仍按 status 累加
       const res = tail.events.find(e => e.k === 'result');
       if (res) {
         const b = loadBatch(wave);
         const bt = b.tasks.find(x => x.code === t.code);
-        if (bt && bt.status === 'running') { settleTask(bt, res); saveBatch(wave, b); }
-        base.state = res.err ? 'failed' : 'reported';
+        if (bt && bt.status === 'running') {
+          settleTask(bt, res);
+          saveBatch(wave, b);
+          base.status = bt.status;
+          base.failReason = bt.failReason;
+        }
       } else if (base.stale && t.pid && !pidAlive(t.pid)) {
         // 孤儿自愈：进程已死 + 日志停更 + 无 result（服务重启连带杀会话场景）→ failed，并保住已收获的 sessionId
         const b = loadBatch(wave);
@@ -168,11 +159,11 @@ function buildStatus(wave) {
           bt.status = 'failed';
           bt.failReason = 'server-restart-orphaned: 进程死亡且日志停更（服务重启连带杀会话，exit 回调丢失）';
           saveBatch(wave, b);
+          base.status = bt.status;
+          base.failReason = bt.failReason;
         }
-        base.state = 'failed';
       }
     }
-    if (!base.state) base.state = 'running';
     return base;
   });
   const counts = { accepted: 0, reported: 0, failed: 0, rejected: 0, running: 0, queued: 0, pending: 0, done: 0, cancelled: 0 };

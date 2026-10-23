@@ -351,7 +351,5 @@ refresh();
 try {
   const es = new EventSource('/api/events?wave=' + encodeURIComponent(WAVE));
   es.onmessage = ev => { try { DATA = JSON.parse(ev.data); render(DATA); } catch (e) { /* 心跳外杂音 */ } };
-  es.onerror = () => { document.getElementById('live-dot')?.classList.add('reconnecting'); };
-  es.onopen = () => { document.getElementById('live-dot')?.classList.remove('reconnecting'); };
 } catch (e) { setInterval(refresh, 5000); }   // EventSource 不可用时退回轮询
 setInterval(refresh, 30000);                    // 慢速兜底（SSE 静默断连时保底）
