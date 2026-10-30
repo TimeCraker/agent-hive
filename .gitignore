@@ -1,5 +1,6 @@
 # agent-console 运行态不入库
 runs/logs/
+runs/archive/
 node_modules/
 *.tmp
 .DS_Store

@@ -17,8 +17,9 @@
 | `app/public/` | 前端三件套（index.html / app.js / theme.css）+ `brand/`（主站圆徽标记 SVG） | 可改 |
 | `batches/<wave>/batch.json` | 每波任务定义与状态（**状态的唯一真相源**） | 派发/状态变更时写 |
 | `batches/<wave>/prompts/` | 任务包提示词 | 派发前可改，派发后只读 |
-| `runs/logs/<wave>/<代号>.ndjson` | 各会话 stream-json 实时流（同目录伴随 `<代号>.ndjson.launcher.err` 排障文件） | 只追加，勿手改 |
-| `runs/reports/<代号>-report.md` | 各会话结果报告 | 会话自己写 |
+| `runs/logs/<wave>/<代号>.ndjson` | 各会话 stream-json 实时流（同目录伴随 `<代号>.ndjson.launcher.err` 排障文件） | 只追加，勿手改；本地运行态，不入库 |
+| `runs/archive/<wave>-logs.zip` | 波次收口后压缩的日志档案 | 本地产物，不入库（`.gitignore` 已挡） |
+| `runs/reports/<代号>-report.md` | 各会话结果报告 | 会话自己写；入库 |
 | `docs/design.md` | UI/UX 设计决策记录 | 设计变更时更新 |
 
 ## 页首与命名规范（面板文案定稿）
@@ -103,7 +104,7 @@ wave1 起实际数据中另有以下扩展字段（观测/回填用，派发不�
 2. **一个 agent 只写自己的文件**：报告写 `runs/reports/<自己代号>-report.md`（整文件覆盖），日志由 launcher 管理。禁止多 agent 共写任何文件。
 3. **key 零入库**：`ZHIPU_API_KEY` 只从 `~/.claude/zhipu.env` 读取经进程 env 注入。提交前必须 `git diff --cached` 自查无 key。
 4. **派发前冒烟**：改过 launcher/env 注入逻辑后，先用一个 1 分钟小任务验证模型路由与日志落盘，再全量派发。
-5. **主仓提交规范**：Conventional Commits 中英对照；`runs/logs/` 加入 .gitignore 不入库。
+5. **主仓提交规范**：Conventional Commits 中英对照；`runs/logs/`、`runs/archive/` 属本地运行态，已在 `.gitignore` 中挡住，不得入库（2026-10-31 起归档 zip 不再提交，仓库只放代码、波次定义、报告与文档）。
 6. **验收纪律**（主控执行）：**终态只出自验收**——进程退出最多到 `reported`，`accepted` 必须由主控核查报告与 git 实证后经 `/api/accept` 产生；虚报用 reject 打回（note 即续派指令）并 resume 重做，同任务续派 ≤3 次。
 7. **控制台入口先行**：服务启动后、首个任务派发**前**，把带 `?wave=` 的面板 URL 明确交给用户——用户是实时监督与验收主体，无头跑完整波不交入口 = 流程违规（2026-10-05 wave5 实犯，用户来问「我的控制台呢」才补交）。主控以后台进程起服务时，须同时言明服务随主控会话存亡。
-8. **波次收口归档**：波全部终态后跑 `.\app\archive.ps1 -Wave <wave>`（或 `-All` 批量，脚本内置活跃任务守卫）——`runs/logs/<wave>/` 压缩至 `runs/archive/<wave>-logs.zip` 并删原目录；`batches/` 与 `runs/reports/` 永久保留不归档。
+8. **波次收口归档**：波全部终态后跑 `.\app\archive.ps1 -Wave <wave>`（或 `-All` 批量，脚本内置活跃任务守卫）——`runs/logs/<wave>/` 压缩至 `runs/archive/<wave>-logs.zip` 并删原目录；归档 zip 留在本机做排障留档，**不提交**（提交只让仓库背 40MB 压缩日志）。`batches/` 与 `runs/reports/` 永久保留并入库。
