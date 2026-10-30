@@ -22,6 +22,8 @@
 | `runs/reports/<代号>-report.md` | 各会话结果报告 | 会话自己写；入库 |
 | `docs/design.md` | UI/UX 设计决策记录 | 设计变更时更新 |
 
+> 历史波次（wave24 起为主）的 `prompts/` 与 `runs/reports/` 中，指向已删除本地证据目录的正文已于 2026-10-31 清理。缺提示词的任务仍显示在面板（状态与验收记录来自 batch.json），但服务会以 `prompt file missing (archived)` 拒绝重新派发，且不改动状态。
+
 ## 页首与命名规范（面板文案定稿）
 
 1. **页首标题**：`太木控制台 · <Wave 名>`——品牌名固定「太木控制台」，圆徽直接继承主站 BrandMark（`brand/timecraker-mark-v1.svg`，44px 深墨圆）+ 字标堆叠（副行 `TAIMU HIVE · 并行派发`）；波次号动态取 batch.json 的 `wave` 字段；不堆功能描述、不加任务计数（数字在统计带里）。

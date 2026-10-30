@@ -307,6 +307,9 @@ function dispatch(wave, code, opts = {}) {
   } else {
     // fresh：首次派发，或 failed 任务整档重跑（日志重写）
     if (!['pending', 'queued', 'failed'].includes(t.status)) return { ok: false, error: `task status is ${t.status}, not dispatchable` };
+    // 历史波次的提示词可能随证据清理被删除：缺文件时先拒绝，避免状态已改 running 却 spawn 失败卡死
+    const promptAbs = path.join(ROOT, 'batches', wave, t.promptFile);
+    if (!fs.existsSync(promptAbs)) return { ok: false, error: `prompt file missing (archived): batches/${wave}/${t.promptFile}` };
   }
   // 并发信号量：满员不 spawn，转 queued 排队（exit 补位自动开跑）；force 可插队（冒烟/抢修）
   const running = batch.tasks.filter(x => x.status === 'running').length;
