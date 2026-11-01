@@ -1,6 +1,6 @@
 // agent-hive 太木 · 派发控制台服务（验收状态机：终态只出自验收）
 // 静态页 + 状态 API + 终端日志尾读 + 派发（spawn claude 无头会话）
-// 统一自包含架构：waves/<wave>/{batch.json, prompts/, reports/, logs/}
+// 架构特性：自包含 Wave 单元 + 同目录并发避让锁（CWD Lock） + 主脑巡检 API
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
@@ -14,7 +14,7 @@ const PORT = Number(process.env.PORT || 17879);
 const KEY_FILE = path.join(process.env.USERPROFILE, '.claude', 'zhipu.env');
 // claude.exe 真身（npm claude.cmd 的最终目标），直接 spawn 绕开一切 PS 包装层
 const CLAUDE_EXE = path.join(process.env.APPDATA, 'npm', 'node_modules', '@anthropic-ai', 'claude-code', 'bin', 'claude.exe');
-// 并发信号量：同一波次同时 running 上限（12 路并发实测撞智谱账户级 429，安全区 4）
+// 并发信号量：全局同时 running 上限（防智谱账户级 429，默认 4）
 const MAX_CONCURRENT = Number(process.env.HIVE_MAX_CONCURRENT || 4);
 // running 且日志无增长超过此时长 → 面板标 stale（仅提示，不改状态；处置走 /api/kill）
 const STALE_AFTER_MS = Number(process.env.HIVE_STALE_MINUTES || 5) * 60 * 1000;
@@ -113,8 +113,10 @@ function walkNewest(dir, depth, cap) {
   } catch (err) { /* gone */ }
   return { newest, touched: touched.slice(0, 4) };
 }
+
+// 规范化绝对路径，保证 CWD 字符串比对 100% 可靠
 function resolveCwd(cwd) {
-  return path.isAbsolute(cwd) ? cwd : path.join(path.dirname(ROOT), cwd);
+  return path.isAbsolute(cwd) ? path.resolve(cwd) : path.resolve(path.dirname(ROOT), cwd);
 }
 
 function readCommits(gitDir, n) {
@@ -167,25 +169,20 @@ function buildStatus(wave) {
     base.events = [];
     if (t.status !== 'running') return base;   // pending / queued：未起进程
     if (logBytes > 0) {
-      // 尾读 8KB 抽取最近 3 个动作事件做卡片 LIVE 预览（紧凑化：徽章+短提示，排除无文本事件）
       const tail = tailLog(wave, t.code, Math.max(0, logBytes - 8192));
       base.events = tail.events
         .filter(e => e.k !== 'usage' && (e.s || e.k === 'result'))
         .slice(-3);
-      // 卡死判定：运行中且日志超 STALE_AFTER_MS 无任何增长
       base.stale = (now - logMtime) > STALE_AFTER_MS;
-      // 思考遥测：末尾思考块超阈值 且 近窗无工具/文本产出 → 标 overthink
       if (tail.thinkTok && tail.thinkTok > OVERTHINK_TOK) {
         const hasRecentAction = tail.events.some(e => e.k === 'tool' || e.k === 'text');
         if (!hasRecentAction) { base.overthink = true; base.thinkTok = tail.thinkTok; }
       }
-      // 动态收割 session_id
       if (!t.sessionId && tail.sid) {
         const b2 = loadBatch(wave);
         const bt2 = b2.tasks.find(x => x.code === t.code);
         if (bt2 && bt2.status === 'running' && !bt2.sessionId) { bt2.sessionId = tail.sid; saveBatch(wave, b2); }
       }
-      // 自愈：exit 回调丢失时，日志出现 result 事件而 batch 仍 running → 就地收档
       const res = tail.events.find(e => e.k === 'result');
       if (res) {
         const b = loadBatch(wave);
@@ -197,7 +194,6 @@ function buildStatus(wave) {
           base.failReason = bt.failReason;
         }
       } else if (base.stale && t.pid && !pidAlive(t.pid)) {
-        // 孤儿自愈：进程已死 + 日志停更 + 无 result → failed
         const b = loadBatch(wave);
         const bt = b.tasks.find(x => x.code === t.code);
         if (bt && bt.status === 'running') {
@@ -211,7 +207,6 @@ function buildStatus(wave) {
         }
       }
     } else {
-      // 0 字节孤儿探测：刚派发但进程死无全尸（未写出一字节）
       if (t.pid && !pidAlive(t.pid)) {
         const b = loadBatch(wave);
         const bt = b.tasks.find(x => x.code === t.code);
@@ -263,8 +258,6 @@ function tailLog(wave, code, since) {
       if (j.type === 'system' && j.subtype === 'thinking_tokens' && j.estimated_tokens != null) {
         thinkTok = j.estimated_tokens;
         events.push({ k: 'think', tok: j.estimated_tokens });
-      } else if (j.type === 'system' && j.session_id) {
-        // 系统事件静默收割
       } else if (j.type === 'assistant') {
         thinkTok = 0;
         const txt = (j.message?.content || []).filter(c => c.type === 'text').map(c => c.text).join('\n');
@@ -330,21 +323,28 @@ function lastResultEvent(wave, code) {
   } catch (e) { return null; }
 }
 
-// 信号量补位
+// ── 队列调度补位：全局并发信号量 + 同仓库避让锁（CWD Lock）双重守卫 ──
 function advanceQueue(wave) {
   try {
     const b = loadBatch(wave);
-    if (b.tasks.filter(x => x.status === 'running').length >= MAX_CONCURRENT) return;
-    const next = b.tasks.find(x => x.status === 'queued');
+    const runningTasks = b.tasks.filter(x => x.status === 'running');
+    if (runningTasks.length >= MAX_CONCURRENT) return;
+
+    // 收集当前正在跑的所有任务的绝对 cwd
+    const runningCwds = new Set(runningTasks.map(x => resolveCwd(x.cwd)));
+
+    // 优先补位：处于 queued 状态，且目标 cwd 与当前正在跑的任务无冲突
+    const next = b.tasks.find(x => x.status === 'queued' && !runningCwds.has(resolveCwd(x.cwd)));
     if (next) dispatch(wave, next.code);
   } catch (e) { /* 忽略 */ }
 }
 
-// ── API: dispatch（fresh / resume 两模式 + 并发信号量）──
+// ── API: dispatch（fresh / resume 两模式 + CWD 锁 + 并发信号量）──
 function dispatch(wave, code, opts = {}) {
   const batch = loadBatch(wave);
   const t = batch.tasks.find(x => x.code === code);
   if (!t) return { ok: false, error: 'task not found' };
+
   if (opts.resume) {
     if (!t.sessionId) return { ok: false, error: 'no sessionId harvested for this task' };
     if (!['reported', 'failed', 'rejected'].includes(t.status)) return { ok: false, error: `cannot resume from status ${t.status}` };
@@ -355,19 +355,42 @@ function dispatch(wave, code, opts = {}) {
     const promptAbs = path.join(waveDir(wave), t.promptFile);
     if (!fs.existsSync(promptAbs)) return { ok: false, error: `prompt file missing: ${t.promptFile}` };
   }
-  // 并发信号量：满员不 spawn，转 queued 排队
-  const running = batch.tasks.filter(x => x.status === 'running').length;
-  if (running >= MAX_CONCURRENT && !opts.force) {
-    if (t.status !== 'queued') { t.status = 'queued'; saveBatch(wave, batch); }
-    return { ok: true, queued: true, running };
+
+  const targetCwd = resolveCwd(t.cwd);
+  const runningTasks = batch.tasks.filter(x => x.status === 'running');
+
+  // 1. 同仓库避让锁（CWD Mutex Lock）：同一工作目录禁止多 Agent 并发施工
+  const sameCwdRunning = runningTasks.find(x => resolveCwd(x.cwd) === targetCwd && x.code !== code);
+  if (sameCwdRunning && !opts.force) {
+    if (t.status !== 'queued' || t.queueReason !== 'cwd-lock') {
+      t.status = 'queued';
+      t.queueReason = 'cwd-lock';
+      t.queueDetail = `等待同目录任务 [${sameCwdRunning.code}] 释放 (${t.cwd})`;
+      saveBatch(wave, batch);
+    }
+    return { ok: true, queued: true, reason: 'cwd-lock', running: runningTasks.length, conflictWith: sameCwdRunning.code };
   }
+
+  // 2. 全局并发信号量：满员不 spawn，转 queued 排队
+  if (runningTasks.length >= MAX_CONCURRENT && !opts.force) {
+    if (t.status !== 'queued' || t.queueReason !== 'concurrency') {
+      t.status = 'queued';
+      t.queueReason = 'concurrency';
+      t.queueDetail = `并发满员 (${runningTasks.length}/${MAX_CONCURRENT})，等待空位`;
+      saveBatch(wave, batch);
+    }
+    return { ok: true, queued: true, reason: 'concurrency', running: runningTasks.length };
+  }
+
   t.status = 'running';
+  delete t.queueReason;
+  delete t.queueDetail;
   t.dispatchedAt = new Date().toISOString();
   if (opts.resume) { t.resumeCount = (t.resumeCount || 0) + 1; t.followUp = String(opts.prompt).slice(0, 300); }
   else delete t.failReason;
   saveBatch(wave, batch);
 
-  const cwdAbs = resolveCwd(t.cwd);
+  const cwdAbs = targetCwd;
   fs.mkdirSync(path.dirname(logPath(wave, code)), { recursive: true });
   fs.mkdirSync(path.join(waveDir(wave), 'reports'), { recursive: true });
 
@@ -452,9 +475,7 @@ function killTask(wave, code) {
   const pid = t.pid;
   if (pid) {
     try {
-      execFile('taskkill', ['/PID', String(pid), '/T', '/F'], (err) => {
-        // taskkill 结束子树
-      });
+      execFile('taskkill', ['/PID', String(pid), '/T', '/F'], () => {});
     } catch (e) { /* 容错 */ }
   }
   t.status = 'failed';
@@ -512,6 +533,8 @@ setInterval(() => {
 
 const server = http.createServer((req, res) => {
   const u = new URL(req.url, 'http://x');
+
+  // 波次列表
   if (u.pathname === '/api/waves') {
     try {
       const list = [];
@@ -534,6 +557,8 @@ const server = http.createServer((req, res) => {
     } catch (e) { res.writeHead(500); res.end('{"error":"scan failed"}'); }
     return;
   }
+
+  // SSE 实时流
   if (u.pathname === '/api/events') {
     const w = u.searchParams.get('wave') || defaultWave();
     if (!WAVE_RE.test(w)) { res.writeHead(400).end(); return; }
@@ -544,6 +569,8 @@ const server = http.createServer((req, res) => {
     req.on('close', () => sseClients.delete(client));
     return;
   }
+
+  // 状态大盘
   if (u.pathname === '/api/status') {
     const w = u.searchParams.get('wave') || defaultWave();
     let payload;
@@ -553,6 +580,111 @@ const server = http.createServer((req, res) => {
     res.end(payload);
     return;
   }
+
+  // 主脑结构化巡检端点（机器高信号报表）
+  if (u.pathname === '/api/supervise') {
+    const wave = u.searchParams.get('wave') || defaultWave();
+    try {
+      const status = buildStatus(wave);
+      const audit = {
+        ok: true,
+        wave,
+        title: status.title,
+        now: status.now,
+        counts: status.counts,
+        total: status.total,
+        needAcceptance: [],
+        blockedOrFailed: [],
+        runningOrQueued: [],
+        recommendations: [],
+      };
+      for (const t of status.tasks) {
+        if (t.status === 'reported') {
+          const rp = reportPath(wave, t.code);
+          audit.needAcceptance.push({
+            code: t.code,
+            name: t.name,
+            goal: t.goal,
+            turns: t.turns,
+            costUsd: t.costUsd,
+            outTok: t.outTok,
+            hasReport: fs.existsSync(rp),
+            reportPath: rp
+          });
+          audit.recommendations.push({
+            code: t.code,
+            action: 'accept-review',
+            level: 'minor',
+            hint: `任务 [${t.code}] (${t.name}) 待验收，主脑核对报告后可调用 /api/accept 确认`
+          });
+        } else if (t.status === 'failed' || t.status === 'rejected') {
+          const isMajor = /architect|fatal|cannot|not feasible|blocker|重大|无法实现|不可行/i.test(t.failReason || t.rejectReason || '');
+          const canAutoResume = (t.resumeCount || 0) < 3 && !!t.sessionId && !isMajor;
+          audit.blockedOrFailed.push({
+            code: t.code,
+            name: t.name,
+            status: t.status,
+            failReason: t.failReason,
+            rejectReason: t.rejectReason,
+            resumeCount: t.resumeCount || 0,
+            canAutoResume,
+            isMajorBlocker: isMajor
+          });
+          audit.recommendations.push({
+            code: t.code,
+            action: isMajor ? 'escalate-to-user' : (canAutoResume ? 'auto-resume' : 'escalate-to-user'),
+            level: isMajor ? 'major' : 'minor',
+            hint: isMajor
+              ? `任务 [${t.code}] 遭遇方案/架构阻断，须向用户请示方案`
+              : (canAutoResume
+                  ? `任务 [${t.code}] 异常 (${t.failReason || t.rejectReason || '退出未达标'})，主脑可调用 dispatch(resume) 自动续派`
+                  : `任务 [${t.code}] 已达最大续派深度或无会话，需升级请示用户`)
+          });
+        } else if (t.status === 'running' || t.status === 'queued') {
+          audit.runningOrQueued.push({
+            code: t.code,
+            name: t.name,
+            status: t.status,
+            elapsed: t.elapsed,
+            cwd: t.cwd,
+            queueReason: t.queueReason,
+            queueDetail: t.queueDetail,
+            stale: t.stale,
+            overthink: t.overthink
+          });
+        }
+      }
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify(audit));
+    } catch (e) {
+      res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+    }
+    return;
+  }
+
+  // 单任务报告内容读取
+  if (u.pathname.startsWith('/api/report/')) {
+    const code = u.pathname.split('/')[3];
+    const wave = u.searchParams.get('wave') || defaultWave();
+    const rp = reportPath(wave, code);
+    if (!fs.existsSync(rp)) {
+      res.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ ok: false, error: 'report not found', path: rp }));
+      return;
+    }
+    try {
+      const content = fs.readFileSync(rp, 'utf8');
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ ok: true, wave, code, path: rp, content }));
+    } catch (e) {
+      res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ ok: false, error: String(e.message || e) }));
+    }
+    return;
+  }
+
+  // 终端日志增量读取
   if (u.pathname.startsWith('/api/logs/')) {
     const code = u.pathname.split('/')[3];
     const since = Number(u.searchParams.get('since') || 0);
@@ -561,6 +693,8 @@ const server = http.createServer((req, res) => {
     res.end(JSON.stringify(tailLog(wave, code, since)));
     return;
   }
+
+  // 派发
   if (u.pathname === '/api/dispatch' && req.method === 'POST') {
     let body = '';
     req.on('data', c => body += c);
@@ -577,6 +711,8 @@ const server = http.createServer((req, res) => {
     });
     return;
   }
+
+  // 验收
   if (u.pathname === '/api/accept' && req.method === 'POST') {
     let body = '';
     req.on('data', c => body += c);
@@ -593,6 +729,8 @@ const server = http.createServer((req, res) => {
     });
     return;
   }
+
+  // 强制结束
   if (u.pathname === '/api/kill' && req.method === 'POST') {
     let body = '';
     req.on('data', c => body += c);
@@ -609,6 +747,7 @@ const server = http.createServer((req, res) => {
     });
     return;
   }
+
   if (u.pathname === '/' || u.pathname === '/index.html') return serveStatic(res, 'index.html');
   if (u.pathname.startsWith('/public/')) return serveStatic(res, u.pathname.slice('/public/'.length));
   return serveStatic(res, u.pathname.slice(1));

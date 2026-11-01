@@ -44,12 +44,11 @@ function render(d) {
   const running = c.running || 0;
   const wait = (c.queued || 0) + (c.pending || 0);
   const cancelled = c.cancelled || 0;
-  document.getElementById('s-running').textContent = running + wait;   // 进行中 = running + queued + pending（与 Tab 口径一致）
+  document.getElementById('s-running').textContent = running + wait;
   document.getElementById('s-reported').textContent = reported;
   document.getElementById('s-accepted').textContent = green;
   document.getElementById('s-failed').textContent = bad;
   document.getElementById('s-cancelled').textContent = cancelled;
-  // 完成率口径：已验收 ÷（全部 − 已取消）；黄=待验收 蓝=进行中 红=失败 灰=排队
   const base = Math.max(1, d.total - cancelled);
   document.getElementById('pbar').innerHTML =
     '<i class="pb-accepted" style="width:' + (green / base * 100) + '%"></i>' +
@@ -73,13 +72,11 @@ function render(d) {
     const ago = fmtAgo(t.lastActivityAgo);
     const el = fmtDur(t.elapsed);
     const staleF = t.stale ? '<span class="staleflag">⚠ 停更 ' + fmtDur(t.staleFor) + '</span>' : '';
-    // 元信息收敛为一行：提交 · 触达文件数 · 模型
     const metaBits = [];
     if (t.commit && t.commit.subject) metaBits.push('<span class="mb">&#9251; ' + esc(String(t.commit.subject).slice(0, 40)) + '</span>');
     if (t.touched && t.touched.length) metaBits.push('<span class="mb">&#9998; ' + t.touched.length + ' 文件</span>');
     if (t.model) metaBits.push('<span class="mb">' + esc(t.model) + '</span>');
     const metaRow = metaBits.length ? '<div class="meta-row">' + metaBits.join('<span class="msep">·</span>') + '</div>' : '';
-    // 实时预览列每行都渲染（列宽固定，行行对齐）；无事件时显示占位
     const last = t.events && t.events.length ? [...t.events].reverse().find(e => e.s != null) : null;
     let liveInner;
     if (t.overthink) liveInner = '<div class="lv-title">LIVE</div><div class="lv-line"><b style="color:var(--st-reported)">⚠</b> 深思 ' + Math.round((t.thinkTok || 0) / 1000) + 'k · 近窗零产出</div>';
@@ -91,7 +88,7 @@ function render(d) {
       ? '<div class="rc-side"><span class="enter">查看终端 →</span><div class="meta">最后活动 ' + ago + ' · 已运行 ' + el + '</div>'
         + '<div class="meta" style="display:flex;gap:6px;margin-top:6px"><button class="act danger" data-act="kill" data-code="' + t.code + '">⏹ 强制结束</button></div></div>'
       : t.status === 'queued'
-        ? '<div class="rc-side"><span class="meta">排队中 · 并发满自动补位</span></div>'
+        ? '<div class="rc-side"><span class="meta" title="' + esc(t.queueDetail || '') + '">' + esc(t.queueDetail || '排队中 · 并发满自动补位') + '</span></div>'
         : '<div class="rc-side"><span class="meta">等待派发</span></div>';
     return '<div class="rowt clickable' + (t.legacy ? ' legacy' : '') + '" data-code="' + t.code + '">'
       + '<div class="rcol rc-code"><span class="code">' + t.code + '</span><span class="st st-' + t.status + '">' + (STLBL[t.status] || t.status) + '</span>' + staleF + '</div>'
@@ -161,7 +158,7 @@ async function doAction(act, code) {
     const p = prompt('续派指令（派回原会话 ' + String(t.sessionId || '').slice(0, 8) + '）：', t.rejectNote || '');
     if (!p || !p.trim()) return;
     const r = await api('/api/dispatch', { wave: WAVE, code, resume: true, prompt: p });
-    if (!r.ok) alert(r.error); else if (r.queued) alert('并发满员，已转入排队，exit 自动补位');
+    if (!r.ok) alert(r.error); else if (r.queued) alert('并发满员或同目录等待，已转入排队，释放后自动补位');
   } else if (act === 'retry') {
     if (!confirm('整档重跑 ' + code + '？（全新会话，日志重写）')) return;
     const r = await api('/api/dispatch', { wave: WAVE, code });
