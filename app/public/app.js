@@ -1,5 +1,5 @@
 // agent-hive 前端：验收状态机渲染 + 筛选 + 终端抽屉 + 验收/打回/续派/结束
-let WAVE = new URLSearchParams(location.search).get('wave') || 'wave1';
+let WAVE = new URLSearchParams(location.search).get('wave') || '';
 let FILTER = 'all';
 let DATA = null;
 let OPEN_CODE = null;   // 终端抽屉当前打开的任务
@@ -73,7 +73,7 @@ function render(d) {
     const ago = fmtAgo(t.lastActivityAgo);
     const el = fmtDur(t.elapsed);
     const staleF = t.stale ? '<span class="staleflag">⚠ 停更 ' + fmtDur(t.staleFor) + '</span>' : '';
-    // 元信息收敛为一行：提交 · 触达文件数 · 模型（替代散落的多行 mono）
+    // 元信息收敛为一行：提交 · 触达文件数 · 模型
     const metaBits = [];
     if (t.commit && t.commit.subject) metaBits.push('<span class="mb">&#9251; ' + esc(String(t.commit.subject).slice(0, 40)) + '</span>');
     if (t.touched && t.touched.length) metaBits.push('<span class="mb">&#9998; ' + t.touched.length + ' 文件</span>');
@@ -125,7 +125,7 @@ function render(d) {
   }).join('') || '<div class="empty">无匹配条目</div>';
   bindActs();
 
-  // Git 动态：服务端直接扫工作区全部 git 仓（与任务 cwd 解耦）——d.repos 每项 = { name, commits[] }
+  // Git 动态
   const gitRepos = d.repos || [];
   document.getElementById('gitlist').innerHTML = gitRepos.map(r => {
     const rows = r.commits.slice(0, 4).map(cm =>
@@ -175,7 +175,6 @@ async function doAction(act, code) {
 }
 
 // ── 终端抽屉 ──
-// markdown-lite：标题/表格/代码/列表分层渲染（转义后最小转换，不做完整 md）
 function mdInline(s) {
   return s
     .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
@@ -228,17 +227,15 @@ async function pollLog() {
     const term = document.getElementById('d-term');
     const stick = FOLLOW;
     for (const e of d.events) {
-      if (e.k === 'usage') continue;   // usage 遥测不再逐事件渲染（台账在 result 收档）
+      if (e.k === 'usage') continue;
       const div = document.createElement('div');
       div.classList.add('fade-in');
       if (e.k === 'say') {
-        // assistant 文本：markdown-lite 分层渲染
         div.className += ' md';
         div.innerHTML = mdBlock(e.s);
-        lastTool = null;   // 文本打断工具连击分组
+        lastTool = null;
         LEDGER.turns++;
       } else if (e.k === 'tool') {
-        // 工具行 v4：紧凑单行 + 连续重复合并 ×N
         const sp = e.s.indexOf(' ');
         const tool = sp < 0 ? e.s : e.s.slice(0, sp);
         let hint = sp < 0 ? '' : e.s.slice(sp + 1);
@@ -272,15 +269,14 @@ async function pollLog() {
     }
   } catch (e) { /* 网络抖动，下轮再试 */ }
 }
-// 会话台账 footer（DSH 风格）——两阶段：运行中显示实时轮数/动作数（真实事件计数），收档后升级为真实 tok/成本全台账
-let lastTool = null;   // 工具连击分组状态（tool+hint 相同的连续行合并 ×N）
+
+let lastTool = null;
 let LEDGER = { turns: 0, tools: 0 };
 const fmtTok = n => n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? (n / 1e3).toFixed(1) + 'k' : String(n ?? 0);
 function updateUsageFooter(t) {
   if (!t) return;
   const bits = [];
   if (t.turns != null) {
-    // 收档台账：轮数 + 输出 tok + tok/s + 成本（真实数）
     bits.push('⟳ ' + t.turns + ' 轮');
     if (t.outTok != null) {
       bits.push(fmtTok(t.outTok) + ' tok');
@@ -288,25 +284,27 @@ function updateUsageFooter(t) {
     }
     if (t.costUsd != null) bits.push('$' + t.costUsd.toFixed(2));
   } else {
-    // 运行中：实时事件计数（zhipu 端点流内无 usage，tok 数收档后才有）
     if (LEDGER.turns) bits.push('⟳ ' + LEDGER.turns + ' 轮');
     if (LEDGER.tools) bits.push(LEDGER.tools + ' 动作');
   }
   document.getElementById('d-bytes').textContent = bits.join(' · ');
 }
 
-// ── Wave 切换下拉：活跃在前，完结在后，切换即跳 ──
+// ── Wave 切换下拉 ──
 async function loadWaves() {
   try {
     const r = await fetch('/api/waves');
     const d = await r.json();
+    const waves = d.waves || [];
+    if (!WAVE && waves.length > 0) {
+      WAVE = waves[0].wave;
+    }
     const sel = document.getElementById('wsel');
-    sel.innerHTML = (d.waves || []).map(w => {
+    sel.innerHTML = waves.map(w => {
       const running = (w.counts.running || 0) + (w.counts.queued || 0) + (w.counts.pending || 0);
       const accepted = (w.counts.accepted || 0) + (w.counts.done || 0);
       const reported = w.counts.reported || 0;
       const bad = (w.counts.failed || 0) + (w.counts.rejected || 0);
-      // 活跃/状态着色：原生 option 支持 Chrome/Windows 逐项底色
       let mark = '✓', bg = '', fg = '';
       if (w.active) { mark = '●'; bg = '#2D5A88'; fg = '#FAF9F5'; }
       else if (reported > 0) { mark = '◔'; bg = 'rgba(192,138,30,.25)'; }
@@ -339,17 +337,20 @@ document.getElementById('git-refresh-btn').onclick = async function () {
   document.getElementById('git-auto').textContent = 'SSE 实时更新';
 };
 
-// ── 主循环：SSE 实时推送（2s 心跳走秒 + batch 变化即时推），轮询 30s 兜底 ──
+// ── 主循环 ──
 async function refresh() {
   try {
-    const r = await fetch('/api/status?wave=' + encodeURIComponent(WAVE));
+    const q = WAVE ? '?wave=' + encodeURIComponent(WAVE) : '';
+    const r = await fetch('/api/status' + q);
     DATA = await r.json();
+    if (DATA.wave) WAVE = DATA.wave;
     render(DATA);
   } catch (e) { document.getElementById('clock').textContent = '连接中断'; }
 }
 refresh();
 try {
-  const es = new EventSource('/api/events?wave=' + encodeURIComponent(WAVE));
-  es.onmessage = ev => { try { DATA = JSON.parse(ev.data); render(DATA); } catch (e) { /* 心跳外杂音 */ } };
-} catch (e) { setInterval(refresh, 5000); }   // EventSource 不可用时退回轮询
-setInterval(refresh, 30000);                    // 慢速兜底（SSE 静默断连时保底）
+  const q = WAVE ? '?wave=' + encodeURIComponent(WAVE) : '';
+  const es = new EventSource('/api/events' + q);
+  es.onmessage = ev => { try { DATA = JSON.parse(ev.data); if (DATA.wave) WAVE = DATA.wave; render(DATA); } catch (e) { /* 心跳外杂音 */ } };
+} catch (e) { setInterval(refresh, 5000); }
+setInterval(refresh, 30000);

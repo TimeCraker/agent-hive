@@ -1,0 +1,15 @@
+{
+  "wave": "template",
+  "title": "任务波次模版 · Starter Template",
+  "tasks": [
+    {
+      "code": "DEMO",
+      "name": "示例任务",
+      "goal": "核查波次自包含结构并验证闭环流程",
+      "model": "glm-5.3[1m]",
+      "cwd": "agent-hive",
+      "promptFile": "prompts/DEMO.md",
+      "status": "pending"
+    }
+  ]
+}
