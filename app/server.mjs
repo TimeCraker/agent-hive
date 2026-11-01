@@ -71,9 +71,24 @@ function logPath(wave, code) {
   return path.join(ROOT, 'runs', 'logs', wave, `${code}.ndjson`);
 }
 
-function reportPath(wave, code) {
+function reportPath(wave, code, cwd) {
   const primary = path.join(waveDir(wave), 'reports', `${code}-report.md`);
   if (fs.existsSync(primary)) return primary;
+  if (cwd) {
+    const fromCwd = path.join(resolveCwd(cwd), 'waves', wave, 'reports', `${code}-report.md`);
+    if (fs.existsSync(fromCwd)) {
+      try {
+        fs.mkdirSync(path.dirname(primary), { recursive: true });
+        fs.copyFileSync(fromCwd, primary);
+        fs.unlinkSync(fromCwd);
+        const subRepDir = path.dirname(fromCwd);
+        if (fs.existsSync(subRepDir) && fs.readdirSync(subRepDir).length === 0) fs.rmdirSync(subRepDir);
+        const subWaveDir = path.dirname(subRepDir);
+        if (fs.existsSync(subWaveDir) && fs.readdirSync(subWaveDir).length === 0) fs.rmdirSync(subWaveDir);
+      } catch (e) { /* ignore */ }
+      return primary;
+    }
+  }
   const legacy = path.join(ROOT, 'runs', 'reports', `${code}-report.md`);
   if (fs.existsSync(legacy)) return legacy;
   return primary;
@@ -292,7 +307,7 @@ function settleTask(bt, res, wave) {
     if (res.cost != null) bt.costUsd = res.cost;
     if (res.outTok != null) bt.outTok = res.outTok;
   }
-  const repFile = wave ? reportPath(wave, bt.code) : path.join(ROOT, 'runs', 'reports', `${bt.code}-report.md`);
+  const repFile = wave ? reportPath(wave, bt.code, bt.cwd) : path.join(ROOT, 'runs', 'reports', `${bt.code}-report.md`);
   const hasReport = fs.existsSync(repFile);
   if (!res) { bt.status = 'failed'; bt.failReason = 'no-result-event'; return; }
   if (res.err) { bt.status = 'failed'; bt.failReason = String(res.s || 'error').slice(0, 200); return; }
@@ -600,7 +615,7 @@ const server = http.createServer((req, res) => {
       };
       for (const t of status.tasks) {
         if (t.status === 'reported') {
-          const rp = reportPath(wave, t.code);
+          const rp = reportPath(wave, t.code, t.cwd);
           audit.needAcceptance.push({
             code: t.code,
             name: t.name,
@@ -667,7 +682,13 @@ const server = http.createServer((req, res) => {
   if (u.pathname.startsWith('/api/report/')) {
     const code = u.pathname.split('/')[3];
     const wave = u.searchParams.get('wave') || defaultWave();
-    const rp = reportPath(wave, code);
+    let taskCwd = null;
+    try {
+      const b = loadBatch(wave);
+      const t = b.tasks.find(x => x.code === code);
+      if (t) taskCwd = t.cwd;
+    } catch (e) { /* ignore */ }
+    const rp = reportPath(wave, code, taskCwd);
     if (!fs.existsSync(rp)) {
       res.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });
       res.end(JSON.stringify({ ok: false, error: 'report not found', path: rp }));
