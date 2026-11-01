@@ -28,8 +28,13 @@ function getWavesRoot() {
 if (!wave) {
   const scanDir = getWavesRoot();
   try {
-    const dirs = fs.readdirSync(scanDir, { withFileTypes: true }).filter(d => d.isDirectory());
-    wave = dirs.length > 0 ? dirs[0].name : 'template';
+    const dirs = fs.readdirSync(scanDir, { withFileTypes: true }).filter(d => d.isDirectory() && d.name !== 'template');
+    if (dirs.length > 0) {
+      dirs.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+      wave = dirs[dirs.length - 1].name;
+    } else {
+      wave = 'template';
+    }
   } catch (e) { wave = 'template'; }
 }
 

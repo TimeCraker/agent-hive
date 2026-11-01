@@ -48,6 +48,11 @@ function defaultWave() {
   const scanDir = getWavesRoot();
   try {
     const dirs = fs.readdirSync(scanDir, { withFileTypes: true }).filter(d => d.isDirectory() && WAVE_RE.test(d.name));
+    const active = dirs.filter(d => d.name !== 'template');
+    if (active.length > 0) {
+      active.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+      return active[active.length - 1].name;
+    }
     return dirs.length > 0 ? dirs[0].name : 'template';
   } catch (e) { return 'template'; }
 }

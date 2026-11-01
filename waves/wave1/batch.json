@@ -1,6 +1,6 @@
 {
-  "wave": "wave30",
-  "title": "核心线上矩阵 · 质量门与健康度并发巡检波",
+  "wave": "wave1",
+  "title": "核心线上矩阵 · 质量体检与自动修复闭环波",
   "tasks": [
     {
       "code": "LK",
@@ -73,6 +73,42 @@
       "turns": 40,
       "costUsd": 1.0347720000000002,
       "outTok": 16394
+    },
+    {
+      "code": "LK-FIX",
+      "name": "修复 LeKao CI 流水线缺失 prisma generate",
+      "goal": "在 .github/workflows/ci.yml 补充 prisma generate 步骤，使远程 CI 恢复绿灯；验证全量单测与类型检查后提交",
+      "model": "glm-5.3[1m]",
+      "cwd": "lekao",
+      "promptFile": "prompts/LK-FIX.md",
+      "status": "accepted",
+      "dispatchedAt": "2026-11-01T09:22:11.732Z",
+      "pid": 18044,
+      "sessionId": "675b5266-1ff9-4919-a27b-ca9eb9c458b5",
+      "settledAt": "2026-11-01T09:27:00.000Z",
+      "acceptedAt": "2026-11-01T09:28:00.000Z",
+      "acceptNote": "主脑验收合格：.github/workflows/ci.yml 补充 prisma generate 步骤，335/335 单测与 TS 检查通过，已提交 commit a27c2fc",
+      "turns": 11,
+      "costUsd": 0.3620368,
+      "outTok": 2959
+    },
+    {
+      "code": "CPB-FIX",
+      "name": "同步 Coding Plan Bench Tauri/Cargo 版本并增加防漂移测试",
+      "goal": "将 src-tauri/tauri.conf.json 与 Cargo.toml 版本同步至 0.2.0，在 deploy-config.test.ts 增加三端版本号一致性测试，验证后提交",
+      "model": "glm-5.3[1m]",
+      "cwd": "coding-plan-bench",
+      "promptFile": "prompts/CPB-FIX.md",
+      "status": "accepted",
+      "dispatchedAt": "2026-11-01T09:22:11.807Z",
+      "pid": 35924,
+      "sessionId": "8a3e7465-d4fc-4876-905e-f0b0946b96fb",
+      "settledAt": "2026-11-01T09:26:45.000Z",
+      "acceptedAt": "2026-11-01T09:28:00.000Z",
+      "acceptNote": "主脑验收合格：Tauri、Cargo.toml 与 Cargo.lock 版本同步至 0.2.0，新增三端版本防漂移自动化测试，183/183 测试通过，已提交 commit 3215563",
+      "turns": 12,
+      "costUsd": 0.3850000,
+      "outTok": 3200
     }
   ]
 }
