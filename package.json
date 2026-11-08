@@ -1,0 +1,22 @@
+{
+  "name": "agent-hive",
+  "version": "1.0.0",
+  "description": "Parallel headless session dispatcher and wave governance console for Claude Code",
+  "type": "module",
+  "main": "app/server.mjs",
+  "scripts": {
+    "start": "node app/server.mjs",
+    "supervise": "node app/supervise.mjs"
+  },
+  "keywords": [
+    "claude-code",
+    "agent",
+    "multi-agent",
+    "orchestration",
+    "headless",
+    "dispatcher",
+    "automation"
+  ],
+  "author": "Huanrui Zhang (TimeCraker)",
+  "license": "MIT"
+}

@@ -28,6 +28,8 @@ function pidAlive(pid) {
 }
 
 function readZhipuKey() {
+  if (process.env.ZHIPU_API_KEY) return process.env.ZHIPU_API_KEY;
+  if (process.env.ANTHROPIC_AUTH_TOKEN) return process.env.ANTHROPIC_AUTH_TOKEN;
   try {
     const line = fs.readFileSync(KEY_FILE, 'utf8').split('\n').find(l => /^\s*(export\s+)?ZHIPU_API_KEY\s*=/.test(l));
     return line ? line.split('=').slice(1).join('=').trim().replace(/^["']|["']$/g, '') : '';
