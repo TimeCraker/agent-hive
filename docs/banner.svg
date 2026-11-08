@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="300" viewBox="0 0 920 300" role="img" aria-label="agent-hive banner">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#14171E"/>
+      <stop offset="50%" stop-color="#0E1015"/>
+      <stop offset="100%" stop-color="#08090C"/>
+    </linearGradient>
+    <radialGradient id="coralGlow" cx="85%" cy="20%" r="55%">
+      <stop offset="0%" stop-color="#E61919" stop-opacity="0.22"/>
+      <stop offset="60%" stop-color="#E61919" stop-opacity="0.03"/>
+      <stop offset="100%" stop-color="#E61919" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="blueGlow" cx="15%" cy="85%" r="50%">
+      <stop offset="0%" stop-color="#2D5A88" stop-opacity="0.3"/>
+      <stop offset="60%" stop-color="#2D5A88" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#2D5A88" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="hexGrid" width="40" height="69.282" patternUnits="userSpaceOnUse" patternTransform="scale(0.8)">
+      <path d="M 40 0 L 20 11.547 L 0 0 L 0 23.094 L 20 34.641 L 40 23.094 Z M 0 34.641 L 20 46.188 L 0 57.735 L 0 80.829 L 20 92.376 L 40 80.829 L 40 57.735 L 20 46.188 Z" fill="none" stroke="#222834" stroke-width="0.8" stroke-opacity="0.45"/>
+    </pattern>
+    <style>
+      .kicker { font: 700 11px ui-monospace, 'Cascadia Mono', Consolas, monospace; fill: #FF4D4D; letter-spacing: 3px; }
+      .title { font: 800 40px 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; fill: #FFFFFF; letter-spacing: -0.5px; }
+      .subtitle { font: 500 15px 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', sans-serif; fill: #BAC2DE; }
+      .tag { font: 600 11.5px ui-monospace, 'Cascadia Mono', monospace; fill: #E2E8F0; }
+      .badge-bg { fill: #1C222E; stroke: #2D3748; stroke-width: 1; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="920" height="300" rx="16" fill="url(#bgGrad)"/>
+  <rect width="920" height="300" rx="16" fill="url(#coralGlow)"/>
+  <rect width="920" height="300" rx="16" fill="url(#blueGlow)"/>
+  <rect width="920" height="300" rx="16" fill="url(#hexGrid)"/>
+  <rect width="920" height="300" rx="16" fill="none" stroke="#2A3241" stroke-width="1.5"/>
+
+  <!-- Left Honeycomb Brand Emblem -->
+  <g transform="translate(62, 70)">
+    <!-- Hexagon Outer Glow -->
+    <polygon points="50,5 92,29 92,77 50,101 8,77 8,29" fill="#1C1818" stroke="#E61919" stroke-width="2.5"/>
+    <!-- Inner Hex Nodes -->
+    <polygon points="50,18 80,35 80,71 50,88 20,71 20,35" fill="none" stroke="#FF4D4D" stroke-width="1.2" stroke-dasharray="4 3"/>
+    <!-- Center Hive Node -->
+    <circle cx="50" cy="53" r="10" fill="#E61919"/>
+    <circle cx="50" cy="53" r="18" fill="none" stroke="#E61919" stroke-width="1" stroke-opacity="0.6"/>
+    <!-- Orbiting Satellite Nodes -->
+    <circle cx="32" cy="42" r="3.5" fill="#38BDF8"/>
+    <circle cx="68" cy="42" r="3.5" fill="#38BDF8"/>
+    <circle cx="50" cy="74" r="3.5" fill="#34D399"/>
+  </g>
+
+  <!-- Typography Content -->
+  <g transform="translate(196, 68)">
+    <text x="0" y="20" class="kicker">CLAUDE CODE PARALLEL ORCHESTRATION CONSOLE</text>
+    <text x="0" y="66" class="title">agent-hive</text>
+    <text x="0" y="98" class="subtitle">无头多 Agent 并行派发与波次治理集群 · 终态只出自验收</text>
+
+    <!-- Meta Tags / Pills -->
+    <g transform="translate(0, 132)">
+      <!-- Pill 1: Waves -->
+      <rect x="0" y="0" width="168" height="28" rx="6" class="badge-bg"/>
+      <circle cx="14" cy="14" r="3.5" fill="#38BDF8"/>
+      <text x="26" y="18" class="tag">Self-Contained Waves</text>
+
+      <!-- Pill 2: CWD Mutex -->
+      <rect x="180" y="0" width="138" height="28" rx="6" class="badge-bg"/>
+      <circle cx="194" cy="14" r="3.5" fill="#E61919"/>
+      <text x="206" y="18" class="tag">CWD Mutex Lock</text>
+
+      <!-- Pill 3: Dual Models -->
+      <rect x="330" y="0" width="186" height="28" rx="6" class="badge-bg"/>
+      <circle cx="344" cy="14" r="3.5" fill="#FBBF24"/>
+      <text x="356" y="18" class="tag">Dual Model (Text/Vision)</text>
+
+      <!-- Pill 4: Zero Deps -->
+      <rect x="528" y="0" width="128" height="28" rx="6" class="badge-bg"/>
+      <circle cx="542" cy="14" r="3.5" fill="#34D399"/>
+      <text x="554" y="18" class="tag">Zero Deps ESM</text>
+    </g>
+  </g>
+</svg>

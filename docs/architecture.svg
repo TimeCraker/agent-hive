@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="520" viewBox="0 0 880 520" role="img" aria-label="agent-hive 架构拓扑">
+  <defs>
+    <style>
+      .tw   { font: 700 18px 'Segoe UI', 'PingFang SC', sans-serif; fill: #F8FAFC; }
+      .t    { font: 600 14px 'Segoe UI', 'PingFang SC', sans-serif; fill: #F1F5F9; }
+      .s    { font: 400 12px 'Segoe UI', 'PingFang SC', sans-serif; fill: #94A3B8; }
+      .d    { font: 400 11px 'Segoe UI', 'PingFang SC', sans-serif; fill: #64748B; }
+      .lab  { font: 700 11px ui-monospace, 'Cascadia Mono', monospace; fill: #FF4D4D; letter-spacing: 2px; }
+      .mono { font: 600 12px ui-monospace, 'Cascadia Mono', monospace; fill: #E2E8F0; }
+      .chip { font: 600 10.5px ui-monospace, 'Cascadia Mono', monospace; fill: #CBD5E1; }
+      .line { stroke: #334155; stroke-width: 1.5; fill: none; }
+      .line-active { stroke: #38BDF8; stroke-width: 1.8; fill: none; stroke-dasharray: 5 4; }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1 L8 5 L0 9 z" fill="#64748B"/>
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 1 L8 5 L0 9 z" fill="#38BDF8"/>
+    </marker>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="880" height="520" rx="16" fill="#0F1219" stroke="#1E2536" stroke-width="1.5"/>
+
+  <!-- Top Brand Header -->
+  <rect x="46" y="32" width="28" height="3" fill="#FF4D4D" rx="1.5"/>
+  <text x="46" y="58" class="lab">AGENT-HIVE · CLUSTER ARCHITECTURE</text>
+  <text x="46" y="86" class="tw">无头多 Agent 并行调度与波次治理系统拓扑</text>
+
+  <!-- ── 1. Top Bar: Master Brain / User Web Dashboard ── -->
+  <g transform="translate(46, 110)">
+    <rect width="788" height="64" rx="10" fill="#171C26" stroke="#252F42"/>
+    <circle cx="28" cy="32" r="7" fill="#E61919"/>
+    <text x="48" y="28" class="t">控制台前端 &amp; 主脑交互层 (Web Dashboard / Master Brain)</text>
+    <text x="48" y="48" class="s">HTTP / SSE 长连接 · 127.0.0.1:17879 · 波次切换 (URL ?wave=) · 实时大屏</text>
+    
+    <rect x="656" y="18" width="112" height="28" rx="6" fill="#202838" stroke="#334155"/>
+    <text x="672" y="36" class="chip" fill="#38BDF8">LIVE SSE 订阅</text>
+  </g>
+
+  <!-- Flow 1 Down -->
+  <line x1="440" y1="174" x2="440" y2="204" class="line" marker-end="url(#arrow)"/>
+
+  <!-- ── 2. Middle Engine: Hive Core Dispatcher & Mutex ── -->
+  <g transform="translate(46, 206)">
+    <rect width="788" height="110" rx="10" fill="#141924" stroke="#2D3A52" stroke-width="1.2"/>
+    
+    <text x="24" y="32" class="lab" fill="#38BDF8">DISPATCH ENGINE · 核心调度器</text>
+    
+    <!-- Component 1: CWD Lock -->
+    <g transform="translate(24, 46)">
+      <rect width="230" height="50" rx="6" fill="#1C2333" stroke="#2A374F"/>
+      <text x="14" y="22" class="t" font-size="13">🔒 CWD Mutex 避让锁</text>
+      <text x="14" y="38" class="d">同项目排队 / 跨项目全速并发</text>
+    </g>
+
+    <!-- Component 2: Wave Container -->
+    <g transform="translate(278, 46)">
+      <rect width="230" height="50" rx="6" fill="#1C2333" stroke="#2A374F"/>
+      <text x="14" y="22" class="t" font-size="13">🌊 自包含波次单元</text>
+      <text x="14" y="38" class="d">waves/&lt;wave&gt;/ 聚合提示词与日志</text>
+    </g>
+
+    <!-- Component 3: Watchdog -->
+    <g transform="translate(532, 46)">
+      <rect width="230" height="50" rx="6" fill="#1C2333" stroke="#2A374F"/>
+      <text x="14" y="22" class="t" font-size="13">🐕 思考看门狗 (Overthink)</text>
+      <text x="14" y="38" class="d">20k Tok 窗口遥测 · 杜绝无限空耗</text>
+    </g>
+  </g>
+
+  <!-- Flow 2 Down to 3 Workers -->
+  <line x1="160" y1="316" x2="160" y2="346" class="line" marker-end="url(#arrow)"/>
+  <line x1="440" y1="316" x2="440" y2="346" class="line" marker-end="url(#arrow)"/>
+  <line x1="720" y1="316" x2="720" y2="346" class="line" marker-end="url(#arrow)"/>
+
+  <!-- ── 3. Bottom Workers: Headless Claude Code Sessions ── -->
+  <!-- Worker 1: Text Coding -->
+  <g transform="translate(46, 348)">
+    <rect width="244" height="136" rx="10" fill="#161B26" stroke="#22C55E" stroke-width="1.2"/>
+    <rect x="14" y="14" width="76" height="20" rx="4" fill="#14532D"/>
+    <text x="22" y="28" class="chip" fill="#4ADE80">RUNNING</text>
+    <text x="100" y="28" class="mono" font-size="11">CWD: Repo-A</text>
+    <text x="14" y="58" class="t">Claude Code 子进程</text>
+    <text x="14" y="78" class="s">模型: glm-5.3[1m] (深度代码重构)</text>
+    <text x="14" y="98" class="d">stream-json 流式遥测每动作落盘</text>
+    <text x="14" y="118" class="d" fill="#38BDF8">▶ 输出 42 tok/s · 累计 8.2k Tok</text>
+  </g>
+
+  <!-- Worker 2: Multimodal -->
+  <g transform="translate(318, 348)">
+    <rect width="244" height="136" rx="10" fill="#161B26" stroke="#38BDF8" stroke-width="1.2"/>
+    <rect x="14" y="14" width="76" height="20" rx="4" fill="#0C4A6E"/>
+    <text x="22" y="28" class="chip" fill="#38BDF8">RUNNING</text>
+    <text x="100" y="28" class="mono" font-size="11">CWD: Repo-B</text>
+    <text x="14" y="58" class="t">Claude Code 子进程</text>
+    <text x="14" y="78" class="s">模型: glm-5.3-flash (UI多模态看图)</text>
+    <text x="14" y="98" class="d">跨项目无冲突 · 完全并行高吞吐</text>
+    <text x="14" y="118" class="d" fill="#38BDF8">▶ 极速模式 · 185 tok/s</text>
+  </g>
+
+  <!-- Worker 3: Mutex Queued -->
+  <g transform="translate(590, 348)">
+    <rect width="244" height="136" rx="10" fill="#161A22" stroke="#475569" stroke-width="1" stroke-dasharray="5 4"/>
+    <rect x="14" y="14" width="76" height="20" rx="4" fill="#334155"/>
+    <text x="22" y="28" class="chip" fill="#94A3B8">QUEUED</text>
+    <text x="100" y="28" class="mono" font-size="11">CWD: Repo-A</text>
+    <text x="14" y="58" class="t" fill="#94A3B8">排队避让等待中</text>
+    <text x="14" y="78" class="s">同属 Repo-A · 等待 Worker 1 退出</text>
+    <text x="14" y="98" class="d">100% 杜绝 Git 代码覆盖与踩踏</text>
+    <text x="14" y="118" class="d" fill="#F59E0B">⏸ 信号量挂起 · 前序释放秒补位</text>
+  </g>
+</svg>
